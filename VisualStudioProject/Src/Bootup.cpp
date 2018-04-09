@@ -7,6 +7,7 @@
 #include <glm/mat4x4.hpp>
 
 #include <iostream>
+#include "../Headers/VulkanInstance.h"
 
 int main() {
 	glfwInit();
@@ -18,6 +19,8 @@ int main() {
 	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
 
 	std::cout << extensionCount << " extensions supported" << std::endl;
+
+	VulkanInstance minstance;
 
 	glm::mat4 matrix;
 	glm::vec4 vec;

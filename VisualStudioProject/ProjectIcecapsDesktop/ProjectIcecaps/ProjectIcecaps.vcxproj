@@ -18,6 +18,16 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Src\Bootup.cpp" />
+    <ClCompile Include="..\..\Src\VulkanInstance.cpp" />
+    <ClCompile Include="..\..\Src\VulkanLayerAndExtension.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\Headers\Headers.h" />
+    <ClInclude Include="..\..\Headers\VulkanInstance.h" />
+    <ClInclude Include="..\..\Headers\VulkanLayerAndExtension.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D95037D6-DE24-41EC-933A-AEB65C713F4E}</ProjectGuid>
@@ -152,9 +162,6 @@
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Bootup.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

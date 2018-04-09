@@ -1,3 +1,9 @@
-﻿  Bootup.cpp
+﻿  VulkanInstance.cpp
+d:\documents\github\icecaps\visualstudioproject\src\vulkaninstance.cpp(16): warning C4244: '=': conversion from 'double' to 'uint32_t', possible loss of data
+  Bootup.cpp
+  Generating Code...
+  Compiling...
+  VulkanLayerAndExtension.cpp
+  Generating Code...
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
-  ProjectIcecaps.vcxproj -> D:\Documents\GitHub\IceCaps\VisualStudioProject\ProjectIcecaps\x64\Debug\ProjectIcecaps.exe
+  ProjectIcecaps.vcxproj -> D:\Documents\GitHub\IceCaps\VisualStudioProject\ProjectIcecapsDesktop\x64\Debug\ProjectIcecaps.exe
