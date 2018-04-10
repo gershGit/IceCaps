@@ -23,6 +23,10 @@ VkResult VulkanInstance::createInstance(vector<const char*>& layers, vector<cons
 	instInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 	instInfo.pNext = NULL;
 	instInfo.flags = 0;
+	instInfo.enabledLayerCount = layers.size();
+	instInfo.ppEnabledLayerNames = layers.data();
+	instInfo.enabledExtensionCount = extensionNames.size();
+	instInfo.ppEnabledExtensionNames = extensionNames.data();
 	instInfo.pApplicationInfo = &appInfo;
 
 	VkResult res = vkCreateInstance(&instInfo, NULL, &instance);

@@ -21,6 +21,7 @@ int main() {
 	std::cout << extensionCount << " extensions supported" << std::endl;
 
 	VulkanInstance minstance;
+	minstance.layerExtension.getInstanceLayerProperties();
 
 	glm::mat4 matrix;
 	glm::vec4 vec;
