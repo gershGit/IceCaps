@@ -1,6 +1,37 @@
 #include "..\Headers\VulkanLayerAndExtension.h"
+#include "..\Headers\VulkanApplication.h"
 
 
+VkResult VulkanLayerAndExtension::getDeviceExtensionProperties(VkPhysicalDevice* gpu) {
+	VkResult result;
+
+	//Query all the extensions for each layer and store it
+	std::cout << "Device extensions" << std::endl;
+	std::cout << "======================" << std::endl;
+	VulkanApplication* appObj = VulkanApplication::GetInstance();
+	std::vector<LayerProperties>* instanceLayerProp = &appObj->GetInstance()->instanceObj.layerExtension.layerPropertyList;
+	for (auto globalLayerProp : *instanceLayerProp) {
+		LayerProperties layerProps;
+		layerProps.properties = globalLayerProp.properties;
+
+		if (result = getExtensionProperties(layerProps, gpu)) {
+			continue;
+		}
+
+		std::cout << "\n" << globalLayerProp.properties.description << "\n\t|\n\t|---[Layer Name]--> " << globalLayerProp.properties.layerName << "\n";
+		layerPropertyList.push_back(layerProps);
+
+		if (layerProps.extensions.size()) {
+			for (auto j : layerProps.extensions) {
+				std::cout << "\t\t|\n\t\t|---[Device Extension]--> " << j.extensionName << "\n";
+			}
+		}
+		else {
+			std::cout << "\t\t|\n\t\t|---[Device Extension]--> No extension found \n";
+		}
+	}
+	return result;
+}
 
 VkResult VulkanLayerAndExtension::getExtensionProperties(LayerProperties & layerProps, VkPhysicalDevice * gpu)
 {
@@ -83,7 +114,6 @@ VkResult VulkanLayerAndExtension::getInstanceLayerProperties()
 VulkanLayerAndExtension::VulkanLayerAndExtension()
 {
 }
-
 
 VulkanLayerAndExtension::~VulkanLayerAndExtension()
 {

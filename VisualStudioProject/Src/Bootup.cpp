@@ -5,9 +5,21 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
-
 #include <iostream>
 #include "../Headers/VulkanInstance.h"
+#include "../Headers/VulkanApplication.h"
+
+std::vector<const char *> instanceExtensionNames = {
+	//VK_KHR_SURFACE_EXTENSION_NAME
+};
+
+std::vector<const char *> layerNames = {
+	//"VK_LAYER_LUNARG_api_dump"
+};
+
+std::vector<const char *> deviceExtensionNames = {
+	//VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
 
 int main() {
 	glfwInit();
@@ -15,13 +27,12 @@ int main() {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkan window", nullptr, nullptr);
 
-	uint32_t extensionCount = 0;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-	std::cout << extensionCount << " extensions supported" << std::endl;
-
-	VulkanInstance minstance;
-	minstance.layerExtension.getInstanceLayerProperties();
+	//Vulkan user-defined classes
+	VulkanApplication* appObj = VulkanApplication::GetInstance();
+	appObj->initialize();
+	appObj->prepare();
+	appObj->render();
+	appObj->deInitialize();
 
 	glm::mat4 matrix;
 	glm::vec4 vec;

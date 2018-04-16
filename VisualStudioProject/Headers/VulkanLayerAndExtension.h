@@ -14,8 +14,8 @@ class VulkanLayerAndExtension
 public:
 
 	// List of layer and extension names requested by the application
-	vector<const char *> instanceLayerNames;
-	vector<const char *> instanceExtensionNames;
+	vector<const char *> appRequestedLayerNames;
+	vector<const char *> appRequestedExtensionNames;
 
 	// Layers and corresponding extions lists
 	vector<LayerProperties> layerPropertyList;

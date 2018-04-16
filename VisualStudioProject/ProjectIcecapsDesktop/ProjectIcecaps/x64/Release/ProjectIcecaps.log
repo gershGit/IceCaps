@@ -1,0 +1,11 @@
+﻿  Bootup.cpp
+  VulkanApplication.cpp
+  VulkanDevice.cpp
+  VulkanInstance.cpp
+..\..\Src\VulkanInstance.cpp(27): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+..\..\Src\VulkanInstance.cpp(29): warning C4267: '=': conversion from 'size_t' to 'uint32_t', possible loss of data
+  VulkanLayerAndExtension.cpp
+  Generating code
+  All 462 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  ProjectIcecaps.vcxproj -> D:\Documents\GitHub\IceCaps\VisualStudioProject\ProjectIcecapsDesktop\x64\Release\ProjectIcecaps.exe
