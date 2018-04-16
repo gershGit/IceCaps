@@ -11,8 +11,12 @@ struct LayerProperties {
 class VulkanLayerAndExtension
 {
 	
-public:
+private:
+	PFN_vkCreateDebugReportCallbackEXT dbgCreateDebugReportCallback;
+	PFN_vkDestroyDebugReportCallbackEXT dbgDestroyDebugReportCallback;
+	VkDebugReportCallbackEXT debugReportCallback;
 
+public:
 	// List of layer and extension names requested by the application
 	vector<const char *> appRequestedLayerNames;
 	vector<const char *> appRequestedExtensionNames;
@@ -28,6 +32,21 @@ public:
 
 	//Instance / global layer
 	VkResult getInstanceLayerProperties();
+
+	/******* VULKAN DEBUGGING MEMBER FUNCTION AND VARAIBLES *******/
+	VkBool32 areLayersSupported(vector<const char *>& layerNames);
+	VkResult createDebugReportCallback();
+	VkDebugReportCallbackCreateInfoEXT dbgReportCreateInfo = {};
+	void	destroyDebugReportCallback();
+	static VKAPI_ATTR VkBool32 VKAPI_CALL debugFunction(VkFlags msgFlags,
+		VkDebugReportObjectTypeEXT objType,
+		uint64_t srcObject,
+		size_t location,
+		int32_t msgCode,
+		const char *layerPrefix,
+		const char *msg,
+		void *userData);
+
 
 	VulkanLayerAndExtension();
 	~VulkanLayerAndExtension();

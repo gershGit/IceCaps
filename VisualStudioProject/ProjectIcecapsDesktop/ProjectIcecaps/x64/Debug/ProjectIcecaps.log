@@ -1,4 +1,11 @@
-﻿  VulkanApplication.cpp
-d:\documents\github\icecaps\visualstudioproject\src\vulkanapplication.cpp(81): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+﻿  VulkanInstance.cpp
+  VulkanApplication.cpp
+d:\documents\github\icecaps\visualstudioproject\src\vulkanapplication.cpp(97): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Bootup.cpp
+  Generating Code...
+  Compiling...
+  VulkanLayerAndExtension.cpp
+d:\documents\github\icecaps\visualstudioproject\src\vulkanlayerandextension.cpp(116): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+d:\documents\github\icecaps\visualstudioproject\src\vulkanlayerandextension.cpp(117): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
+  Generating Code...
   ProjectIcecaps.vcxproj -> D:\Documents\GitHub\IceCaps\VisualStudioProject\ProjectIcecapsDesktop\x64\Debug\ProjectIcecaps.exe

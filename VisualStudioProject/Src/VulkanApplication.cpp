@@ -11,7 +11,9 @@ extern std::vector<const char *> deviceExtensionNames;
 VulkanApplication::VulkanApplication()
 {
 	instanceObj.layerExtension.getInstanceLayerProperties();
+
 	deviceObj = NULL;
+	debugFlag = true;
 }
 
 VulkanApplication::~VulkanApplication()
@@ -41,6 +43,9 @@ VkResult VulkanApplication::handShakeWithDevice(VkPhysicalDevice* gpu, std::vect
 
 	//Get the memory properties from the physical device or GPU
 	vkGetPhysicalDeviceMemoryProperties(*gpu, &deviceObj->memeoryProperties);
+
+	// Query the availabe queues on the physical device and their properties.
+	deviceObj->getPhysicalDeviceQueuesAndProperties();
 
 	//Query the available queues on the physical device and their properties
 	deviceObj->getGraphicsQueueHandle();
@@ -72,8 +77,19 @@ VkResult VulkanApplication::enumeratePhysicalDevices(std::vector<VkPhysicalDevic
 
 void VulkanApplication::initialize() {
 	char title[] = "Project Icecaps";
+
+	//Check if the supplied layers are supported or not
+	if (debugFlag) {
+		instanceObj.layerExtension.areLayersSupported(layerNames);
+	}
+
 	//Create the Vulkan instance with specified layer and extension names.
 	createVulkanInstance(layerNames, instanceExtensionNames, title);
+
+	//Create debugging report if debugging is enabled
+	if (debugFlag) {
+		instanceObj.layerExtension.createDebugReportCallback();
+	}
 
 	//Get the list of physical devices on the system
 	std::vector<VkPhysicalDevice> gpuList;
@@ -83,27 +99,32 @@ void VulkanApplication::initialize() {
 	//Handshake with chosen device
 	//TODO implement proper choosing of device
 	if (gpuList.size() > 0) {
+		bool amdFound = false;
 		std::vector<VkPhysicalDeviceProperties> deviceProps;
 		deviceProps.resize(gpuCount);
 
 		for (int i = 0; i < gpuCount; i++) {
 			vkGetPhysicalDeviceProperties(gpuList[i], &deviceProps[i]);
 			std::cout << "Checking device with vendor " << deviceProps[i].vendorID << std::endl;
+			if (deviceProps[i].vendorID == 4098) { //4098 = AMD 
+				amdFound = true;
+				std::cout << "Handshaking with AMD gpu" << std::endl;
+				handShakeWithDevice(&gpuList[1], layerNames, deviceExtensionNames);
+			}
 		}
-		if (deviceProps[1].vendorID == 4098) {
-			std::cout << "Handshaking with AMD gpu" << std::endl;
-			handShakeWithDevice(&gpuList[1], layerNames, deviceExtensionNames);
-		}
-		else {
+		if (!amdFound) {
 			std::cout << "Handshaking with gpu from vendor " << &deviceProps[0].vendorID << std::endl;
 			handShakeWithDevice(&gpuList[0], layerNames, deviceExtensionNames);
-		}
-		
+		}	
 	}
 }
 
 void VulkanApplication::deInitialize() {
+	std::cout << "Destroying user-defined vulkan classes" << std::endl;
 	deviceObj->destroyDevice();
+	if (debugFlag) {
+		instanceObj.layerExtension.destroyDebugReportCallback();
+	}
 	instanceObj.destroyInstance();
 }
 

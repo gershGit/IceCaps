@@ -15,6 +15,8 @@ private:
 	VkResult handShakeWithDevice(VkPhysicalDevice* gpu, std::vector<const char *>& layers, std::vector<const char *>& extensions);
 	VkResult enumeratePhysicalDevices(std::vector<VkPhysicalDevice>& gpuList);
 
+	bool debugFlag;
+
 public:
 	static VulkanApplication* GetInstance();
 	VulkanInstance instanceObj;

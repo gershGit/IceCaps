@@ -17,20 +17,26 @@ VkResult VulkanInstance::createInstance(vector<const char*>& layers, vector<cons
 	appInfo.applicationVersion = 1;
 	appInfo.pEngineName = applicationName;
 	appInfo.engineVersion = 1;
-	appInfo.apiVersion = VK_API_VERSION_1_0;
+	appInfo.apiVersion = VK_MAKE_VERSION(1, 0, 0);
 
 	//Define the vulkan instance create infor structure
 	VkInstanceCreateInfo instInfo = {};
 	instInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	instInfo.pNext = NULL;
+	instInfo.pNext = &layerExtension.dbgReportCreateInfo; //Enables debugging
 	instInfo.flags = 0;
-	instInfo.enabledLayerCount = layers.size();
-	instInfo.ppEnabledLayerNames = layers.data();
-	instInfo.enabledExtensionCount = extensionNames.size();
-	instInfo.ppEnabledExtensionNames = extensionNames.data();
 	instInfo.pApplicationInfo = &appInfo;
 
+	//Specify the list of layer name to be enabled
+	instInfo.enabledLayerCount = (uint32_t)layers.size();
+	instInfo.ppEnabledLayerNames = layers.size() ? layers.data() : NULL;
+
+	//Specify the list of extensions to be used in the application
+	instInfo.enabledExtensionCount = (uint32_t)extensionNames.size();
+	instInfo.ppEnabledExtensionNames = extensionNames.size() ? extensionNames.data() : NULL;
+	
 	VkResult res = vkCreateInstance(&instInfo, NULL, &instance);
+	assert(res == VK_SUCCESS);
+
 	return res;
 }
 
@@ -42,7 +48,6 @@ void VulkanInstance::destroyInstance()
 VulkanInstance::VulkanInstance()
 {
 }
-
 
 VulkanInstance::~VulkanInstance()
 {
