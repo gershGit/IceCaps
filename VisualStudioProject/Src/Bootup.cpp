@@ -1,3 +1,4 @@
+#define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -11,6 +12,7 @@
 
 std::vector<const char *> instanceExtensionNames = {
 	VK_KHR_SURFACE_EXTENSION_NAME,
+	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 	VK_EXT_DEBUG_REPORT_EXTENSION_NAME
 };
 
@@ -29,11 +31,6 @@ std::vector<const char *> deviceExtensionNames = {
 };
 
 int main() {
-	glfwInit();
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	GLFWwindow* window = glfwCreateWindow(800, 600, "Vulkan window", nullptr, nullptr);
-
 	//Vulkan user-defined classes
 	VulkanApplication* appObj = VulkanApplication::GetInstance();
 	appObj->initialize();
@@ -41,6 +38,7 @@ int main() {
 	appObj->render();
 	appObj->deInitialize();
 
+	/*
 	glm::mat4 matrix;
 	glm::vec4 vec;
 	auto test = matrix * vec;
@@ -49,7 +47,7 @@ int main() {
 		glfwPollEvents();
 	}
 
-	glfwDestroyWindow(window);
+	glfwDestroyWindow(window);*/
 
 	glfwTerminate();
 

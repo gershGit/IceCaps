@@ -102,23 +102,29 @@ void VulkanApplication::initialize() {
 		bool amdFound = false;
 		std::vector<VkPhysicalDeviceProperties> deviceProps;
 		deviceProps.resize(gpuCount);
+		std::cout << "-------Detected " << gpuCount << " gpus on system----------" << std::endl;
 
 		for (int i = 0; i < gpuCount; i++) {
 			vkGetPhysicalDeviceProperties(gpuList[i], &deviceProps[i]);
-			std::cout << "Checking device with vendor " << deviceProps[i].vendorID << std::endl;
+			std::cout << "\n Checking device " << i << std::endl;
+			std::cout << "\tDevice vendor ID: " << deviceProps[i].vendorID << std::endl;
+			std::cout << "\tDevice name: " << deviceProps[i].deviceName << std::endl;
+			std::cout << "\tSupported Vulkan API: " << deviceProps[i].apiVersion << std::endl;
+			std::cout << "\tDriver version: " << deviceProps[i].driverVersion << std::endl;
 			if (deviceProps[i].vendorID == 4098) { //4098 = AMD 
 				amdFound = true;
-				std::cout << "Handshaking with AMD gpu" << std::endl;
+				std::cout << "-----Handshaking with AMD gpu" << std::endl;
 				handShakeWithDevice(&gpuList[1], layerNames, deviceExtensionNames);
+				break;
 			}
 		}
 		if (!amdFound) {
-			std::cout << "Handshaking with gpu from vendor " << &deviceProps[0].vendorID << std::endl;
+			std::cout << "Handshaking with gpu from vendor " << deviceProps[0].vendorID << std::endl;
 			handShakeWithDevice(&gpuList[0], layerNames, deviceExtensionNames);
-		}	
+		}
 	}
 }
-
+	
 void VulkanApplication::deInitialize() {
 	std::cout << "Destroying user-defined vulkan classes" << std::endl;
 	deviceObj->destroyDevice();

@@ -79,6 +79,14 @@ uint32_t VulkanDevice::getGraphicsQueueHandle()
 	return 0;
 }
 
+//Queue related functions
+void VulkanDevice::getDeviceQueue()
+{
+	// Parminder: this depends on intialiing the SwapChain to 
+	// get the graphics queue with presentation support
+	vkGetDeviceQueue(device, graphicsQueueWithPresentIndex, 0, &queue);
+}
+
 void VulkanDevice::destroyDevice()
 {
 	vkDestroyDevice(device, NULL);

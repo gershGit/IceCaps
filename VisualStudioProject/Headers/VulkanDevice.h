@@ -28,6 +28,9 @@ public:
 	//Stores graphics queue index
 	uint32_t graphicsQueueIndex;
 
+	//Graphics queue index capable of presentation
+	uint32_t graphictsQueueWithPresentIndex;
+
 	//Number of queue family exposed by device
 	uint32_t queueFamilyCount;
 
@@ -37,6 +40,7 @@ public:
 public:
 	//This class exposes the below function to the outside world
 	VkResult createDevice(std::vector<const char *>& layers, std::vector<const char *>& extensions);
+	void getDeviceQueue();
 	void destroyDevice();
 
 	// Get the avaialbe queues exposed by the physical devices
