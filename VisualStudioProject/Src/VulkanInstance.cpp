@@ -1,6 +1,4 @@
-#pragma once
 #include "..\Headers\VulkanInstance.h"
-
 
 
 VkResult VulkanInstance::createInstance(vector<const char*>& layers, vector<const char*>& extensionNames, const char * applicationName)

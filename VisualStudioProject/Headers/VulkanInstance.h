@@ -1,5 +1,4 @@
 #pragma once
-#include "../Headers/Headers.h"
 #include "../Headers/VulkanLayerAndExtension.h"
 
 class VulkanInstance

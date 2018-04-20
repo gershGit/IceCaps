@@ -1,4 +1,6 @@
 #include "..\Headers\VulkanDevice.h"
+#include "..\Headers\VulkanInstance.h"
+#include "..\Headers\VulkanApplication.h"
 #include <assert.h>
 
 
@@ -90,4 +92,21 @@ void VulkanDevice::getDeviceQueue()
 void VulkanDevice::destroyDevice()
 {
 	vkDestroyDevice(device, NULL);
+}
+
+bool VulkanDevice::memoryTypeFromProperties(uint32_t typeBits, VkFlags requirements_mask, uint32_t * typeIndex)
+{
+	// Search memtypes to find first index with those properties
+	for (uint32_t i = 0; i < 32; i++) {
+		if ((typeBits & 1) == 1) {
+			// Type is available, does it match user properties?
+			if ((memoryProperties.memoryTypes[i].propertyFlags & requirements_mask) == requirements_mask) {
+				*typeIndex = i;
+				return true;
+			}
+		}
+		typeBits >>= 1;
+	}
+	// No memory types matched, return failure
+	return false;
 }

@@ -1,5 +1,4 @@
 #include "..\Headers\VulkanApplication.h"
-#include "..\Headers\VulkanInstance.h"
 
 std::unique_ptr<VulkanApplication> VulkanApplication::instance;
 std::once_flag VulkanApplication::onlyOnce;
@@ -14,13 +13,13 @@ VulkanApplication::VulkanApplication()
 
 	deviceObj = NULL;
 	debugFlag = true;
-	rendererObj = NULL;
+	rendererPointer = NULL;
 }
 
 VulkanApplication::~VulkanApplication()
 {
-	delete rendererObj;
-	rendererObj = NULL;
+	delete rendererPointer;
+	rendererPointer = NULL;
 }
 
 VulkanApplication* VulkanApplication::GetInstance() {
@@ -45,7 +44,7 @@ VkResult VulkanApplication::handShakeWithDevice(VkPhysicalDevice* gpu, std::vect
 	vkGetPhysicalDeviceProperties(*gpu, &deviceObj->gpuProps);
 
 	//Get the memory properties from the physical device or GPU
-	vkGetPhysicalDeviceMemoryProperties(*gpu, &deviceObj->memeoryProperties);
+	vkGetPhysicalDeviceMemoryProperties(*gpu, &deviceObj->memoryProperties);
 
 	// Query the availabe queues on the physical device and their properties.
 	deviceObj->getPhysicalDeviceQueuesAndProperties();
@@ -127,17 +126,18 @@ void VulkanApplication::initialize() {
 		}
 	}
 
-	rendererObj = new VulkanRenderer(this, deviceObj);
-	rendererObj->initialize();
+	rendererPointer = new VulkanRenderer(this, deviceObj);
+	rendererPointer->initialize(640, 480);
 }
 	
 void VulkanApplication::deInitialize() {
 	std::cout << "Destroying user-defined vulkan classes" << std::endl;
-	rendererObj->destroyDepthBuffer();
-	rendererObj->getSwapChain->destroySwapChain();
-	rendererObj->destroyCommandBuffer();
-	rendererObj->destroyCommandPool();
-	rendererObj->destroyPresentationWindow();
+	rendererPointer->destroyDepthBuffer();
+	rendererPointer->getSwapchain()->destroySwapchain();
+	rendererPointer->destroyCommandBuffer();
+	rendererPointer->destroyCommandPool();
+	rendererPointer->destroyPresentationWindow();
+	rendererPointer->destroyRenderpass();
 	deviceObj->destroyDevice();
 	if (debugFlag) {
 		instanceObj.layerExtension.destroyDebugReportCallback();
@@ -155,5 +155,5 @@ void VulkanApplication::update() {
 
 bool VulkanApplication::render() {
 	std::cout << "Rendering..." << std::endl;
-	return rendererObj->render();
+	return rendererPointer->render();
 }

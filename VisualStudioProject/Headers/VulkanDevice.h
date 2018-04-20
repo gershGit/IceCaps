@@ -15,7 +15,7 @@ public:
 	VkDevice	device;
 	VkPhysicalDevice* gpu;
 	VkPhysicalDeviceProperties gpuProps;
-	VkPhysicalDeviceMemoryProperties memeoryProperties;
+	VkPhysicalDeviceMemoryProperties memoryProperties;
 
 	//Queue related properties
 
@@ -42,6 +42,8 @@ public:
 	VkResult createDevice(std::vector<const char *>& layers, std::vector<const char *>& extensions);
 	void getDeviceQueue();
 	void destroyDevice();
+
+	bool memoryTypeFromProperties(uint32_t typeBits, VkFlags requirements_mask, uint32_t *typeIndex);
 
 	// Get the avaialbe queues exposed by the physical devices
 	void getPhysicalDeviceQueuesAndProperties();

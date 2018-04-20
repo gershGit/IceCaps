@@ -1,11 +1,4 @@
-﻿  VulkanInstance.cpp
-  VulkanApplication.cpp
-d:\documents\github\icecaps\visualstudioproject\src\vulkanapplication.cpp(97): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-  Bootup.cpp
-  Generating Code...
-  Compiling...
-  VulkanLayerAndExtension.cpp
-d:\documents\github\icecaps\visualstudioproject\src\vulkanlayerandextension.cpp(116): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-d:\documents\github\icecaps\visualstudioproject\src\vulkanlayerandextension.cpp(117): warning C4267: 'initializing': conversion from 'size_t' to 'uint32_t', possible loss of data
-  Generating Code...
+﻿  VulkanRenderer.cpp
+d:\documents\github\icecaps\visualstudioproject\src\vulkanrenderer.cpp(49): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\documents\github\icecaps\visualstudioproject\src\vulkanrenderer.cpp(42): warning C4101: 'elapsed': unreferenced local variable
   ProjectIcecaps.vcxproj -> D:\Documents\GitHub\IceCaps\VisualStudioProject\ProjectIcecapsDesktop\x64\Debug\ProjectIcecaps.exe

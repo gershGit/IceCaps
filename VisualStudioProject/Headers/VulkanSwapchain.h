@@ -1,7 +1,9 @@
 #pragma once
-#include "Headers.h"
-#include "VulkanRenderer.h"
-#include "VulkanApplication.h"
+#include "../Headers/Headers.h"
+class VulkanInstance;
+class VulkanDevice;
+class VulkanRenderer;
+class VulkanApplication;
 
 /*
 * Keep each of our swap chain buffers' image, command buffer and view in one spot

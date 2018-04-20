@@ -1,4 +1,3 @@
-
 #include "..\Headers\VulkanSwapchain.h"
 #include "..\Headers\VulkanDevice.h"
 #include "..\Headers\VulkanInstance.h"
@@ -28,7 +27,19 @@ VkResult VulkanSwapchain::createSwapChainExtensions() {
 	uint32_t count;
 	const char** extensions = glfwGetRequiredInstanceExtensions(&count);
 
+	// Get Instance based swap chain extension function pointer
+	fpGetPhysicalDeviceSurfaceSupportKHR = (PFN_vkGetPhysicalDeviceSurfaceSupportKHR)vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceSupportKHR");
+	fpGetPhysicalDeviceSurfaceCapabilitiesKHR = (PFN_vkGetPhysicalDeviceSurfaceCapabilitiesKHR)vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceCapabilitiesKHR");
+	fpGetPhysicalDeviceSurfaceFormatsKHR = (PFN_vkGetPhysicalDeviceSurfaceFormatsKHR)vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfaceFormatsKHR");
+	fpGetPhysicalDeviceSurfacePresentModesKHR = (PFN_vkGetPhysicalDeviceSurfacePresentModesKHR)vkGetInstanceProcAddr(instance, "vkGetPhysicalDeviceSurfacePresentModesKHR");
+	fpDestroySurfaceKHR = (PFN_vkDestroySurfaceKHR)vkGetInstanceProcAddr(instance, "vkDestroySurfaceKHR");
 
+	// Get Device based swap chain extension function pointer
+	fpCreateSwapchainKHR = (PFN_vkCreateSwapchainKHR)vkGetDeviceProcAddr(device, "vkCreateSwapchainKHR");
+	fpDestroySwapchainKHR = (PFN_vkDestroySwapchainKHR)vkGetDeviceProcAddr(device, "vkDestroySwapchainKHR");
+	fpGetSwapchainImagesKHR = (PFN_vkGetSwapchainImagesKHR)vkGetDeviceProcAddr(device, "vkGetSwapchainImagesKHR");
+
+	return VK_SUCCESS;
 }
 
 VkResult VulkanSwapchain::createSurface() {
@@ -37,9 +48,11 @@ VkResult VulkanSwapchain::createSurface() {
 
 	//Construct the surface description
 	//GLFW version
-	VkSurfaceKHR surface;
-	VkResult err = glfwCreateWindowSurface(instance, rendererObj->window, NULL, &surface);
-	assert(!err);
+	if (glfwVulkanSupported()) {
+		std::cout << "Vulkan supported by GLFW" << std::endl;
+	}
+	VkResult result = glfwCreateWindowSurface(instance, rendererObj->window, NULL, &scPublicVars.surface);
+	assert(result == VK_SUCCESS);
 	return VK_SUCCESS;
 }
 
@@ -129,7 +142,7 @@ void VulkanSwapchain::initialize() {
 		std::cout << "Could not find a graphics and a present queue" << std::endl;
 		exit(-1);
 	}
-	rendererObj->getDevice->graphicsQueueWithPresentIndex = index;
+	rendererObj->getDevice()->graphicsQueueWithPresentIndex = index;
 
 	//Get the list of formats that are supported
 	getSupportedFormats();
@@ -229,11 +242,11 @@ void VulkanSwapchain::createSwapChainColorImages() {
 	swapchainInfo.queueFamilyIndexCount = 0;
 	swapchainInfo.pQueueFamilyIndices = NULL;
 
-	result = fpCreateSwapchainKHR(rendererObj->getDevice->device, &swapchainInfo, NULL, &scPublicVars.swapChain);
+	result = fpCreateSwapchainKHR(rendererObj->getDevice()->device, &swapchainInfo, NULL, &scPublicVars.swapChain);
 	assert(result == VK_SUCCESS);
 
 	//Create the swapchain object
-	result = fpGetSwapchainImagesKHR(rendererObj->getDevice->device, scPublicVars.swapChain, &scPublicVars.swapchainImageCount, NULL);
+	result = fpGetSwapchainImagesKHR(rendererObj->getDevice()->device, scPublicVars.swapChain, &scPublicVars.swapchainImageCount, NULL);
 	assert(result == VK_SUCCESS);
 
 	scPrivateVars.swapchainImages.clear();
@@ -242,7 +255,7 @@ void VulkanSwapchain::createSwapChainColorImages() {
 	assert(scPrivateVars.swapchainImages.size() >= 1);
 
 	//Retrieve the swapchain image surfaces
-	result = fpGetSwapchainImagesKHR(rendererObj->getDevice->device, scPublicVars.swapChain, &scPublicVars.swapchainImageCount, &scPrivateVars.swapchainImages[0]);
+	result = fpGetSwapchainImagesKHR(rendererObj->getDevice()->device, scPublicVars.swapChain, &scPublicVars.swapchainImageCount, &scPrivateVars.swapchainImages[0]);
 	assert(result == VK_SUCCESS);
 }
 

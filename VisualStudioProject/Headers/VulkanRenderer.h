@@ -1,9 +1,8 @@
 #pragma once
-#define GLFW_INCLUDE_VULKAN
 #include "Headers.h"
-#include "VulkanApplication.h"
-#include <GLFW/glfw3.h>
-#include "VulkanSwapchain.h"
+#include "..\Headers\VulkanSwapchain.h"
+
+#define NUM_SAMPLES VK_SAMPLE_COUNT_1_BIT
 
 class VulkanRenderer
 {
@@ -16,19 +15,20 @@ private:
 public:
 	GLFWwindow* window;
 	char windowName[80];
-	struct Depth {
-		VkFormat format;
-		VkImage image;
-		VkDeviceMemory memory;
-		VkImageView view;
-	};
-	VkCommandBuffer		cmdDepthImage;	// Command buffer for depth image layout
-	VkCommandPool		cmdPool;		// Command pool
+	struct {
+		VkFormat		format;
+		VkImage			image;
+		VkDeviceMemory	mem;
+		VkImageView		view;
+	}Depth;
+	VkCommandBuffer	cmdDepthImage;	// Command buffer for depth image layout
+	VkCommandPool cmdPool;		// Command pool
 	int	width, height;
+	VkRenderPass renderPass;
 
 	//------------------Functions----------------
 
-	void initialize(const int &width = 640, const int &height = 480);
+	void initialize(const int &width, const int &height);
 	bool render();
 
 	void createPresentationWindow(const int &width = 640, const int &height = 480);
@@ -38,16 +38,24 @@ public:
 	// Getter functions for member variable specific to classes.
 	inline VulkanApplication* getApplication() { return application; }
 	inline VulkanDevice*  getDevice() { return deviceObj; }
-	//inline VulkanSwapChain*  getSwapChain() { return swapChainObj; }
+	inline VulkanSwapchain * getSwapchain() { return swapchainObj; }
 
 	void createCommandPool();							// Create command pool
 	void buildSwapChainAndDepthImage();					// Create swapchain color image and depth image
 	void createDepthImage();							// Create depth image
 
-	VulkanSwapchain* getSwapChain() { return swapchainObj; };
 	void destroyCommandBuffer();
 	void destroyCommandPool();
 	void destroyDepthBuffer();
+
+	//Record render pass command buffer
+	void createRenderPassCB(bool includeDepth);
+
+	//Render Pass creation
+	void createRenderPass(bool includeDepth, bool clear = true);
+
+	//Destroy the render pass object when no longer required
+	void destroyRenderpass();
 
 	VulkanRenderer(VulkanApplication * applicationPointer, VulkanDevice * devicePointer);
 	~VulkanRenderer();

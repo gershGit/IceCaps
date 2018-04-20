@@ -1,8 +1,8 @@
 #pragma once
-#include "Headers.h"
-#include "VulkanInstance.h"
-#include "VulkanDevice.h"
-#include "VulkanRenderer.h"
+#include "..\Headers\VulkanInstance.h"
+#include "..\Headers\VulkanDevice.h"
+#include "..\Headers\VulkanRenderer.h"
+#include "..\Headers\VulkanLayerAndExtension.h"
 
 class VulkanApplication
 {
@@ -19,10 +19,9 @@ private:
 	bool debugFlag;
 
 public:
-	static VulkanApplication* GetInstance();
+	VulkanRenderer * rendererPointer;
 	VulkanInstance instanceObj;
 	VulkanDevice* deviceObj;
-	VulkanRenderer* rendererObj;
 
 	void initialize();
 	void prepare();
@@ -32,4 +31,7 @@ public:
 
 	VulkanApplication();
 	~VulkanApplication();
+
+public:
+	static VulkanApplication* GetInstance();
 };
