@@ -147,13 +147,23 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Src\Bootup.cpp" />
+    <ClCompile Include="..\..\Src\VulkanApplication.cpp" />
+    <ClCompile Include="..\..\Src\VulkanDevice.cpp" />
     <ClCompile Include="..\..\Src\VulkanInstance.cpp" />
     <ClCompile Include="..\..\Src\VulkanLayerAndExtension.cpp" />
+    <ClCompile Include="..\..\Src\VulkanRenderer.cpp" />
+    <ClCompile Include="..\..\Src\VulkanSwapchain.cpp" />
+    <ClCompile Include="..\..\Src\VulkanWrappers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Headers.h" />
+    <ClInclude Include="..\..\Headers\VulkanApplication.h" />
+    <ClInclude Include="..\..\Headers\VulkanDevice.h" />
     <ClInclude Include="..\..\Headers\VulkanInstance.h" />
     <ClInclude Include="..\..\Headers\VulkanLayerAndExtension.h" />
+    <ClInclude Include="..\..\Headers\VulkanRenderer.h" />
+    <ClInclude Include="..\..\Headers\VulkanSwapchain.h" />
+    <ClInclude Include="..\..\Headers\VulkanWrappers.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

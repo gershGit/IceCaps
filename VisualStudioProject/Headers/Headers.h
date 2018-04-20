@@ -5,3 +5,4 @@
 #include <memory>
 #include <mutex>
 #include <assert.h>
+#include <GLFW/glfw3.h>

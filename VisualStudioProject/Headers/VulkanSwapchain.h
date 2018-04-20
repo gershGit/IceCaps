@@ -90,7 +90,7 @@ private:
 	void getSurfaceCapabilitiesAndPresentMode();
 	void managePresentMode();
 	void createSwapChainColorImages();
-	void createColorImageView(const VkCommandBuffer& cmd);
+	void createColorImageView(const VkCommandBuffer commandBuffer);
 
 public:
 	// User define structure containing public variables used 
@@ -103,6 +103,7 @@ public:
 	void createSwapchain(const VkCommandBuffer &commandBuffer);
 	void destroySwapchain();
 
-	VulkanSwapchain();
+
+	VulkanSwapchain(VulkanRenderer * renderer);
 	~VulkanSwapchain();
 };

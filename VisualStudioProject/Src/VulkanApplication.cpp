@@ -14,10 +14,13 @@ VulkanApplication::VulkanApplication()
 
 	deviceObj = NULL;
 	debugFlag = true;
+	rendererObj = NULL;
 }
 
 VulkanApplication::~VulkanApplication()
 {
+	delete rendererObj;
+	rendererObj = NULL;
 }
 
 VulkanApplication* VulkanApplication::GetInstance() {
@@ -123,10 +126,18 @@ void VulkanApplication::initialize() {
 			handShakeWithDevice(&gpuList[0], layerNames, deviceExtensionNames);
 		}
 	}
+
+	rendererObj = new VulkanRenderer(this, deviceObj);
+	rendererObj->initialize();
 }
 	
 void VulkanApplication::deInitialize() {
 	std::cout << "Destroying user-defined vulkan classes" << std::endl;
+	rendererObj->destroyDepthBuffer();
+	rendererObj->getSwapChain->destroySwapChain();
+	rendererObj->destroyCommandBuffer();
+	rendererObj->destroyCommandPool();
+	rendererObj->destroyPresentationWindow();
 	deviceObj->destroyDevice();
 	if (debugFlag) {
 		instanceObj.layerExtension.destroyDebugReportCallback();
@@ -144,5 +155,5 @@ void VulkanApplication::update() {
 
 bool VulkanApplication::render() {
 	std::cout << "Rendering..." << std::endl;
-	return true;
+	return rendererObj->render();
 }

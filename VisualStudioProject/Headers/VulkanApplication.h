@@ -2,6 +2,7 @@
 #include "Headers.h"
 #include "VulkanInstance.h"
 #include "VulkanDevice.h"
+#include "VulkanRenderer.h"
 
 class VulkanApplication
 {
@@ -21,6 +22,7 @@ public:
 	static VulkanApplication* GetInstance();
 	VulkanInstance instanceObj;
 	VulkanDevice* deviceObj;
+	VulkanRenderer* rendererObj;
 
 	void initialize();
 	void prepare();

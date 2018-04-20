@@ -29,7 +29,7 @@ public:
 	//------------------Functions----------------
 
 	void initialize(const int &width = 640, const int &height = 480);
-	void render();
+	bool render();
 
 	void createPresentationWindow(const int &width = 640, const int &height = 480);
 	void setImageLayout(VkImage image, VkImageAspectFlags aspectMask, VkImageLayout oldImageLayout, VkImageLayout newImageLayout, VkAccessFlagBits sourceAccessMask, const VkCommandBuffer& commandBuffer);
@@ -44,6 +44,7 @@ public:
 	void buildSwapChainAndDepthImage();					// Create swapchain color image and depth image
 	void createDepthImage();							// Create depth image
 
+	VulkanSwapchain* getSwapChain() { return swapchainObj; };
 	void destroyCommandBuffer();
 	void destroyCommandPool();
 	void destroyDepthBuffer();

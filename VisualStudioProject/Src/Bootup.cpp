@@ -1,4 +1,4 @@
-#define VK_USE_PLATFORM_WIN32_KHR
+//#define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
@@ -12,7 +12,6 @@
 
 std::vector<const char *> instanceExtensionNames = {
 	VK_KHR_SURFACE_EXTENSION_NAME,
-	VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
 	VK_EXT_DEBUG_REPORT_EXTENSION_NAME
 };
 

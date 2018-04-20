@@ -15,7 +15,7 @@ void VulkanRenderer::initialize(const int &width = 640, const int &height = 480)
 	createPresentationWindow(width, height);
 
 	//Initialize swapchain
-	//swapchainObj->initialize();
+	swapchainObj->initialize();
 
 	//Create a command pool
 	createCommandPool();
@@ -24,11 +24,12 @@ void VulkanRenderer::initialize(const int &width = 640, const int &height = 480)
 	buildSwapChainAndDepthImage();
 }
 
-void VulkanRenderer::render()
+bool VulkanRenderer::render()
 {
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 	}
+	return true;
 }
 
 void VulkanRenderer::createPresentationWindow(const int & windowWidth, const int & windowHeight)

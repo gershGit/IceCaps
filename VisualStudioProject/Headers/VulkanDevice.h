@@ -29,7 +29,7 @@ public:
 	uint32_t graphicsQueueIndex;
 
 	//Graphics queue index capable of presentation
-	uint32_t graphictsQueueWithPresentIndex;
+	uint32_t graphicsQueueWithPresentIndex;
 
 	//Number of queue family exposed by device
 	uint32_t queueFamilyCount;
