@@ -73,6 +73,41 @@ void VulkanRenderer::destroyRenderpass()
 	vkDestroyRenderPass(deviceObj->device, renderPass, NULL);
 }
 
+void VulkanRenderer::createFrameBuffer(bool includeDepth, bool clear)
+{
+	//Depends on creation of renderpass, swapchain, and creation of depth view first
+	VkResult result;
+	VkImageView attachments[2];
+	attachments[1] = Depth.view;
+
+	VkFramebufferCreateInfo defaultFramebufferInfo = {};
+	defaultFramebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	defaultFramebufferInfo.pNext = NULL;
+	defaultFramebufferInfo.renderPass = renderPass;
+	defaultFramebufferInfo.attachmentCount = includeDepth ? 2 : 1;
+	defaultFramebufferInfo.pAttachments = attachments;
+	defaultFramebufferInfo.width = width;
+	defaultFramebufferInfo.height = height;
+	defaultFramebufferInfo.layers = 1;
+
+	uint32_t i;
+	framebuffers.clear();
+	framebuffers.resize(swapchainObj->scPublicVars.swapchainImageCount);
+	for (i = 0; i < swapchainObj->scPublicVars.swapchainImageCount; i++) {
+		attachments[0] = swapchainObj->scPublicVars.colorBuffer[i].view;
+		result = vkCreateFramebuffer(deviceObj->device, &defaultFramebufferInfo, NULL, &framebuffers.at(i));
+		assert(result == VK_SUCCESS);
+	}
+}
+
+void VulkanRenderer::destroyFrameBuffer()
+{
+	for (uint32_t i = 0; i < swapchainObj->scPublicVars.swapchainImageCount; i++) {
+		vkDestroyFramebuffer(deviceObj->device, framebuffers.at(i), NULL);
+	}
+	framebuffers.clear();
+}
+
 VulkanRenderer::VulkanRenderer(VulkanApplication * applicationPointer, VulkanDevice * devicePointer)
 {
 	assert(applicationPointer != NULL);
@@ -107,6 +142,7 @@ void VulkanRenderer::initialize(const int &width = 640, const int &height = 480)
 
 	const bool includeDepth = true;
 	createRenderPass(includeDepth);
+	createFrameBuffer(includeDepth);
 }
 
 bool VulkanRenderer::render()

@@ -25,6 +25,7 @@ public:
 	VkCommandPool cmdPool;		// Command pool
 	int	width, height;
 	VkRenderPass renderPass;
+	std::vector<VkFramebuffer> framebuffers;
 
 	//------------------Functions----------------
 
@@ -56,6 +57,12 @@ public:
 
 	//Destroy the render pass object when no longer required
 	void destroyRenderpass();
+
+	//Create and destroy FrameBuffer
+	void createFrameBuffer(bool includeDepth, bool clear = true);
+	void destroyFrameBuffer();
+
+	inline VkCommandPool* getCommandPool() { return &cmdPool; }
 
 	VulkanRenderer(VulkanApplication * applicationPointer, VulkanDevice * devicePointer);
 	~VulkanRenderer();

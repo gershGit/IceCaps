@@ -2,6 +2,7 @@
 
 #include "../Headers/VulkanApplication.h"
 #include "../Headers/VulkanRenderer.h"
+#include "../Headers/VulkanWrappers.h"
 
 VulkanDrawable::VulkanDrawable(VulkanRenderer* parent) {
 	// Note: It's very important to initilize the member with 0 or respective value other wise it will break the system
@@ -100,5 +101,24 @@ void VulkanDrawable::destroyVertexBuffer()
 
 	vkDestroyBuffer(deviceObj->device, VertexBuffer.buf, NULL);
 	vkFreeMemory(deviceObj->device, VertexBuffer.mem, NULL);
+}
+
+void VulkanDrawable::prepare()
+{
+	VulkanDevice* deviceObj = rendererObj->getDevice();
+	vectorCommandDraw.resize(rendererObj->getSwapchain()->scPublicVars.colorBuffer.size());
+
+	// For each swapbuffer color surface image buffer allocate the corresponding command buffer
+	for (int i = 0; i < rendererObj->getSwapchain()->scPublicVars.colorBuffer.size(); i++) {
+		//Allocate, create, and start command buffer recording
+		CommandBufferManager::allocCommandBuffer(&deviceObj->device, *rendererObj->getCommandPool(), &vectorCommandDraw[i]);
+		CommandBufferManager::beginCommandBuffer(vectorCommandDraw[i]);
+
+		// Create the render pass instance 
+		recordCommandBuffer(i, &vectorCommandDraw[i]);
+
+		// Finish the command buffer recording
+		CommandBufferManager::endCommandBuffer(vectorCommandDraw[i]);
+	}
 }
 
