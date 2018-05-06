@@ -152,6 +152,7 @@ bool VulkanRenderer::render()
 	double elapsed;
 	float FPS;
 	int frame = 0;
+
 	while (!glfwWindowShouldClose(window)) {
 		frame++;
 		current = glfwGetTime();

@@ -111,7 +111,7 @@ void VulkanDrawable::prepare()
 	// For each swapbuffer color surface image buffer allocate the corresponding command buffer
 	for (int i = 0; i < rendererObj->getSwapchain()->scPublicVars.colorBuffer.size(); i++) {
 		//Allocate, create, and start command buffer recording
-		CommandBufferManager::allocCommandBuffer(&deviceObj->device, *rendererObj->getCommandPool(), &vectorCommandDraw[i]);
+		CommandBufferManager::allocCommandBuffer(&deviceObj->device, *rendererObj->getCommandPool(), &vectorCommandDraw[i], NULL);
 		CommandBufferManager::beginCommandBuffer(vectorCommandDraw[i]);
 
 		// Create the render pass instance 
@@ -122,3 +122,60 @@ void VulkanDrawable::prepare()
 	}
 }
 
+void VulkanDrawable::recordCommandBuffer(int currentImage, VkCommandBuffer * commandDraw) {
+	//Specify the clear color value
+	VkClearValue clearValues[2];
+	switch (currentImage) {
+		case 0: clearValues[0].color = {1.0f, 0.0f, 0.0f, 1.0f}; break;
+		case 1: clearValues[0].color = { 0.0f, 1.0f, 0.0f, 1.0f }; break;
+		case 2: clearValues[0].color = { 0.0f, 0.0f, 1.0f, 1.0f }; break;
+		default: clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f }; break;
+	}
+
+	//Specify the depth/stencil clear value
+	clearValues[1].depthStencil.depth = 1.0f;
+	clearValues[1].depthStencil.stencil = 0;
+
+	//Define the VkRenderPassBeginInfo control structure
+	VkRenderPassBeginInfo renderPassBegin = {};
+	renderPassBegin.renderPass = rendererObj->renderPass;
+	renderPassBegin.framebuffer = rendererObj->framebuffers[currentImage];
+	renderPassBegin.renderArea.extent.width = rendererObj->width;
+	renderPassBegin.renderArea.extent.height = rendererObj->height;
+	renderPassBegin.clearValueCount = 2;
+	renderPassBegin.pClearValues = clearValues;
+
+	//Start recording the render pass instance
+	vkCmdBeginRenderPass(*commandDraw, &renderPassBegin, VK_SUBPASS_CONTENTS_INLINE);
+
+	//End of render pass instance recording 
+	vkCmdEndRenderPass(*commandDraw);
+}
+
+void VulkanDrawable::render() {
+	VulkanDevice* deviceObj = rendererObj->getDevice();
+	VulkanSwapchain* swapChainObj = rendererObj->getSwapchain();
+
+	uint32_t currentColorImage = swapChainObj->scPublicVars.currentColorBuffer;
+	VkSwapchainKHR& swapChain = swapChainObj->scPublicVars.swapChain;
+	
+	//Render each background color for 1 second
+	Sleep(1000);
+
+	//Get the index of the next available swapchain image
+	VkResult result = swapChainObj->fpAcquireNextImageKHR(deviceObj->device, swapChain, UINT64_MAX, VK_NULL_HANDLE, VK_NULL_HANDLE, &currentColorImage);
+
+	//Queue the command buffer for execution
+	CommandBufferManager::submitCommandBuffer(deviceObj->queue, &vectorCommandDraw[currentColorImage], NULL);
+
+	//Present the image in the window
+	VkPresentInfoKHR presentInfo = {};
+	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+	presentInfo.swapchainCount = 1;
+	presentInfo.pSwapchains = &swapChain;
+	presentInfo.pImageIndices = &currentColorImage;
+
+	//Queue the image for presentation
+	result = swapChainObj->fpQueuePresentKHR(deviceObj->queue, &presentInfo);
+	assert(result == VK_SUCCESS);
+}
