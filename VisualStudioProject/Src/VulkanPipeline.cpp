@@ -10,28 +10,27 @@ VulkanPipeline::VulkanPipeline()
 	deviceObj = appObj->deviceObj;
 }
 
+
 VulkanPipeline::~VulkanPipeline()
 {
 }
 
-void VulkanPipeline::createPipelineCache()
-{
-	VkResult  result;
-
+void VulkanPipeline::createPipelineCache() {
+	VkResult result;
 	VkPipelineCacheCreateInfo pipelineCacheInfo;
 	pipelineCacheInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_CACHE_CREATE_INFO;
 	pipelineCacheInfo.pNext = NULL;
 	pipelineCacheInfo.initialDataSize = 0;
 	pipelineCacheInfo.pInitialData = NULL;
 	pipelineCacheInfo.flags = 0;
+
+	//Create the pipeline cache using VkPipelineCachCreateInfo
 	result = vkCreatePipelineCache(deviceObj->device, &pipelineCacheInfo, NULL, &pipelineCache);
 	assert(result == VK_SUCCESS);
 }
 
-bool VulkanPipeline::createPipeline(VulkanDrawable* drawableObj, VkPipeline* pipeline, VulkanShader* shaderObj, VkBool32 includeDepth, VkBool32 includeVi)
-{
-	// Initialize the dynamic states, initially it’s empty
-	VkDynamicState dynamicStateEnables[VK_DYNAMIC_STATE_RANGE_SIZE];
+bool VulkanPipeline::createPipeline(VulkanDrawable* drawableObj, VkPipeline* pipeline, VulkanShader* shaderObj, VkBool32 includeDepth, VkBool32 includeVi) {
+	VkPipelineDynamicStateCreateInfo dynamicState = {};
 	memset(dynamicStateEnables, 0, sizeof dynamicStateEnables);
 
 	// Specify the dynamic state information to pipeline through
@@ -53,6 +52,7 @@ bool VulkanPipeline::createPipeline(VulkanDrawable* drawableObj, VkPipeline* pip
 		vertexInputStateInfo.vertexAttributeDescriptionCount = sizeof(drawableObj->viIpAttrb) / sizeof(VkVertexInputAttributeDescription);
 		vertexInputStateInfo.pVertexAttributeDescriptions = drawableObj->viIpAttrb;
 	}
+
 	VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
 	inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	inputAssemblyInfo.pNext = NULL;
@@ -95,6 +95,7 @@ bool VulkanPipeline::createPipeline(VulkanDrawable* drawableObj, VkPipeline* pip
 	colorBlendStateInfo.attachmentCount = 1;
 	colorBlendStateInfo.pAttachments = colorBlendAttachmentStateInfo;
 	colorBlendStateInfo.logicOpEnable = VK_FALSE;
+	colorBlendStateInfo.logicOp = VK_LOGIC_OP_NO_OP;
 	colorBlendStateInfo.blendConstants[0] = 1.0f;
 	colorBlendStateInfo.blendConstants[1] = 1.0f;
 	colorBlendStateInfo.blendConstants[2] = 1.0f;

@@ -1,4 +1,6 @@
 ﻿  VulkanRenderer.cpp
-d:\documents\github\icecaps\visualstudioproject\src\vulkanrenderer.cpp(49): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-d:\documents\github\icecaps\visualstudioproject\src\vulkanrenderer.cpp(42): warning C4101: 'elapsed': unreferenced local variable
+c:\program files (x86)\windows kits\10\include\10.0.16299.0\shared\minwindef.h(130): warning C4005: 'APIENTRY': macro redefinition
+  d:\documents\visual studio 2017\libraries\glfw-3.2.1.bin.win64\include\glfw\glfw3.h(98): note: see previous definition of 'APIENTRY'
+d:\documents\github\icecaps\visualstudioproject\src\vulkanrenderer.cpp(162): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\documents\github\icecaps\visualstudioproject\src\vulkanrenderer.cpp(153): warning C4101: 'elapsed': unreferenced local variable
   ProjectIcecaps.vcxproj -> D:\Documents\GitHub\IceCaps\VisualStudioProject\ProjectIcecapsDesktop\x64\Debug\ProjectIcecaps.exe

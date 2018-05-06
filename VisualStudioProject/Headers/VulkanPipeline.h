@@ -1,5 +1,5 @@
 #pragma once
-#include "Headers.h"
+#include "../Headers/Headers.h"
 class VulkanShader;
 class VulkanDrawable;
 class VulkanDevice;
@@ -12,6 +12,14 @@ class VulkanApplication;
 
 class VulkanPipeline
 {
+public:
+	// Pipeline preparation member variables
+	// Pipeline cache object
+	VkPipelineCache						pipelineCache;
+	VkPipelineLayout 					pipelineLayout;
+	VulkanApplication*					appObj;
+	VulkanDevice*						deviceObj;
+
 public:
 	VulkanPipeline();
 
@@ -28,12 +36,4 @@ public:
 
 	// Destruct the pipeline cache object
 	void destroyPipelineCache();
-
-public:
-	// Pipeline preparation member variables
-	// Pipeline cache object
-	VkPipelineCache						pipelineCache;
-	VkPipelineLayout 					pipelineLayout;
-	VulkanApplication*					appObj;
-	VulkanDevice*						deviceObj;
 };
