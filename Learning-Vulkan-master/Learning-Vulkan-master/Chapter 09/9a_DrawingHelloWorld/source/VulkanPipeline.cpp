@@ -1,4 +1,4 @@
-#/*
+/*
 * Learning Vulkan - ISBN: 9781786469809
 *
 * Author: Parminder Singh, parminder.vulkan@gmail.com

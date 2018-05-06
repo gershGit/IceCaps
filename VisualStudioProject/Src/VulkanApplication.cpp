@@ -132,12 +132,23 @@ void VulkanApplication::initialize() {
 	
 void VulkanApplication::deInitialize() {
 	std::cout << "Destroying user-defined vulkan classes" << std::endl;
+
+	//Destroy all the pipeline objects
+	rendererPointer->destroyPipeline();
+
+	//Destroy the associated pipeline cache
+	rendererPointer->getPipelineObject()->destoryPipelineCache();
+
+	rendererPointer->getShader()->destroyShaders();
+	rendererPointer->destroyFrameBuffer();
+	rendererPointer->destroyRenderpass();
+	rendererPointer->destroyDrawableVertexBuffer();
+	rendererPointer->destroyDrawableCommandBuffer();
 	rendererPointer->destroyDepthBuffer();
 	rendererPointer->getSwapchain()->destroySwapchain();
 	rendererPointer->destroyCommandBuffer();
 	rendererPointer->destroyCommandPool();
 	rendererPointer->destroyPresentationWindow();
-	rendererPointer->destroyRenderpass();
 	deviceObj->destroyDevice();
 	if (debugFlag) {
 		instanceObj.layerExtension.destroyDebugReportCallback();
@@ -147,6 +158,7 @@ void VulkanApplication::deInitialize() {
 
 void VulkanApplication::prepare() {
 	std::cout << "Preparing application" << std::endl;
+	rendererPointer->prepare();
 }
 
 void VulkanApplication::update() {

@@ -37,7 +37,10 @@ int main() {
 	VulkanApplication* appObj = VulkanApplication::GetInstance();
 	appObj->initialize();
 	appObj->prepare();
-	appObj->render();
+	bool isWindowOpen = true;
+	while (isWindowOpen) {
+		isWindowOpen = appObj->render();
+	}
 	appObj->deInitialize();
 
 	glfwTerminate();

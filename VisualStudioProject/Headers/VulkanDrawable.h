@@ -5,8 +5,15 @@ class VulkanRenderer;
 class VulkanDrawable
 {
 private:
-	//Command buffer for drawing
-	std::vector<VkCommandBuffer> vectorCommandDraw;
+	std::vector<VkCommandBuffer> vecCmdDraw;			// Command buffer for drawing
+	void recordCommandBuffer(int currentImage, VkCommandBuffer* cmdDraw);
+	VkViewport viewport;
+	VkRect2D   scissor;
+	VkSemaphore presentCompleteSemaphore;
+	VkSemaphore drawingCompleteSemaphore;
+
+	VulkanRenderer* rendererObj;
+	VkPipeline*		pipeline;
 
 public:
 	// Structure storing vertex buffer metadata
@@ -23,10 +30,16 @@ public:
 	VulkanRenderer* rendererObj;
 
 	//---------Functions-----------
-	VulkanDrawable(VulkanRenderer* parent = 0);
+	VulkanDrawable(VulkanRenderer* parent);
 	~VulkanDrawable();
 
+	void destroyCommandBuffer();
+
+	void destroySynchronizationObjects();
+
 	void createVertexBuffer(const void *vertexData, uint32_t dataSize, uint32_t dataStride, bool useTexture);
+	void initViewports(VkCommandBuffer * cmd);
+	void initScissors(VkCommandBuffer * cmd);
 	void destroyVertexBuffer();
 
 	void prepare();

@@ -4,7 +4,7 @@
 class CommandBufferManager {
 public:
 	//Allocate memory for command buffer from comand buffer pool
-	static void allocCommandBuffer(const VkDevice* device, const VkCommandPool commandPool, VkCommandBuffer* commandBuffer, const VkCommandBufferAllocateInfo* commandBufferInfo);
+	static void allocCommandBuffer(const VkDevice* device, const VkCommandPool commandPool, VkCommandBuffer* commandBuffer, const VkCommandBufferAllocateInfo* commandBufferInfo = NULL);
 	//Start command buffer recording
 	static void beginCommandBuffer(VkCommandBuffer commandBuffer, VkCommandBufferBeginInfo* commandBufferBeginInfo = NULL);
 	//End the command buffer recording
