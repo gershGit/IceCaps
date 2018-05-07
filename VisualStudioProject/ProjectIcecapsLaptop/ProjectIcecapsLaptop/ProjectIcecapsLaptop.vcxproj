@@ -152,7 +152,9 @@
     <ClCompile Include="..\..\Src\VulkanDrawable.cpp" />
     <ClCompile Include="..\..\Src\VulkanInstance.cpp" />
     <ClCompile Include="..\..\Src\VulkanLayerAndExtension.cpp" />
+    <ClCompile Include="..\..\Src\VulkanPipeline.cpp" />
     <ClCompile Include="..\..\Src\VulkanRenderer.cpp" />
+    <ClCompile Include="..\..\Src\VulkanShader.cpp" />
     <ClCompile Include="..\..\Src\VulkanSwapchain.cpp" />
     <ClCompile Include="..\..\Src\VulkanWrappers.cpp" />
   </ItemGroup>
@@ -163,7 +165,9 @@
     <ClInclude Include="..\..\Headers\VulkanDrawable.h" />
     <ClInclude Include="..\..\Headers\VulkanInstance.h" />
     <ClInclude Include="..\..\Headers\VulkanLayerAndExtension.h" />
+    <ClInclude Include="..\..\Headers\VulkanPipeline.h" />
     <ClInclude Include="..\..\Headers\VulkanRenderer.h" />
+    <ClInclude Include="..\..\Headers\VulkanShader.h" />
     <ClInclude Include="..\..\Headers\VulkanSwapchain.h" />
     <ClInclude Include="..\..\Headers\VulkanWrappers.h" />
   </ItemGroup>

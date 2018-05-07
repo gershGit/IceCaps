@@ -137,10 +137,10 @@ void VulkanApplication::deInitialize() {
 	rendererPointer->destroyPipeline();
 
 	//Destroy the associated pipeline cache
-	rendererPointer->getPipelineObject()->destoryPipelineCache();
+	rendererPointer->getPipelineObject()->destroyPipelineCache();
 
 	rendererPointer->getShader()->destroyShaders();
-	rendererPointer->destroyFrameBuffer();
+	rendererPointer->destroyFramebuffer();
 	rendererPointer->destroyRenderpass();
 	rendererPointer->destroyDrawableVertexBuffer();
 	rendererPointer->destroyDrawableCommandBuffer();

@@ -12,3 +12,5 @@ public:
 	//Submit the command buffer for execution
 	static void submitCommandBuffer(const VkQueue &queue, const VkCommandBuffer* commandBufferList, const VkSubmitInfo* submitInfo = NULL, const VkFence &fence = VK_NULL_HANDLE);
 };
+
+void* readFile(const char *spvFileName, size_t *fileSize);

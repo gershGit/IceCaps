@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include "..\Headers\VulkanWrappers.h"
 
 void CommandBufferManager::allocCommandBuffer(const VkDevice * device, const VkCommandPool commandPool, VkCommandBuffer * commandBuffer, const VkCommandBufferAllocateInfo * commandBufferInfo)
@@ -89,4 +90,30 @@ void CommandBufferManager::submitCommandBuffer(const VkQueue & queue, const VkCo
 
 	result = vkQueueWaitIdle(queue);
 	assert(!result);
+}
+
+void* readFile(const char *spvFileName, size_t *fileSize) {
+
+	FILE *fp = fopen(spvFileName, "rb");
+	if (!fp) {
+		return NULL;
+	}
+
+	size_t retval;
+	long int size;
+
+	fseek(fp, 0L, SEEK_END);
+	size = ftell(fp);
+
+	fseek(fp, 0L, SEEK_SET);
+
+	void* spvShader = malloc(size + 1); // Plus for NULL character '\0'
+	memset(spvShader, 0, size + 1);
+
+	retval = fread(spvShader, size, 1, fp);
+	assert(retval == 1);
+
+	*fileSize = size;
+	fclose(fp);
+	return spvShader;
 }

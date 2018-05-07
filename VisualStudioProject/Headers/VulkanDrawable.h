@@ -15,15 +15,6 @@ private:
 	VulkanRenderer* rendererObj;
 	VkPipeline*		pipeline;
 
-	//Prepares render pass instance
-	void recordCommandBuffer(int currentImage, VkCommandBuffer* commandDraw);
-
-	//Viewport and Scissor variables
-	VkViewport viewport;
-	VkRect2D scissor;
-	VkSemaphore presentCompleteSemaphore;
-	VkSemaphore drawingCompleteSemaphore;
-
 public:
 	// Structure storing vertex buffer metadata
 	struct {
@@ -36,19 +27,17 @@ public:
 	VkVertexInputBindingDescription		viIpBind;
 	// Store metadata helpful in data interpretation
 	VkVertexInputAttributeDescription	viIpAttrb[2];
-	VulkanRenderer* rendererObj;
 
 	//---------Functions-----------
 	VulkanDrawable(VulkanRenderer* parent);
 	~VulkanDrawable();
 
-	void destroyCommandBuffer();
+	void setPipeline(VkPipeline* vulkanPipeline) { pipeline = vulkanPipeline; }
+	VkPipeline* getPipeline() { return pipeline; }
 
 	void destroySynchronizationObjects();
 
 	void createVertexBuffer(const void *vertexData, uint32_t dataSize, uint32_t dataStride, bool useTexture);
-	void initViewports(VkCommandBuffer * cmd);
-	void initScissors(VkCommandBuffer * cmd);
 	void destroyVertexBuffer();
 
 	//Allocate, create, record command buffer
