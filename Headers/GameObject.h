@@ -35,9 +35,9 @@ public:
 	bool moved = true;
 	bool drawFlag = false;
 
-	std::vector<Property> properties;
-	GLDrawable glDrawable;
-	GLCamera camera;
+	std::vector<Property*> properties;
+	GLDrawable* glDrawable;
+	GLCamera* camera;
 
 	glm::vec3 forward() {
 		//TODO calculate forward

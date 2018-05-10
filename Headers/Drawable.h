@@ -16,7 +16,7 @@ public:
 	GLuint vbo;
 	GLuint vao;
 	std::vector<float> coords;
-	GLMaterial material;
+	GLMaterial* material;
 
 	GLDrawable();
 	~GLDrawable();
