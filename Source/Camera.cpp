@@ -34,7 +34,7 @@ glm::mat4 GLCamera::getProjectionMatrix()
 	projection[1][1] = 1 / (tan(theta));
 	projection[2][2] = -(f + n) / (f - n);
 	projection[3][2] = (-2 * f*n) / (f - n);
-	projection[2][3] = 1;
+	projection[2][3] = -1;
 	projection[3][3] = 0;
 
 	return projection;

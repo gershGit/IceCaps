@@ -40,16 +40,22 @@ public:
 	GLCamera* camera;
 
 	glm::vec3 forward() {
-		//TODO calculate forward
-		return glm::vec3(0, 0, 1);
+		glm::quat q = glm::quat(rot);
+		glm::vec3 forwardVec(2*(q.x*q.z + q.w*q.y), 2 * (q.y*q.z - q.w*q.x), 1 - 2 * (q.x*q.x + q.y*q.y));
+
+		return glm::normalize(forwardVec);
 	};
 	glm::vec3 up() {
-		//TODO calculate up
-		return glm::vec3(0, 1, 0);
+		glm::quat q = glm::quat(rot);
+		glm::vec3 upVec(2 * (q.x*q.y - q.w*q.z), 1 - 2 * (q.x*q.x + q.z*q.z), 2 * (q.y*q.z + q.w*q.x));
+
+		return glm::normalize(upVec);
 	};
 	glm::vec3 right() {
-		//TODO calculate right
-		return glm::vec3(1, 0, 0);
+		glm::quat q = glm::quat(rot);
+		glm::vec3 rightVec(1- 2 * (q.y*q.y + q.z*q.z), 2 * (q.x*q.y + q.w*q.z), 2 * (q.x*q.z - q.w*q.y));
+
+		return glm::normalize(-rightVec);
 	};
 	glm::mat4 getTransform() {
 		if (moved) {

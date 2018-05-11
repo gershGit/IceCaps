@@ -4,6 +4,8 @@ class GLInstance {
 private:
 	
 public:
+	int W_HEIGHT = 600;
+	int W_WIDTH = 800;
 	GLFWwindow * window;
 	GLInstance();
 	~GLInstance();
