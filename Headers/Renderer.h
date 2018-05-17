@@ -9,17 +9,6 @@ public:
 	void render(GameObject* object, GameObject* camera) {
 		//std::cout << "Now rendering " << object->name << std::endl;
 
-		GLDrawable* drawableProp = object->glDrawable;
-		Shader shader = drawableProp->material->shader;
-		shader.use();
-		
-		GLuint loc = glGetUniformLocation(shader.id(), "model");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, &object->getTransform()[0][0]);
-		GLuint viewLoc = glGetUniformLocation(shader.id(), "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &camera->camera->getViewMatrix()[0][0]);
-		GLuint projLoc = glGetUniformLocation(shader.id(), "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &camera->camera->getProjectionMatrix()[0][0]);
-
 		/*
 		std::cout << "Triangle Coords:" << std::endl;
 		std::cout << object->glDrawable->coords[0] << ", " << object->glDrawable->coords[1] << ", " << object->glDrawable->coords[2] << std::endl;
@@ -75,11 +64,21 @@ public:
 		std::cout << std::endl; 
 		*/
 
+		GLDrawable* drawableProp = object->glDrawable;
+		ShaderProgram shader = drawableProp->material->shader;
+		shader.use();
+
+		GLuint loc = glGetUniformLocation(shader.id(), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, &object->getTransform()[0][0]);
+		GLuint viewLoc = glGetUniformLocation(shader.id(), "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &camera->camera->getViewMatrix()[0][0]);
+		GLuint projLoc = glGetUniformLocation(shader.id(), "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &camera->camera->getProjectionMatrix()[0][0]);
+
 		// render the object
-		glBindVertexArray(drawableProp->vao);
+		glBindVertexArray(drawableProp->vao);	
 		glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
 		
-		//TODO fix children positioning and rendering
 		for (GameObject* child : object->children) {
 			render(child, camera);
 		}

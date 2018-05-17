@@ -9,7 +9,7 @@ enum tType {DIFFUSE, METAL_MASK, SPEC_MASK, NORMAL, DISPLACEMENT};
 class GLMaterial {
 public:
 	mType type;
-	Shader shader;
+	ShaderProgram shader;
 
 	std::vector<GLuint> textures;
 	std::vector<tType> textureTypes;

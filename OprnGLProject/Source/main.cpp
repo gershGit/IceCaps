@@ -1,5 +1,6 @@
-#include <iostream>
+#pragma once
 
+#include <iostream>
 #include "Headers.h"
 #include "OpenGlInstance.h"
 #include "GameObject.h"
@@ -8,6 +9,7 @@
 #include "Renderer.h"
 #include "baseShapeCoords.h"
 #include "InputControl.h"
+#include "objLoader.h"
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -76,10 +78,12 @@ void renderScene() {
 			//object->pos.z = 12 -nowTime;
 			//object->scale.x = nowTime;
 			//object->rot.z = nowTime / 6;
-			object->rot.y = nowTime;
-			object->rot.z = nowTime/6;
-			object->rot.x = nowTime/2;
-			object->moved = true;
+			if (strcmp(object->name, "Parent") == 0) {
+				object->rot.y = nowTime;
+				object->rot.z = nowTime / 6;
+				object->rot.x = nowTime / 2;
+				object->moved = true;
+			}
 			renderer.render(object, mainCamera);
 		}
 	}
@@ -93,11 +97,15 @@ void loadScene() {
 	mainCam->gameObject = mainCamera;
 	mainCamera->camera = mainCam;
 	
+
+	//------------Materials--------------
 	GLMaterial* tMaterial = new GLMaterial();
 	tMaterial->type = PHONG;
-	Shader tShader = Shader("base.vert", "base.frag");
+	ShaderProgram tShader = ShaderProgram("base.vert", "base.frag");
 	tMaterial->shader = tShader;
 
+
+	//------------Drawables-------------------
 	GLDrawable* triangleMesh = new GLDrawable();
 	triangleMesh->ptype = DRAWABLE;
 	triangleMesh->renderFlag = true;
@@ -105,33 +113,52 @@ void loadScene() {
 	triangleMesh->coords = {	0.0f, 1.0f, 10.0f,		1.0f, 0.0f, 0.0f,
 								1.0f, 0.0f, 10.0f,		0.0f, 1.0f, 0.0f,
 								-1.0f, 0.0f, 10.0f,		0.0f, 0.0f, 1.0f};
-	triangleMesh->generateBuffers();
+	triangleMesh->generateBuffers(3, 0, 0);
 	triangleMesh->material = tMaterial;
+
+	GLDrawable* planeMesh = new GLDrawable();
+	planeMesh->ptype = DRAWABLE;
+	planeMesh->renderFlag = true;
+	planeMesh->dtype = MESH;
+	planeMesh->coords = planeCoords;
+	planeMesh->generateBuffers(3, 0, 0);
+	planeMesh->material = tMaterial;
 
 	GLDrawable* squareMesh = new GLDrawable();
 	squareMesh->ptype = DRAWABLE;
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
 	squareMesh->coords = squareCoords;
-	squareMesh->generateBuffers();
+	squareMesh->generateBuffers(3, 0, 0);
 	squareMesh->material = tMaterial;
+	
+	
 
 	/*
-	GLDrawable* planeMesh = new GLDrawable();
-	squareMesh->ptype = DRAWABLE;
-	squareMesh->renderFlag = true;
-	squareMesh->dtype = MESH;
-	squareMesh->coords = planeCoords;
-	squareMesh->generateBuffers();
-	squareMesh->material = tMaterial;*/
-	
+	GLDrawable* suzzane_drawable = new GLDrawable();
+	suzzane_drawable->ptype = DRAWABLE;
+	suzzane_drawable->renderFlag = true;
+	suzzane_drawable->dtype = MESH;
+	suzzane_drawable->coords = createCoordVector("someObj.txt");
+	suzzane_drawable->generateBuffers(3, 3, 0);
+	suzzane_drawable->material = tMaterial;*/
+
+
+	//-----------Objects------------
 	GameObject* childCube = new GameObject();
 	childCube->pos.x = 3.0f;
 	childCube->scale = glm::vec3(0.5, 0.5, 0.5);
 	childCube->name = "Child";
-	childCube->properties.push_back(triangleMesh);
+	childCube->properties.push_back(squareMesh);
 	childCube->glDrawable = squareMesh;
 	childCube->drawFlag = true;
+
+	GameObject* triangle = new GameObject();
+	triangle->name = "Tri";
+	triangle->drawFlag = true;
+	triangle->glDrawable = triangleMesh;
+	triangle->properties.push_back(triangleMesh);
+	triangle->pos.z = -6;
 
 	GameObject* parentCube = new GameObject();
 	parentCube->name = "Parent";
@@ -142,15 +169,29 @@ void loadScene() {
 	parentCube->pos.z = -12.0f;
 
 	/*
+	GameObject* suzaneHead = new GameObject();
+	suzaneHead->name = "sh";
+	suzaneHead->properties.push_back(suzzane_drawable);
+	suzaneHead->glDrawable = suzzane_drawable;
+	suzaneHead->drawFlag = true;
+	suzaneHead->pos.x = -3;
+	suzaneHead->pos.z = -20;*/
+	
 	GameObject* ground = new GameObject();
 	ground->name = "Ground";
 	ground->drawFlag = true;
 	ground->glDrawable = planeMesh;
 	ground->properties.push_back(planeMesh);
-	ground->pos.y = -2;*/
+	ground->pos.z = -12.0f;
+	ground->pos.y = -5;
+	ground->scale = glm::vec3(100, 100, 100);
+	
 
+	//-------------Adding objects to list-----------------
 	objects.push_back(parentCube);
-	//objects.push_back(ground);
+	objects.push_back(ground);
+	objects.push_back(triangle);
+	//objects.push_back(suzaneHead);
 };
 
 int main()

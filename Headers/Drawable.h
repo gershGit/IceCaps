@@ -20,5 +20,5 @@ public:
 
 	GLDrawable();
 	~GLDrawable();
-	void generateBuffers();
+	void generateBuffers(int colors, int normals, int uvs);
 };

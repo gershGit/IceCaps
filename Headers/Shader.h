@@ -7,12 +7,12 @@
 #include <cmath>
 #include <iostream>
 
-class Shader {
+class ShaderProgram {
 private:
 	GLuint shaderID;
 public:
-	Shader() {}
-	Shader(const std::string& vertexPath, const std::string& fragmentPath) {
+	ShaderProgram() {}
+	ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath) {
 		GLuint vertexShader = createShader(vertexPath, GL_VERTEX_SHADER);
 		GLuint fragmentShader = createShader(fragmentPath, GL_FRAGMENT_SHADER);
 
