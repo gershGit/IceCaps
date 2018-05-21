@@ -89,6 +89,8 @@ void renderScene() {
 	}
 };
 void loadScene() {
+	int texture_number = 0;
+
 	//TODO fix so that multiple objects have their own vbo and vao correctly
 	GLCamera* mainCam = new GLCamera();
 	mainCam->fov = 45;
@@ -99,50 +101,60 @@ void loadScene() {
 	
 
 	//------------Materials--------------
-	GLMaterial* tMaterial = new GLMaterial();
-	tMaterial->type = PHONG;
-	ShaderProgram tShader = ShaderProgram("base.vert", "base.frag");
-	tMaterial->shader = tShader;
+	GLMaterial* pMaterial = new GLMaterial();
+	pMaterial->type = SIMPLE;
+	ShaderProgram pShader = ShaderProgram("base.vert", "base.frag");
+	pMaterial->shader = pShader;
 
+	GLMaterial* sMaterial = new GLMaterial();
+	sMaterial->type = PHONG_SIMPLE;
+	ShaderProgram sShader = ShaderProgram("phongSun.vert", "phongSun.frag");
+	sMaterial->shader = sShader;
+
+	GLMaterial* tMaterial = new GLMaterial();
+	tMaterial->type = UNLIT_TEX;
+	int addResult = tMaterial->addTexture("gf.bmp", DIFFUSE, texture_number++);
+	if (addResult == 1) {
+		tMaterial->type = SIMPLE;
+		ShaderProgram sShader = ShaderProgram("phongSun.vert", "phongSun.frag");
+		tMaterial->shader = sShader;
+	}
+	else {
+		ShaderProgram tShader = ShaderProgram("texturedUnlit.vert", "texturedUnlit.frag");
+		tMaterial->shader = tShader;
+	}
 
 	//------------Drawables-------------------
-	GLDrawable* triangleMesh = new GLDrawable();
-	triangleMesh->ptype = DRAWABLE;
-	triangleMesh->renderFlag = true;
-	triangleMesh->dtype = MESH;
-	triangleMesh->coords = {	0.0f, 1.0f, 10.0f,		1.0f, 0.0f, 0.0f,
-								1.0f, 0.0f, 10.0f,		0.0f, 1.0f, 0.0f,
-								-1.0f, 0.0f, 10.0f,		0.0f, 0.0f, 1.0f};
-	triangleMesh->generateBuffers(3, 0, 0);
-	triangleMesh->material = tMaterial;
-
 	GLDrawable* planeMesh = new GLDrawable();
 	planeMesh->ptype = DRAWABLE;
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
 	planeMesh->coords = planeCoords;
-	planeMesh->generateBuffers(3, 0, 0);
-	planeMesh->material = tMaterial;
+	planeMesh->material = pMaterial;
+	planeMesh->bufferAttributes = glm::vec3(3, 0, 0);
 
 	GLDrawable* squareMesh = new GLDrawable();
 	squareMesh->ptype = DRAWABLE;
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
-	squareMesh->coords = squareCoords;
-	squareMesh->generateBuffers(3, 0, 0);
+	if (addResult == 0) {
+		squareMesh->coords = squareCoordsUV;
+		squareMesh->bufferAttributes = glm::vec3(0, 0, 2);
+	}
+	else {
+		squareMesh->coords = squareCoordsNormal;
+		squareMesh->bufferAttributes = glm::vec3(3, 3, 0);
+	}
 	squareMesh->material = tMaterial;
 	
 	
-
-	/*
 	GLDrawable* suzzane_drawable = new GLDrawable();
 	suzzane_drawable->ptype = DRAWABLE;
 	suzzane_drawable->renderFlag = true;
 	suzzane_drawable->dtype = MESH;
 	suzzane_drawable->coords = createCoordVector("someObj.txt");
-	suzzane_drawable->generateBuffers(3, 3, 0);
-	suzzane_drawable->material = tMaterial;*/
-
+	suzzane_drawable->material = sMaterial;
+	suzzane_drawable->bufferAttributes = glm::vec3(3, 3, 0);
 
 	//-----------Objects------------
 	GameObject* childCube = new GameObject();
@@ -153,12 +165,13 @@ void loadScene() {
 	childCube->glDrawable = squareMesh;
 	childCube->drawFlag = true;
 
+	/*
 	GameObject* triangle = new GameObject();
 	triangle->name = "Tri";
 	triangle->drawFlag = true;
 	triangle->glDrawable = triangleMesh;
 	triangle->properties.push_back(triangleMesh);
-	triangle->pos.z = -6;
+	triangle->pos.z = -6;*/
 
 	GameObject* parentCube = new GameObject();
 	parentCube->name = "Parent";
@@ -168,14 +181,14 @@ void loadScene() {
 	parentCube->addChild(childCube);
 	parentCube->pos.z = -12.0f;
 
-	/*
+	
 	GameObject* suzaneHead = new GameObject();
 	suzaneHead->name = "sh";
 	suzaneHead->properties.push_back(suzzane_drawable);
 	suzaneHead->glDrawable = suzzane_drawable;
 	suzaneHead->drawFlag = true;
 	suzaneHead->pos.x = -3;
-	suzaneHead->pos.z = -20;*/
+	suzaneHead->pos.z = -20;
 	
 	GameObject* ground = new GameObject();
 	ground->name = "Ground";
@@ -186,19 +199,24 @@ void loadScene() {
 	ground->pos.y = -5;
 	ground->scale = glm::vec3(100, 100, 100);
 	
+	suzzane_drawable->generateBuffers();
+	squareMesh->generateBuffers();
+	planeMesh->generateBuffers();
+
 
 	//-------------Adding objects to list-----------------
 	objects.push_back(parentCube);
 	objects.push_back(ground);
-	objects.push_back(triangle);
-	//objects.push_back(suzaneHead);
+	objects.push_back(suzaneHead);
 };
 
 int main()
 {
+	//std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
+
 	GLInstance instance;
 	instance.initialize();
-	instance.createWindow();
+	instance.createWindow("IceCaps - Week 2", 720, 1280);
 	instance.initGlad();
 	input = new InputControl(instance.window);
 	glfwSetKeyCallback(instance.window, key_callback);
@@ -207,12 +225,14 @@ int main()
 	glfwSetFramebufferSizeCallback(instance.window, framebuffer_size_callback);
 
 	loadScene();
+
 	//glEnable(GL_CULL_FACE);
 	//glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_GEQUAL);
 	glDepthRange(0.0f, 1.0f);
+
 
 	// render loop
 	while (!glfwWindowShouldClose(instance.window))

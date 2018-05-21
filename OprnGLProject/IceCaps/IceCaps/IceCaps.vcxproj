@@ -155,6 +155,7 @@
     <ClInclude Include="..\..\..\Headers\Property.h" />
     <ClInclude Include="..\..\..\Headers\Renderer.h" />
     <ClInclude Include="..\..\..\Headers\Shader.h" />
+    <ClInclude Include="..\..\..\Headers\stb_image.h" />
     <ClInclude Include="..\..\Headers\Headers.h" />
     <ClInclude Include="..\..\Headers\OpenGlInstance.h" />
   </ItemGroup>
@@ -163,10 +164,17 @@
     <None Include="..\..\..\Shaders\discoCubeVert.glsl" />
     <None Include="base.frag" />
     <None Include="base.vert" />
+    <None Include="phongSun.frag" />
+    <None Include="phongSun.vert" />
+    <None Include="texturedUnlit.vert" />
+    <None Include="texturedUnlit.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\..\Graphics\csci441-spring2018\programs\program3\susan.txt" />
     <Text Include="someObj.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="gf.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

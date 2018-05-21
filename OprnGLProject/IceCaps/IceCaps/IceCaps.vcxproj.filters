@@ -77,6 +77,9 @@
     <ClInclude Include="..\..\..\Headers\objLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Headers\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Shaders\discoCubeFrag.glsl">
@@ -91,6 +94,18 @@
     <None Include="base.frag">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="phongSun.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="phongSun.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="texturedUnlit.vert">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="texturedUnlit.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="someObj.txt">
@@ -99,5 +114,10 @@
     <Text Include="..\..\..\..\Graphics\csci441-spring2018\programs\program3\susan.txt">
       <Filter>Source Files</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="gf.bmp">
+      <Filter>Source Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

@@ -1,6 +1,10 @@
 #pragma once
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
+
+#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/matrix_interpolation.hpp>
+
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/compatibility.hpp>
 #include "Headers.h"
@@ -91,6 +95,9 @@ public:
 			return lastTransform;
 		}
 	};
+	glm::mat3 getInverseTranspose() {
+		return glm::inverseTranspose(glm::mat3(getTransform()));
+	}
 	void addChild(GameObject* newChild) {
 		children.push_back(newChild);
 	};

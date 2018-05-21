@@ -15,10 +15,11 @@ public:
 
 	GLuint vbo;
 	GLuint vao;
+	glm::vec3 bufferAttributes;
 	std::vector<float> coords;
 	GLMaterial* material;
 
 	GLDrawable();
 	~GLDrawable();
-	void generateBuffers(int colors, int normals, int uvs);
+	void generateBuffers();
 };
