@@ -18,7 +18,7 @@ public:
 	GLuint ebo;
 
 	bool usingEBO = false;
-	glm::vec3 bufferAttributes;
+	glm::vec4 bufferAttributes;
 	std::vector<float> coords;
 	std::vector<unsigned int> indeces;
 	GLMaterial* material;

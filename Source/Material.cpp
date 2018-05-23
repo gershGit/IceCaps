@@ -17,6 +17,12 @@ int GLMaterial::addTexture(const char * file_name, tType texture_type, int textu
 		glGenTextures(1, &specular);
 		glBindTexture(GL_TEXTURE_2D, specular);
 	}
+	else if (texture_type == NORMAL_MAP) {
+		normalTexNumber = texture_number;
+		glActiveTexture(GL_TEXTURE0 + texture_number);
+		glGenTextures(1, &normal);
+		glBindTexture(GL_TEXTURE_2D, normal);
+	}
 		int width, height, nrComponents;
 		stbi_set_flip_vertically_on_load(true);
 		unsigned char *data = stbi_load(file_name, &width, &height, &nrComponents, 0);

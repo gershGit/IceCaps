@@ -123,10 +123,11 @@ void loadScene() {
 	sMaterial->shader = sShader;
 
 	GLMaterial* tMaterial = new GLMaterial();
-	tMaterial->type = SIMPLE_TEX;
+	tMaterial->type = SIMPLE_PHONG_TEXTURED;
 	int addResult = tMaterial->addTexture("gf.bmp", DIFFUSE, texture_number++);
 	addResult = tMaterial->addTexture("specular.bmp", SPECULAR_MASK, texture_number++);
-	ShaderProgram tShader = ShaderProgram("diffuseSpec.vert", "diffuseSpec.frag");
+	addResult = tMaterial->addTexture("normal.png", NORMAL_MAP, texture_number++);
+	ShaderProgram tShader = ShaderProgram("phongFull.vert", "phongFull.frag");
 	tMaterial->shader = tShader;
 
 
@@ -139,21 +140,17 @@ void loadScene() {
 	planeMesh->coords = planeCoordsOnly;
 	planeMesh->indeces = planeIndeces;
 	planeMesh->material = pMaterial;
-	planeMesh->bufferAttributes = glm::vec3(3, 0, 0);
+	planeMesh->bufferAttributes = glm::vec4(3, 0, 0, 0);
 	toGenerate.push_back(planeMesh);
 
 	GLDrawable* squareMesh = new GLDrawable();
 	squareMesh->ptype = DRAWABLE;
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
-	if (addResult == 0) {
-		squareMesh->coords = squareCoordsNormalUV;
-		squareMesh->bufferAttributes = glm::vec3(0, 3, 2);
-	}
-	else {
-		squareMesh->coords = squareCoordsNormal;
-		squareMesh->bufferAttributes = glm::vec3(3, 3, 0);
-	}
+	squareMesh->usingEBO = true;
+	squareMesh->coords = squareCoordsOnly;
+	squareMesh->indeces = squareIndices;
+	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	squareMesh->material = tMaterial;
 	toGenerate.push_back(squareMesh);
 	
@@ -164,12 +161,12 @@ void loadScene() {
 	suzzane_drawable->dtype = MESH;
 	std::vector<float> coords = std::vector<float>();
 	std::vector<unsigned int> indices = std::vector<unsigned int>();
-	createCoordsIndices_UV_NORMAL("suzzane.obj", coords, indices);
+	createCoordsIndices_UV_NORMAL_MAPPING("suzzane.obj", coords, indices);
 	suzzane_drawable->usingEBO = true;
 	suzzane_drawable->coords = coords;
 	suzzane_drawable->indeces = indices;
 	suzzane_drawable->material = tMaterial;
-	suzzane_drawable->bufferAttributes = glm::vec3(0, 3, 2);
+	suzzane_drawable->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(suzzane_drawable);
 
 	//-----------Objects------------

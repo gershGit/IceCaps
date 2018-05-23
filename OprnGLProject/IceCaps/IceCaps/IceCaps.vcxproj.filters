@@ -127,6 +127,18 @@
     <None Include="diffuseSpec.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="phongFull.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="phongFull.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="displacePhong.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="displacePhong.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="someObj.txt">

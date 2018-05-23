@@ -181,6 +181,119 @@ void createCoordsIndices_UV_NORMAL(const char* file_name, std::vector<float> &fi
 		finalVertices.push_back(texture_array[tempVertexList[i].uv-1].y);
 	}
 }
+void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<float> &finalVertices, std::vector<unsigned int> &finalIndices) {
+	std::cout << "Loading model at " << file_name << std::endl;
 
+	std::vector<glm::vec3> vertices_array = std::vector<glm::vec3>();
+	std::vector<glm::vec3> normal_array = std::vector<glm::vec3>();
+	std::vector<glm::vec2> texture_array = std::vector<glm::vec2>();
+
+	std::vector<fullVertex> tempVertexList = std::vector<fullVertex>();
+
+	FILE* file;
+	errno_t err;
+	err = fopen_s(&file, file_name, "r");
+
+	if (file == NULL) {
+		std::cout << "File open error!" << std::endl;
+		return;
+	}
+	glm::vec3 tempVec = glm::vec3();
+	glm::vec2 tempVecUV = glm::vec2();
+	while (true) {
+		char lineHeader[128];
+		int res = fscanf_s(file, "%s", lineHeader, sizeof(lineHeader));
+		if (res == EOF) {
+			break;
+		}
+		else {
+			if (strcmp(lineHeader, "v") == 0) {
+				fscanf_s(file, "%f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z, sizeof(float), sizeof(float), sizeof(float));
+				vertices_array.push_back(tempVec);
+			}
+			else if (strcmp(lineHeader, "vn") == 0) {
+				fscanf_s(file, "%f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z, sizeof(float), sizeof(float), sizeof(float));
+				normal_array.push_back(tempVec);
+			}
+			else if (strcmp(lineHeader, "vt") == 0) {
+				fscanf_s(file, "%f %f %f\n", &tempVecUV.x, &tempVecUV.y, sizeof(float), sizeof(float));
+				texture_array.push_back(tempVecUV);
+			}
+			else if (strcmp(lineHeader, "f") == 0) {
+				//VERTEX / TEXTURE / NORMAL
+
+				fullVertex vertex1 = fullVertex(), vertex2 = fullVertex(), vertex3 = fullVertex();
+
+				fscanf_s(file, "%u/%u/%u %u/%u/%u %u/%u/%u\n", &vertex1.position, &vertex1.uv, &vertex1.normal, &vertex2.position, &vertex2.uv, &vertex2.normal, &vertex3.position, &vertex3.uv, &vertex3.normal,
+					sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int));
+
+				finalIndices.push_back(getIndex(vertex1, tempVertexList));
+				finalIndices.push_back(getIndex(vertex2, tempVertexList));
+				finalIndices.push_back(getIndex(vertex3, tempVertexList));
+			}
+		}
+	}
+	for (int i = 0; i < tempVertexList.size(); i++) {
+		finalVertices.push_back(vertices_array[tempVertexList[i].position - 1].x);
+		finalVertices.push_back(vertices_array[tempVertexList[i].position - 1].y);
+		finalVertices.push_back(vertices_array[tempVertexList[i].position - 1].z);
+
+		finalVertices.push_back(normal_array[tempVertexList[i].normal - 1].x);
+		finalVertices.push_back(normal_array[tempVertexList[i].normal - 1].y);
+		finalVertices.push_back(normal_array[tempVertexList[i].normal - 1].z);
+		if (i>0 && (i+1) % 3 == 0) {
+			glm::vec3 v2 = vertices_array[tempVertexList[i].position - 1];
+			glm::vec3 v1 = vertices_array[tempVertexList[i].position - 2];
+			glm::vec3 v0 = vertices_array[tempVertexList[i].position - 3];
+
+			glm::vec2 uv2 = texture_array[tempVertexList[i].uv - 1];
+			glm::vec2 uv1 = texture_array[tempVertexList[i].uv - 2];
+			glm::vec2 uv0 = texture_array[tempVertexList[i].uv - 3];
+
+			glm::vec3 deltaPos1 = v1 - v0;
+			glm::vec3 deltaPos2 = v2 - v0;
+
+			glm::vec2 deltaUV1 = uv1 - uv0;
+			glm::vec2 deltaUV2 = uv2 - uv0;
+
+			float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+			glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+			glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+			finalVertices.push_back(tangent.x);
+			finalVertices[finalVertices.size() - (1 + 14)] = tangent.x;
+			finalVertices[finalVertices.size() - (1 + 28)] = tangent.x;
+			finalVertices.push_back(tangent.y);
+			finalVertices[finalVertices.size() - (1 + 14)] = tangent.y;
+			finalVertices[finalVertices.size() - (1 + 28)] = tangent.y;
+			finalVertices.push_back(tangent.z);
+			finalVertices[finalVertices.size() - (1 + 14)] = tangent.z;
+			finalVertices[finalVertices.size() - (1 + 28)] = tangent.z;
+
+			finalVertices.push_back(bitangent.x);
+			finalVertices[finalVertices.size() - (1 + 14)] = bitangent.x;
+			finalVertices[finalVertices.size() - (1 + 28)] = bitangent.x;
+			finalVertices.push_back(bitangent.y);
+			finalVertices[finalVertices.size() - (1 + 14)] = bitangent.y;
+			finalVertices[finalVertices.size() - (1 + 28)] = bitangent.y;
+			finalVertices.push_back(bitangent.z);
+			finalVertices[finalVertices.size() - (1 + 14)] = bitangent.z;
+			finalVertices[finalVertices.size() - (1 + 28)] = bitangent.z;
+		}
+		else {
+			finalVertices.push_back(999);
+			finalVertices.push_back(999);
+			finalVertices.push_back(999);
+
+			finalVertices.push_back(999);
+			finalVertices.push_back(999);
+			finalVertices.push_back(999);
+		}
+		
+
+		finalVertices.push_back(texture_array[tempVertexList[i].uv - 1].x);
+		finalVertices.push_back(texture_array[tempVertexList[i].uv - 1].y);
+	}
+}
 
 #endif //GLFW_EXAMPLE_BADOBJLOADER_H

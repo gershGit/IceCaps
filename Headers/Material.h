@@ -3,8 +3,8 @@
 #include "Shader.h"
 #include <vector>
 
-enum mType {SIMPLE, PBR, GLASS, UNLIT_TEX, SIMPLE_TEX, SIMPLE_DIFFUSE_SPECULAR, PHONG, PHONG_SIMPLE, SSS};
-enum tType {DIFFUSE, METAL_MASK, SPECULAR_MASK, NORMAL, DISPLACEMENT};
+enum mType {SIMPLE, PBR, GLASS, UNLIT_TEX, SIMPLE_TEX, SIMPLE_DIFFUSE_SPECULAR, SIMPLE_PHONG_TEXTURED, PHONG, PHONG_SIMPLE, SSS};
+enum tType {DIFFUSE, METAL_MASK, SPECULAR_MASK, NORMAL_MAP, DISPLACEMENT_MAP};
 
 class GLMaterial {
 public:
@@ -16,12 +16,16 @@ public:
 	int diffuseTexNumber;
 
 	//Specular texture information
-	GLuint normal;
+	GLuint specular;
 	int specularTexNumber;
 
+	//Normal texture information
+	GLuint normal;
+	int normalTexNumber;
+
 	GLuint mettalic;
-	GLuint specular;
 	GLuint ambient_occlusion;
+	GLuint roughness;
 
 	int addTexture(const char* file_name, tType texture_type, int texture_number);
 	GLMaterial();

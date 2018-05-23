@@ -281,3 +281,42 @@ std::vector<unsigned int> planeIndeces = {
 	0, 2, 1,
 	2, 3, 1,
 };
+
+std::vector<float> squareCoordsOnly = {
+	//Front face			Normal				Tangent				Bitangent			UV
+	-1.0f, 1.0f, -1.0f,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 1.0,	//Front left top		0
+	-1.0f, -1.0f, -1.0f,	0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 0.0,	//Front left bottom		1
+	1.0f, -1.0f, -1.0f,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		1.0, 0.0,	//Front right bottom	2
+	1.0f, 1.0f, -1.0f,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		1.0, 1.0,	//Front right top		3
+
+	//Back face
+	-1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 1.0,	//Back left top			4
+	-1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		0.0, 0.0,	//Back left bottom		5
+	1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		1.0, 0.0,	//Back right bottom		6
+	1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 0.0, -1.0,		0.0, 0.0, -1.0,		1.0, 1.0,	//Back right top 		7																											
+};
+std::vector<unsigned int> squareIndices = {
+	//Front
+	1, 0, 2,
+	0, 3, 2,
+
+	//Back
+	4, 5, 7,
+	6, 7, 5,
+
+	//Right
+	2, 3, 7,
+	2, 7, 6,
+
+	//Left
+	4, 0, 1,
+	4, 1, 5,
+
+	//Top
+	0, 4, 7,
+	0, 7, 3,
+
+	//Bottom
+	5, 1, 2,
+	5, 2, 6,
+};

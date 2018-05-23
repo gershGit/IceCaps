@@ -71,6 +71,28 @@ public:
 			GLuint specularImageLoc = glGetUniformLocation(shader.id(), "specularSampler");
 			glUniform1i(specularImageLoc, drawableProp->material->specularTexNumber);
 		}
+		else if (drawableProp->material->type == SIMPLE_PHONG_TEXTURED) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			glm::vec3 eyeVec = camera->forward();
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			//TODO make an array of lights instead
+			GLuint sunPos = glGetUniformLocation(shader.id(), "sunPos");
+			glUniform3f(sunPos, -2, 3, -6);
+
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glm::mat3 itMatrix = object->getInverseTranspose();
+			glUniformMatrix3fv(itModel, 1, GL_FALSE, &itMatrix[0][0]);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+
+			GLuint specularImageLoc = glGetUniformLocation(shader.id(), "specularSampler");
+			glUniform1i(specularImageLoc, drawableProp->material->specularTexNumber);
+
+			GLuint normalImageLoc = glGetUniformLocation(shader.id(), "normalSampler");
+			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
+		}
 		else if (drawableProp->material->type == UNLIT_TEX) {
 			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
 			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);

@@ -166,6 +166,10 @@
     <None Include="base.vert" />
     <None Include="diffuseSpec.frag" />
     <None Include="diffuseSpec.vert" />
+    <None Include="displacePhong.frag" />
+    <None Include="displacePhong.vert" />
+    <None Include="phongFull.frag" />
+    <None Include="phongFull.vert" />
     <None Include="phongSun.frag" />
     <None Include="phongSun.vert" />
     <None Include="texturedSimple.frag" />
