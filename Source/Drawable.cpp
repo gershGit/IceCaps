@@ -11,14 +11,21 @@ GLDrawable::~GLDrawable()
 }
 
 void GLDrawable::generateBuffers() {
+	//VAO creation
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
 	// VBO creation
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, coords.size() * sizeof(float), coords.data(), GL_STATIC_DRAW);
-
-	//VAO creation
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	
+	//EBO creation
+	if (usingEBO) {
+		glGenBuffers(1, &ebo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indeces.size() * sizeof(unsigned int), indeces.data(), GL_STATIC_DRAW);
+	}
 
 	// VAO implementation
 	if (bufferAttributes.x > 0 && bufferAttributes.y == 0 && bufferAttributes.z == 0) {
@@ -84,6 +91,21 @@ void GLDrawable::generateBuffers() {
 		//UV info stored in vao at position 1
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 
+	}
+	else if (bufferAttributes.x == 0 && bufferAttributes.y > 0 && bufferAttributes.z > 0) {
+		glEnableVertexAttribArray(0); //Position attribute
+		glEnableVertexAttribArray(1); //Normal attribute
+		glEnableVertexAttribArray(2); //UV attribute
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+		//Position info stored in vao at position 0
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(0 * sizeof(float)));
+
+		//Color info stored in vao at position 1
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+
+		//UV info stored in vao at position 2
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	}
 	glBindVertexArray(0);
 }

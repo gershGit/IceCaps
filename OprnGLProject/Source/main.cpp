@@ -10,6 +10,7 @@
 #include "baseShapeCoords.h"
 #include "InputControl.h"
 #include "objLoader.h"
+#include <cstdlib>
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -28,6 +29,14 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	mainCamera->rot.x -= (ydif / 600) * 2;
 	mainCamera->moved = true;
 }
+int compareByCoordSize(const void * d1, const void * d2) {
+	GLDrawable* draw1 = *(GLDrawable**) d1;
+	GLDrawable* draw2 = *(GLDrawable**)d2;
+	if (draw1->coords.size() > draw2->coords.size()) return -1;
+	if (draw1->coords.size() == draw2->coords.size()) return 0;
+	if (draw1->coords.size() < draw2->coords.size()) return 1;
+}
+
 
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
@@ -89,6 +98,7 @@ void renderScene() {
 	}
 };
 void loadScene() {
+	std::vector<GLDrawable*> toGenerate = std::vector<GLDrawable*>();
 	int texture_number = 0;
 
 	//TODO fix so that multiple objects have their own vbo and vao correctly
@@ -106,55 +116,61 @@ void loadScene() {
 	ShaderProgram pShader = ShaderProgram("base.vert", "base.frag");
 	pMaterial->shader = pShader;
 
+
 	GLMaterial* sMaterial = new GLMaterial();
 	sMaterial->type = PHONG_SIMPLE;
 	ShaderProgram sShader = ShaderProgram("phongSun.vert", "phongSun.frag");
 	sMaterial->shader = sShader;
 
 	GLMaterial* tMaterial = new GLMaterial();
-	tMaterial->type = UNLIT_TEX;
+	tMaterial->type = SIMPLE_TEX;
 	int addResult = tMaterial->addTexture("gf.bmp", DIFFUSE, texture_number++);
-	if (addResult == 1) {
-		tMaterial->type = SIMPLE;
-		ShaderProgram sShader = ShaderProgram("phongSun.vert", "phongSun.frag");
-		tMaterial->shader = sShader;
-	}
-	else {
-		ShaderProgram tShader = ShaderProgram("texturedUnlit.vert", "texturedUnlit.frag");
-		tMaterial->shader = tShader;
-	}
+	addResult = tMaterial->addTexture("specular.bmp", SPECULAR_MASK, texture_number++);
+	ShaderProgram tShader = ShaderProgram("diffuseSpec.vert", "diffuseSpec.frag");
+	tMaterial->shader = tShader;
+
 
 	//------------Drawables-------------------
 	GLDrawable* planeMesh = new GLDrawable();
 	planeMesh->ptype = DRAWABLE;
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
-	planeMesh->coords = planeCoords;
+	planeMesh->usingEBO = true;
+	planeMesh->coords = planeCoordsOnly;
+	planeMesh->indeces = planeIndeces;
 	planeMesh->material = pMaterial;
 	planeMesh->bufferAttributes = glm::vec3(3, 0, 0);
+	toGenerate.push_back(planeMesh);
 
 	GLDrawable* squareMesh = new GLDrawable();
 	squareMesh->ptype = DRAWABLE;
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
 	if (addResult == 0) {
-		squareMesh->coords = squareCoordsUV;
-		squareMesh->bufferAttributes = glm::vec3(0, 0, 2);
+		squareMesh->coords = squareCoordsNormalUV;
+		squareMesh->bufferAttributes = glm::vec3(0, 3, 2);
 	}
 	else {
 		squareMesh->coords = squareCoordsNormal;
 		squareMesh->bufferAttributes = glm::vec3(3, 3, 0);
 	}
 	squareMesh->material = tMaterial;
+	toGenerate.push_back(squareMesh);
 	
 	
 	GLDrawable* suzzane_drawable = new GLDrawable();
 	suzzane_drawable->ptype = DRAWABLE;
 	suzzane_drawable->renderFlag = true;
 	suzzane_drawable->dtype = MESH;
-	suzzane_drawable->coords = createCoordVector("someObj.txt");
-	suzzane_drawable->material = sMaterial;
-	suzzane_drawable->bufferAttributes = glm::vec3(3, 3, 0);
+	std::vector<float> coords = std::vector<float>();
+	std::vector<unsigned int> indices = std::vector<unsigned int>();
+	createCoordsIndices_UV_NORMAL("suzzane.obj", coords, indices);
+	suzzane_drawable->usingEBO = true;
+	suzzane_drawable->coords = coords;
+	suzzane_drawable->indeces = indices;
+	suzzane_drawable->material = tMaterial;
+	suzzane_drawable->bufferAttributes = glm::vec3(0, 3, 2);
+	toGenerate.push_back(suzzane_drawable);
 
 	//-----------Objects------------
 	GameObject* childCube = new GameObject();
@@ -199,10 +215,10 @@ void loadScene() {
 	ground->pos.y = -5;
 	ground->scale = glm::vec3(100, 100, 100);
 	
-	suzzane_drawable->generateBuffers();
-	squareMesh->generateBuffers();
-	planeMesh->generateBuffers();
-
+	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
+	for (GLDrawable* drawable : toGenerate) {
+		drawable->generateBuffers();
+	}
 
 	//-------------Adding objects to list-----------------
 	objects.push_back(parentCube);

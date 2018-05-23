@@ -15,8 +15,12 @@ public:
 
 	GLuint vbo;
 	GLuint vao;
+	GLuint ebo;
+
+	bool usingEBO = false;
 	glm::vec3 bufferAttributes;
 	std::vector<float> coords;
+	std::vector<unsigned int> indeces;
 	GLMaterial* material;
 
 	GLDrawable();

@@ -36,6 +36,41 @@ public:
 			glm::mat3 itMatrix = object->getInverseTranspose();
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &itMatrix[0][0]);
 		}
+		else if (drawableProp->material->type == SIMPLE_TEX) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			glm::vec3 eyeVec = camera->forward();
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			//TODO make an array of lights instead
+			GLuint sunPos = glGetUniformLocation(shader.id(), "sunPos");
+			glUniform3f(sunPos, -2, 3, -6);
+
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glm::mat3 itMatrix = object->getInverseTranspose();
+			glUniformMatrix3fv(itModel, 1, GL_FALSE, &itMatrix[0][0]);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+		}
+		else if (drawableProp->material->type == SIMPLE_DIFFUSE_SPECULAR) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			glm::vec3 eyeVec = camera->forward();
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			//TODO make an array of lights instead
+			GLuint sunPos = glGetUniformLocation(shader.id(), "sunPos");
+			glUniform3f(sunPos, -2, 3, -6);
+
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glm::mat3 itMatrix = object->getInverseTranspose();
+			glUniformMatrix3fv(itModel, 1, GL_FALSE, &itMatrix[0][0]);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+
+			GLuint specularImageLoc = glGetUniformLocation(shader.id(), "specularSampler");
+			glUniform1i(specularImageLoc, drawableProp->material->specularTexNumber);
+		}
 		else if (drawableProp->material->type == UNLIT_TEX) {
 			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
 			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
@@ -43,8 +78,14 @@ public:
 
 		// render the object
 		glBindVertexArray(drawableProp->vao);	
-		glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
-		glBindVertexArray(0);
+		if (drawableProp->usingEBO) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo);
+			glDrawElements(GL_TRIANGLES, drawableProp->indeces.size(), GL_UNSIGNED_INT, 0);
+		}
+		else {
+			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
+			glBindVertexArray(0);
+		}
 		
 		for (GameObject* child : object->children) {
 			render(child, camera);

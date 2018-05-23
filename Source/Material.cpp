@@ -4,12 +4,19 @@
 
 int GLMaterial::addTexture(const char * file_name, tType texture_type, int texture_number)
 {
+	std::cout << "Loading texture at " << file_name << std::endl;
 	if (texture_type == DIFFUSE) {
 		diffuseTexNumber = texture_number;
 		glActiveTexture(GL_TEXTURE0 + texture_number);
 		glGenTextures(1, &diffuse);
 		glBindTexture(GL_TEXTURE_2D, diffuse);
-
+	}
+	else if (texture_type == SPECULAR_MASK) {
+		specularTexNumber = texture_number;
+		glActiveTexture(GL_TEXTURE0 + texture_number);
+		glGenTextures(1, &specular);
+		glBindTexture(GL_TEXTURE_2D, specular);
+	}
 		int width, height, nrComponents;
 		stbi_set_flip_vertically_on_load(true);
 		unsigned char *data = stbi_load(file_name, &width, &height, &nrComponents, 0);
@@ -35,7 +42,6 @@ int GLMaterial::addTexture(const char * file_name, tType texture_type, int textu
 			stbi_image_free(data);
 			return 1;
 		}
-	}
 }
 
 GLMaterial::GLMaterial() {};

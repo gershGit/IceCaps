@@ -164,8 +164,12 @@
     <None Include="..\..\..\Shaders\discoCubeVert.glsl" />
     <None Include="base.frag" />
     <None Include="base.vert" />
+    <None Include="diffuseSpec.frag" />
+    <None Include="diffuseSpec.vert" />
     <None Include="phongSun.frag" />
     <None Include="phongSun.vert" />
+    <None Include="texturedSimple.frag" />
+    <None Include="texturedSimple.vert" />
     <None Include="texturedUnlit.vert" />
     <None Include="texturedUnlit.frag" />
   </ItemGroup>
@@ -175,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="gf.bmp" />
+    <Image Include="specular.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
