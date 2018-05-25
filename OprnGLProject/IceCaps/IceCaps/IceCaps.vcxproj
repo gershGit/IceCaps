@@ -145,6 +145,7 @@
     <ClCompile Include="..\..\Source\OpenGLInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Headers\iceLoader.h" />
     <ClInclude Include="..\..\..\Headers\objLoader.h" />
     <ClInclude Include="..\..\..\Headers\baseShapeCoords.h" />
     <ClInclude Include="..\..\..\Headers\Camera.h" />
@@ -168,6 +169,8 @@
     <None Include="diffuseSpec.vert" />
     <None Include="displacePhong.frag" />
     <None Include="displacePhong.vert" />
+    <None Include="PBR.frag" />
+    <None Include="PBR.vert" />
     <None Include="phongFull.frag" />
     <None Include="phongFull.vert" />
     <None Include="phongSun.frag" />

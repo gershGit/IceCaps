@@ -107,7 +107,7 @@ void GLDrawable::generateBuffers() {
 		//UV info stored in vao at position 2
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	}
-	else if (bufferAttributes.x == 0 && bufferAttributes.y > 0 && bufferAttributes.z > 0 && bufferAttributes.w > 0) {
+	else if (material->type==STANDARD || material->type==PBR_BASIC) {
 		glEnableVertexAttribArray(0); //Position attribute
 		glEnableVertexAttribArray(1); //Normal attribute
 		glEnableVertexAttribArray(2); //Tangent attribute

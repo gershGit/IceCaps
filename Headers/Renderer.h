@@ -22,7 +22,7 @@ public:
 		GLuint viewLoc = glGetUniformLocation(shader.id(), "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &camera->camera->getViewMatrix()[0][0]);
 		GLuint projLoc = glGetUniformLocation(shader.id(), "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &camera->camera->getProjectionMatrix()[0][0]);
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
 
 		//Upload uniforms based on the type of material
 		if (drawableProp->material->type == SIMPLE) {
@@ -136,6 +136,42 @@ public:
 			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
 
 			GLuint specularImageLoc = glGetUniformLocation(shader.id(), "specularSampler");
+			glUniform1i(specularImageLoc, drawableProp->material->specularTexNumber);
+
+			GLuint normalImageLoc = glGetUniformLocation(shader.id(), "normalSampler");
+			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
+		}
+		else if (drawableProp->material->type == PBR_BASIC) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			glm::vec3 eyeVec = camera->forward();
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			//Lights
+			GLuint sunAngle = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunAngle, 0, -1, 0);
+
+			GLuint sunColor = glGetUniformLocation(shader.id(), "sunColor");
+			glUniform4f(sunColor, 0.1, 4.0, 0.1, 0.4);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), -2, 4, -4);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), -2, 8, -10);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), 2, 2, -4);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), 2, 2, -10);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), 0, 1.0f, 0.0f);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), 1.0f, 1.0f, 0.0f);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), 0.0f, 0.0f, 1.0f);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), 1.0f, 0.0f, 1.0f);
+
+
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "albedoSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+
+			GLuint specularImageLoc = glGetUniformLocation(shader.id(), "metallicSampler");
 			glUniform1i(specularImageLoc, drawableProp->material->specularTexNumber);
 
 			GLuint normalImageLoc = glGetUniformLocation(shader.id(), "normalSampler");

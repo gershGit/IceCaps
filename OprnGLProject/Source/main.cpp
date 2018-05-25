@@ -10,6 +10,7 @@
 #include "baseShapeCoords.h"
 #include "InputControl.h"
 #include "objLoader.h"
+#include "iceLoader.h"
 #include <cstdlib>
 
 InputControl* input;
@@ -123,11 +124,11 @@ void loadScene() {
 	sMaterial->shader = sShader;
 
 	GLMaterial* tMaterial = new GLMaterial();
-	tMaterial->type = STANDARD;
-	int addResult = tMaterial->addTexture("gf.bmp", DIFFUSE, texture_number++);
-	addResult = tMaterial->addTexture("specular.bmp", SPECULAR_MASK, texture_number++);
-	addResult = tMaterial->addTexture("normal.png", NORMAL_MAP, texture_number++);
-	ShaderProgram tShader = ShaderProgram("standard.vert", "standard.frag");
+	tMaterial->type = PBR_BASIC;
+	int addResult = tMaterial->addTexture("Textures/diffuse.png", DIFFUSE, texture_number++);
+	addResult = tMaterial->addTexture("Textures/metallic.png", SPECULAR_MASK, texture_number++);
+	addResult = tMaterial->addTexture("Textures/normal.png", NORMAL_MAP, texture_number++);
+	ShaderProgram tShader = ShaderProgram("PBR.vert", "PBR.frag");
 	tMaterial->shader = tShader;
 
 	GLMaterial* bottomMaterial = new GLMaterial();
@@ -144,10 +145,10 @@ void loadScene() {
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
 	planeMesh->usingEBO = true;
-	planeMesh->coords = planeCoordsNoNMOnly;
+	planeMesh->coords = planeCoordsOnly;
 	planeMesh->indices = planeIndeces;
-	planeMesh->material = bottomMaterial;
-	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 0);
+	planeMesh->material = tMaterial;
+	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(planeMesh);
 
 	GLDrawable* squareMesh = new GLDrawable();
@@ -168,11 +169,11 @@ void loadScene() {
 	suzzane_drawable->dtype = MESH;
 	std::vector<float> coords = std::vector<float>();
 	std::vector<unsigned int> indices = std::vector<unsigned int>();
-	createCoordsIndices_UV_NORMAL_MAPPING("suzzane.obj", coords, indices);
+	loadICE("some.ice", coords, indices);
 	suzzane_drawable->usingEBO = true;
 	suzzane_drawable->coords = coords;
 	suzzane_drawable->indices = indices;
-	suzzane_drawable->material = tMaterial;
+	suzzane_drawable->material = pMaterial;
 	suzzane_drawable->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(suzzane_drawable);
 

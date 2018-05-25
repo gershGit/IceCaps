@@ -19,6 +19,7 @@ public:
 	ShaderProgram() {}
 	//Creates a shader program from a vertex and fragment file
 	ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath) {
+		std::cout << "Loading shaders at " << vertexPath << " and " << fragmentPath << std::endl;
 		GLuint vertexShader = createShader(vertexPath, GL_VERTEX_SHADER);
 		GLuint fragmentShader = createShader(fragmentPath, GL_FRAGMENT_SHADER);
 

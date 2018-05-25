@@ -59,7 +59,7 @@ vec3 CalcPointLight(int index, vec3 normal, vec3 halfDir){
 }
 
 void main() {
-	//mat3 TBN = mat3(ourTangent, ourBitangent, ourNormal);
+	mat3 TBN = mat3(ourTangent, ourBitangent, ourNormal);
 
 	vec4 ourColorFour = texture(diffuseSampler, ourTexCoord);
 	vec3 ourColor = vec3(ourColorFour.x, ourColorFour.y, ourColorFour.z);
@@ -68,13 +68,11 @@ void main() {
 
 	vec3 ambient = ambientStrength * lightColor;
 
-	//vec4 ourSampledNormal = texture(normalSampler, ourTexCoord);
-    //vec3 normal = normalize(ourNormal + vec3(ourSampledNormal.x, ourSampledNormal.y, ourSampledNormal.z));
 	vec3 normal = normalize (texture(normalSampler, ourTexCoord).xyz*2.0 - 1.0);
-	//vec3 normal = normalize(ourNormal);
+
     vec3 lightDir = normalize(-sunAngle);
-	//lightDir *= TBN;
-	//lightDir = normalize(lightDir);
+	lightDir *= TBN;
+	lightDir = normalize(lightDir);
 
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
@@ -84,9 +82,6 @@ void main() {
 	vec3 halfDir = normalize(lightDir + viewDir);
 	float specAngle = max(dot(halfDir, normal), 0.0);
 	vec3 specular = pow(specAngle, shininess/4.0) * specularStrength * lightColor;
-
-    //vec3 result = (ambient+diffuse+specular)*ourColor;
-    //fragColor = vec4(result, 1.0f);
 
 	vec3 result = CalcSunlight(normal, halfDir);
 	for (int i=0; i< NR_POINT_LIGHTS; i++){
