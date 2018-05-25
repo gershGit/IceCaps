@@ -123,12 +123,19 @@ void loadScene() {
 	sMaterial->shader = sShader;
 
 	GLMaterial* tMaterial = new GLMaterial();
-	tMaterial->type = SIMPLE_PHONG_TEXTURED;
+	tMaterial->type = STANDARD;
 	int addResult = tMaterial->addTexture("gf.bmp", DIFFUSE, texture_number++);
 	addResult = tMaterial->addTexture("specular.bmp", SPECULAR_MASK, texture_number++);
 	addResult = tMaterial->addTexture("normal.png", NORMAL_MAP, texture_number++);
-	ShaderProgram tShader = ShaderProgram("phongFull.vert", "phongFull.frag");
+	ShaderProgram tShader = ShaderProgram("standard.vert", "standard.frag");
 	tMaterial->shader = tShader;
+
+	GLMaterial* bottomMaterial = new GLMaterial();
+	bottomMaterial->type = SIMPLE_DIFFUSE_SPECULAR;
+	addResult = bottomMaterial->addTexture("specular.bmp", DIFFUSE, texture_number++);
+	addResult = bottomMaterial->addTexture("specular.bmp", SPECULAR_MASK, texture_number++);
+	ShaderProgram bShader = ShaderProgram("diffuseSpec.vert", "diffuseSpec.frag");
+	bottomMaterial->shader = bShader;
 
 
 	//------------Drawables-------------------
@@ -137,10 +144,10 @@ void loadScene() {
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
 	planeMesh->usingEBO = true;
-	planeMesh->coords = planeCoordsOnly;
-	planeMesh->indeces = planeIndeces;
-	planeMesh->material = pMaterial;
-	planeMesh->bufferAttributes = glm::vec4(3, 0, 0, 0);
+	planeMesh->coords = planeCoordsNoNMOnly;
+	planeMesh->indices = planeIndeces;
+	planeMesh->material = bottomMaterial;
+	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 0);
 	toGenerate.push_back(planeMesh);
 
 	GLDrawable* squareMesh = new GLDrawable();
@@ -149,7 +156,7 @@ void loadScene() {
 	squareMesh->dtype = MESH;
 	squareMesh->usingEBO = true;
 	squareMesh->coords = squareCoordsOnly;
-	squareMesh->indeces = squareIndices;
+	squareMesh->indices = squareIndices;
 	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	squareMesh->material = tMaterial;
 	toGenerate.push_back(squareMesh);
@@ -164,7 +171,7 @@ void loadScene() {
 	createCoordsIndices_UV_NORMAL_MAPPING("suzzane.obj", coords, indices);
 	suzzane_drawable->usingEBO = true;
 	suzzane_drawable->coords = coords;
-	suzzane_drawable->indeces = indices;
+	suzzane_drawable->indices = indices;
 	suzzane_drawable->material = tMaterial;
 	suzzane_drawable->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(suzzane_drawable);
@@ -210,7 +217,7 @@ void loadScene() {
 	ground->properties.push_back(planeMesh);
 	ground->pos.z = -12.0f;
 	ground->pos.y = -5;
-	ground->scale = glm::vec3(100, 100, 100);
+	ground->scale = glm::vec3(10, 10, 10);
 	
 	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
 	for (GLDrawable* drawable : toGenerate) {
@@ -251,7 +258,7 @@ int main()
 	while (!glfwWindowShouldClose(instance.window))
 	{
 		// render
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClearDepth(0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

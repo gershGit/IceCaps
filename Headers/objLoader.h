@@ -1,6 +1,6 @@
-//
-// Created by garret on 3/31/18.
-//
+/*
+	Header file to load obj files into coordinates and indices
+*/
 
 #ifndef GLFW_EXAMPLE_BADOBJLOADER_H
 #define GLFW_EXAMPLE_BADOBJLOADER_H
@@ -8,6 +8,7 @@
 #include "Drawable.h"
 #include "string.h"
 
+//Mini class to store an obj index
 class vnIndex {
 public:
     unsigned int vertices[3];
@@ -26,11 +27,15 @@ public:
         normals[pos] = normal;
     }
 };
+
+//Structure with index location for a position, normal, and uv
 struct fullVertex {
 	unsigned int position;
 	unsigned int normal;
 	unsigned int uv;
 };
+
+//Get's the index of a vertex from a list, or adds one to the list if it does not exist
 unsigned int getIndex(fullVertex checkVertex, std::vector<fullVertex> &tempVertices) {
 	for (unsigned int i=0; i < tempVertices.size(); i++) {
 		//If that vertex already exists then return that index
@@ -43,6 +48,7 @@ unsigned int getIndex(fullVertex checkVertex, std::vector<fullVertex> &tempVerti
 	return tempVertices.size() - 1;
 }
 
+//Deprecated, delete when safe
 std::vector<float> createCoordVector_NORMAL(const char* file_name){
     std::vector<float> vertices_array= std::vector<float>();
     std::vector<float> normal_array= std::vector<float>();
@@ -116,15 +122,19 @@ std::vector<float> createCoordVector_NORMAL(const char* file_name){
     return coords;
 }
 
+//Creates coordinate and indices for an object that does not need to be normal mapped
 void createCoordsIndices_UV_NORMAL(const char* file_name, std::vector<float> &finalVertices, std::vector<unsigned int> &finalIndices){
+	//Output information
 	std::cout << "Loading model at " << file_name << std::endl;
 
+	//Necessary vectors
 	std::vector<glm::vec3> vertices_array = std::vector<glm::vec3>();
 	std::vector<glm::vec3> normal_array = std::vector<glm::vec3>();
 	std::vector<glm::vec2> texture_array = std::vector<glm::vec2>();
 
 	std::vector<fullVertex> tempVertexList = std::vector<fullVertex>();
 
+	//Attempt to open file
 	FILE* file;
 	errno_t err;
 	err = fopen_s(&file, file_name, "r");
@@ -133,9 +143,14 @@ void createCoordsIndices_UV_NORMAL(const char* file_name, std::vector<float> &fi
 		std::cout << "File open error!" << std::endl;
 		return;
 	}
+
+	//Temporary variables for lines of the obj
 	glm::vec3 tempVec = glm::vec3();
 	glm::vec2 tempVecUV = glm::vec2();
+
+	//Loop through the lines of the obj and store them into vectors
 	while (true) {
+		//Determine the type of each line
 		char lineHeader[128];
 		int res = fscanf_s(file, "%s", lineHeader, sizeof(lineHeader));
 		if (res == EOF) {
@@ -143,31 +158,34 @@ void createCoordsIndices_UV_NORMAL(const char* file_name, std::vector<float> &fi
 		}
 		else {			
 			if (strcmp(lineHeader, "v") == 0) {
+				//Store vertex information into the vertex vector
 				fscanf_s(file, "%f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z, sizeof(float), sizeof(float), sizeof(float));
 				vertices_array.push_back(tempVec);
 			}
 			else if (strcmp(lineHeader, "vn") == 0) {
+				//Store vertex normal information into the vertex vector
 				fscanf_s(file, "%f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z, sizeof(float), sizeof(float), sizeof(float));
 				normal_array.push_back(tempVec);
 			}
 			else if (strcmp(lineHeader, "vt") == 0) {
+				//Store vertex texture information into the vertex vector
 				fscanf_s(file, "%f %f %f\n", &tempVecUV.x, &tempVecUV.y, sizeof(float), sizeof(float));
 				texture_array.push_back(tempVecUV);
 			}
 			else if (strcmp(lineHeader, "f") == 0) {
-				//VERTEX / TEXTURE / NORMAL
-
+				//Create a vertex structure from a face line
 				fullVertex vertex1 = fullVertex(), vertex2 = fullVertex(), vertex3 = fullVertex();
-
 				fscanf_s(file, "%u/%u/%u %u/%u/%u %u/%u/%u\n", &vertex1.position, &vertex1.uv, &vertex1.normal, &vertex2.position, &vertex2.uv, &vertex2.normal, &vertex3.position, &vertex3.uv, &vertex3.normal, 
 					sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int));
 
+				//Add index references for the three new vertices
 				finalIndices.push_back(getIndex(vertex1, tempVertexList));
 				finalIndices.push_back(getIndex(vertex2, tempVertexList));
 				finalIndices.push_back(getIndex(vertex3, tempVertexList));
 			}
 		}
 	}
+	//Build the final coordinate vector that has already been indexed
 	for (int i = 0; i < tempVertexList.size(); i++) {
 		finalVertices.push_back(vertices_array[tempVertexList[i].position-1].x);
 		finalVertices.push_back(vertices_array[tempVertexList[i].position-1].y);
@@ -181,15 +199,20 @@ void createCoordsIndices_UV_NORMAL(const char* file_name, std::vector<float> &fi
 		finalVertices.push_back(texture_array[tempVertexList[i].uv-1].y);
 	}
 }
+
+//Creates coordinate and indices for an object that has normal mapping
 void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<float> &finalVertices, std::vector<unsigned int> &finalIndices) {
+	//Output information
 	std::cout << "Loading model at " << file_name << std::endl;
 
+	//Necessary vectors
 	std::vector<glm::vec3> vertices_array = std::vector<glm::vec3>();
 	std::vector<glm::vec3> normal_array = std::vector<glm::vec3>();
 	std::vector<glm::vec2> texture_array = std::vector<glm::vec2>();
 
 	std::vector<fullVertex> tempVertexList = std::vector<fullVertex>();
 
+	//Attempt to open file
 	FILE* file;
 	errno_t err;
 	err = fopen_s(&file, file_name, "r");
@@ -198,9 +221,14 @@ void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<fl
 		std::cout << "File open error!" << std::endl;
 		return;
 	}
+
+	//Temporary variables for lines of the obj
 	glm::vec3 tempVec = glm::vec3();
 	glm::vec2 tempVecUV = glm::vec2();
+
+	//Loop through the lines of the obj and store them into vectors
 	while (true) {
+		//Determine the type of each line
 		char lineHeader[128];
 		int res = fscanf_s(file, "%s", lineHeader, sizeof(lineHeader));
 		if (res == EOF) {
@@ -208,31 +236,34 @@ void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<fl
 		}
 		else {
 			if (strcmp(lineHeader, "v") == 0) {
+				//Store vertex information into the vertex vector
 				fscanf_s(file, "%f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z, sizeof(float), sizeof(float), sizeof(float));
 				vertices_array.push_back(tempVec);
 			}
 			else if (strcmp(lineHeader, "vn") == 0) {
+				//Store vertex normal information into the vertex vector
 				fscanf_s(file, "%f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z, sizeof(float), sizeof(float), sizeof(float));
 				normal_array.push_back(tempVec);
 			}
 			else if (strcmp(lineHeader, "vt") == 0) {
+				//Store vertex texture information into the vertex vector
 				fscanf_s(file, "%f %f %f\n", &tempVecUV.x, &tempVecUV.y, sizeof(float), sizeof(float));
 				texture_array.push_back(tempVecUV);
 			}
 			else if (strcmp(lineHeader, "f") == 0) {
-				//VERTEX / TEXTURE / NORMAL
-
+				//Create a vertex structure from a face line
 				fullVertex vertex1 = fullVertex(), vertex2 = fullVertex(), vertex3 = fullVertex();
-
 				fscanf_s(file, "%u/%u/%u %u/%u/%u %u/%u/%u\n", &vertex1.position, &vertex1.uv, &vertex1.normal, &vertex2.position, &vertex2.uv, &vertex2.normal, &vertex3.position, &vertex3.uv, &vertex3.normal,
 					sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int), sizeof(unsigned int));
 
+				//Add index references for the three new vertices
 				finalIndices.push_back(getIndex(vertex1, tempVertexList));
 				finalIndices.push_back(getIndex(vertex2, tempVertexList));
 				finalIndices.push_back(getIndex(vertex3, tempVertexList));
 			}
 		}
 	}
+	//Build the final coordinate vector that has already been indexed
 	for (int i = 0; i < tempVertexList.size(); i++) {
 		finalVertices.push_back(vertices_array[tempVertexList[i].position - 1].x);
 		finalVertices.push_back(vertices_array[tempVertexList[i].position - 1].y);
@@ -241,6 +272,8 @@ void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<fl
 		finalVertices.push_back(normal_array[tempVertexList[i].normal - 1].x);
 		finalVertices.push_back(normal_array[tempVertexList[i].normal - 1].y);
 		finalVertices.push_back(normal_array[tempVertexList[i].normal - 1].z);
+
+		//For each triangle create the tangent and bitangent vectors
 		if (i>0 && (i+1) % 3 == 0) {
 			glm::vec3 v2 = vertices_array[tempVertexList[i].position - 1];
 			glm::vec3 v1 = vertices_array[tempVertexList[i].position - 2];
@@ -260,6 +293,7 @@ void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<fl
 			glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
 			glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
 
+			//Update tangent and bitangent info for this vertex and the preceding two
 			finalVertices.push_back(tangent.x);
 			finalVertices[finalVertices.size() - (1 + 14)] = tangent.x;
 			finalVertices[finalVertices.size() - (1 + 28)] = tangent.x;
@@ -281,6 +315,7 @@ void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<fl
 			finalVertices[finalVertices.size() - (1 + 28)] = bitangent.z;
 		}
 		else {
+			//Add default tangent and bitangent vectors
 			finalVertices.push_back(999);
 			finalVertices.push_back(999);
 			finalVertices.push_back(999);
@@ -290,7 +325,7 @@ void createCoordsIndices_UV_NORMAL_MAPPING(const char* file_name, std::vector<fl
 			finalVertices.push_back(999);
 		}
 		
-
+		//Add texture information to the vertex
 		finalVertices.push_back(texture_array[tempVertexList[i].uv - 1].x);
 		finalVertices.push_back(texture_array[tempVertexList[i].uv - 1].y);
 	}

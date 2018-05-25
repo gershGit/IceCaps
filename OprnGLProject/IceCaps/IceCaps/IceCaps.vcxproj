@@ -172,6 +172,8 @@
     <None Include="phongFull.vert" />
     <None Include="phongSun.frag" />
     <None Include="phongSun.vert" />
+    <None Include="standard.frag" />
+    <None Include="standard.vert" />
     <None Include="texturedSimple.frag" />
     <None Include="texturedSimple.vert" />
     <None Include="texturedUnlit.vert" />

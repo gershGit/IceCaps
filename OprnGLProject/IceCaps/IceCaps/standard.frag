@@ -6,8 +6,12 @@ in vec2 ourTexCoord;
 in vec3 ourNormal;
 in vec3 ourFragPos;
 
+in vec3 ourTangent;
+in vec3 ourBitangent;
+
 uniform sampler2D diffuseSampler;
 uniform sampler2D specularSampler;
+uniform sampler2D normalSampler;
 uniform vec3 eyePos;
 
 uniform vec3 sunAngle;			//x,y,z, strength
@@ -55,6 +59,8 @@ vec3 CalcPointLight(int index, vec3 normal, vec3 halfDir){
 }
 
 void main() {
+	//mat3 TBN = mat3(ourTangent, ourBitangent, ourNormal);
+
 	vec4 ourColorFour = texture(diffuseSampler, ourTexCoord);
 	vec3 ourColor = vec3(ourColorFour.x, ourColorFour.y, ourColorFour.z);
 
@@ -62,25 +68,30 @@ void main() {
 
 	vec3 ambient = ambientStrength * lightColor;
 
-    vec3 normal = normalize(ourNormal);
+	//vec4 ourSampledNormal = texture(normalSampler, ourTexCoord);
+    //vec3 normal = normalize(ourNormal + vec3(ourSampledNormal.x, ourSampledNormal.y, ourSampledNormal.z));
+	vec3 normal = normalize (texture(normalSampler, ourTexCoord).xyz*2.0 - 1.0);
+	//vec3 normal = normalize(ourNormal);
     vec3 lightDir = normalize(-sunAngle);
+	//lightDir *= TBN;
+	//lightDir = normalize(lightDir);
 
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
 	//Blinn phong
-	vec3 viewDir = normalize(-ourFragPos);
+	vec3 viewDir = normalize(eyePos - ourFragPos);
 	vec3 halfDir = normalize(lightDir + viewDir);
 	float specAngle = max(dot(halfDir, normal), 0.0);
 	vec3 specular = pow(specAngle, shininess/4.0) * specularStrength * lightColor;
 
-    vec3 result = (ambient+diffuse+specular)*ourColor;
-    fragColor = vec4(result, 1.0f);
+    //vec3 result = (ambient+diffuse+specular)*ourColor;
+    //fragColor = vec4(result, 1.0f);
 
-	//vec3 result = CalcSunlight(normal, halfDir);
-	//for (int i=0; i< NR_POINT_LIGHTS; i++){
-	//	result+= CalcPointLight(i, normal, halfDir);
-	//}
+	vec3 result = CalcSunlight(normal, halfDir);
+	for (int i=0; i< NR_POINT_LIGHTS; i++){
+		result+= CalcPointLight(i, normal, halfDir);
+	}
 
-	//fragColor = vec4(result, 1.0);
+	fragColor = vec4(result, 1.0);
 }

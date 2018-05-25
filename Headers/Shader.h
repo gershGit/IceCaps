@@ -1,5 +1,8 @@
-#pragma once
+/*
+	Header file used to create shader programs from shader files
+*/
 
+#pragma once
 #include <string>
 #include "Headers.h"
 #include <fstream>
@@ -9,9 +12,12 @@
 
 class ShaderProgram {
 private:
+	//ID of the shader
 	GLuint shaderID;
 public:
+	//Create a default shader
 	ShaderProgram() {}
+	//Creates a shader program from a vertex and fragment file
 	ShaderProgram(const std::string& vertexPath, const std::string& fragmentPath) {
 		GLuint vertexShader = createShader(vertexPath, GL_VERTEX_SHADER);
 		GLuint fragmentShader = createShader(fragmentPath, GL_FRAGMENT_SHADER);
@@ -23,14 +29,17 @@ public:
 		glDeleteShader(fragmentShader);
 	}
 
+	//Returns the shader's id
 	GLuint id() const {
 		return shaderID;
 	}
 
+	//Calls the opengl use of the program
 	void use() {
 		glUseProgram(id());
 	}
 
+	//Creates the program from references to a vertex and frag shader
 	GLuint createShaderProgram(GLuint vertexShader, GLuint fragmentShader) {
 		GLuint program = glCreateProgram();
 		glAttachShader(program, vertexShader);
@@ -49,6 +58,7 @@ public:
 		return program;
 	}
 
+	//Returns the name of the shader type
 	std::string shaderTypeName(GLenum shaderType) {
 		switch (shaderType) {
 		case GL_VERTEX_SHADER: return "VERTEX";
@@ -57,6 +67,7 @@ public:
 		}
 	}
 
+	//Creates a shader from a shader file
 	GLuint createShader(const std::string& fileName, GLenum shaderType) {
 		std::ifstream stream(fileName);
 		std::stringstream buffer;

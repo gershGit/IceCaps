@@ -139,6 +139,12 @@
     <None Include="displacePhong.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="standard.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="standard.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="someObj.txt">
