@@ -135,15 +135,18 @@
     <ClCompile Include="..\..\..\Source\Camera.cpp" />
     <ClCompile Include="..\..\..\Source\Drawable.cpp" />
     <ClCompile Include="..\..\..\Source\GameObject.cpp" />
+    <ClCompile Include="..\..\..\Source\InputControl.cpp" />
     <ClCompile Include="..\..\..\Source\Material.cpp" />
+    <ClCompile Include="..\..\Source\main.cpp" />
     <ClCompile Include="..\..\Source\OpenGLInstance.cpp" />
-    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\Headers\Camera.h" />
     <ClInclude Include="..\..\..\Headers\Drawable.h" />
     <ClInclude Include="..\..\..\Headers\GameObject.h" />
+    <ClInclude Include="..\..\..\Headers\InputControl.h" />
     <ClInclude Include="..\..\..\Headers\Material.h" />
+    <ClInclude Include="..\..\..\Headers\objLoader.h" />
     <ClInclude Include="..\..\..\Headers\Property.h" />
     <ClInclude Include="..\..\..\Headers\Renderer.h" />
     <ClInclude Include="..\..\..\Headers\Shader.h" />
@@ -156,6 +159,9 @@
     <None Include="..\..\..\Shaders\discoCubeVert.glsl" />
     <None Include="base.frag" />
     <None Include="base.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\IceCaps\IceCaps\someObj.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

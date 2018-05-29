@@ -35,6 +35,7 @@ std::vector<float> createCoordVector(const char* file_name){
 	errno_t err;
 	err = fopen_s(&file, file_name, "r");
 
+	std::cout << "Opening file\n\t-->";
     if (file == NULL){
         std::cout << "File open error!" << std::endl;
         return std::vector<float>();

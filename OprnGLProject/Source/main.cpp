@@ -43,26 +43,18 @@ void runUpdates() {
 		objects[0]->pos.x += 0.01f;
 	}
 	if (input->isDown(W_KEY)) {
-		//std::cout << "Rotation: " << mainCamera->rot.x << ", " << mainCamera->rot.y << ", " << mainCamera->rot.z << std::endl;
-		//std::cout << "Forward: " << mainCamera->forward().x << ", " << mainCamera->forward().y << ", " << mainCamera->forward().z << std::endl;
 		mainCamera->pos -= mainCamera->forward() * 0.01f;
 		mainCamera->moved = true;
 	}
 	if (input->isDown(S_KEY)) {
-		//std::cout << "Rotation: " << mainCamera->rot.x << ", " << mainCamera->rot.y << ", " << mainCamera->rot.z << std::endl;
-		//std::cout << "Forward: " << mainCamera->forward().x << ", " << mainCamera->forward().y << ", " << mainCamera->forward().z << std::endl;
 		mainCamera->pos += mainCamera->forward() * 0.01f;
 		mainCamera->moved = true;
 	}
 	if (input->isDown(A_KEY)) {
-		//std::cout << "Rotation: " << mainCamera->rot.x << ", " << mainCamera->rot.y << ", " << mainCamera->rot.z << std::endl;
-		//std::cout << "Right: " << mainCamera->right().x << ", " << mainCamera->right().y << ", " << mainCamera->right().z << std::endl;
 		mainCamera->pos += mainCamera->right() * 0.01f;
 		mainCamera->moved = true;
 	}
 	if (input->isDown(D_KEY)) {
-		//std::cout << "Rotation: " << mainCamera->rot.x << ", " << mainCamera->rot.y << ", " << mainCamera->rot.z << std::endl;
-		//std::cout << "Right: " << mainCamera->right().x << ", " << mainCamera->right().y << ", " << mainCamera->right().z << std::endl;
 		mainCamera->pos -= mainCamera->right() * 0.01f;
 		mainCamera->moved = true;
 	}
@@ -75,9 +67,6 @@ void renderScene() {
 		if (object->drawFlag) {
 			double nowTime = fmod(glfwGetTime(),12);
 			
-			//object->pos.z = 12 -nowTime;
-			//object->scale.x = nowTime;
-			//object->rot.z = nowTime / 6;
 			if (strcmp(object->name, "Parent") == 0) {
 				object->rot.y = nowTime;
 				object->rot.z = nowTime / 6;
@@ -132,16 +121,14 @@ void loadScene() {
 	squareMesh->generateBuffers(3, 0, 0);
 	squareMesh->material = tMaterial;
 	
-	
-
-	/*
+	std::cout << "Loading suzzane head" << std::endl;
 	GLDrawable* suzzane_drawable = new GLDrawable();
 	suzzane_drawable->ptype = DRAWABLE;
 	suzzane_drawable->renderFlag = true;
 	suzzane_drawable->dtype = MESH;
 	suzzane_drawable->coords = createCoordVector("someObj.txt");
 	suzzane_drawable->generateBuffers(3, 3, 0);
-	suzzane_drawable->material = tMaterial;*/
+	suzzane_drawable->material = tMaterial;
 
 
 	//-----------Objects------------
@@ -168,14 +155,13 @@ void loadScene() {
 	parentCube->addChild(childCube);
 	parentCube->pos.z = -12.0f;
 
-	/*
 	GameObject* suzaneHead = new GameObject();
 	suzaneHead->name = "sh";
 	suzaneHead->properties.push_back(suzzane_drawable);
 	suzaneHead->glDrawable = suzzane_drawable;
 	suzaneHead->drawFlag = true;
 	suzaneHead->pos.x = -3;
-	suzaneHead->pos.z = -20;*/
+	suzaneHead->pos.z = -20;
 	
 	GameObject* ground = new GameObject();
 	ground->name = "Ground";
@@ -191,7 +177,7 @@ void loadScene() {
 	objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(triangle);
-	//objects.push_back(suzaneHead);
+	objects.push_back(suzaneHead);
 };
 
 int main()
@@ -207,6 +193,7 @@ int main()
 	glfwSetFramebufferSizeCallback(instance.window, framebuffer_size_callback);
 
 	loadScene();
+
 	//glEnable(GL_CULL_FACE);
 	//glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
