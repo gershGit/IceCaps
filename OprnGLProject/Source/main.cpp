@@ -10,6 +10,8 @@
 #include "baseShapeCoords.h"
 #include "InputControl.h"
 #include "objLoader.h"
+#include "iceLoader.h"
+#include <cstdlib>
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -28,6 +30,14 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	mainCamera->rot.x -= (ydif / 600) * 2;
 	mainCamera->moved = true;
 }
+int compareByCoordSize(const void * d1, const void * d2) {
+	GLDrawable* draw1 = *(GLDrawable**) d1;
+	GLDrawable* draw2 = *(GLDrawable**)d2;
+	if (draw1->coords.size() > draw2->coords.size()) return -1;
+	if (draw1->coords.size() == draw2->coords.size()) return 0;
+	if (draw1->coords.size() < draw2->coords.size()) return 1;
+}
+
 
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
@@ -78,6 +88,9 @@ void renderScene() {
 	}
 };
 void loadScene() {
+	std::vector<GLDrawable*> toGenerate = std::vector<GLDrawable*>();
+	int texture_number = 0;
+
 	//TODO fix so that multiple objects have their own vbo and vao correctly
 	GLCamera* mainCam = new GLCamera();
 	mainCam->fov = 45;
@@ -88,48 +101,71 @@ void loadScene() {
 	
 
 	//------------Materials--------------
+	GLMaterial* pMaterial = new GLMaterial();
+	pMaterial->type = SIMPLE;
+	ShaderProgram pShader = ShaderProgram("base.vert", "base.frag");
+	pMaterial->shader = pShader;
+
+
+	GLMaterial* sMaterial = new GLMaterial();
+	sMaterial->type = PHONG_SIMPLE;
+	ShaderProgram sShader = ShaderProgram("phongSun.vert", "phongSun.frag");
+	sMaterial->shader = sShader;
+
 	GLMaterial* tMaterial = new GLMaterial();
-	tMaterial->type = PHONG;
-	ShaderProgram tShader = ShaderProgram("base.vert", "base.frag");
+	tMaterial->type = PBR_BASIC;
+	int addResult = tMaterial->addTexture("Textures/diffuse.png", DIFFUSE, texture_number++);
+	addResult = tMaterial->addTexture("Textures/metallic.png", SPECULAR_MASK, texture_number++);
+	addResult = tMaterial->addTexture("Textures/normal.png", NORMAL_MAP, texture_number++);
+	ShaderProgram tShader = ShaderProgram("PBR.vert", "PBR.frag");
 	tMaterial->shader = tShader;
+
+	GLMaterial* bottomMaterial = new GLMaterial();
+	bottomMaterial->type = SIMPLE_DIFFUSE_SPECULAR;
+	addResult = bottomMaterial->addTexture("specular.bmp", DIFFUSE, texture_number++);
+	addResult = bottomMaterial->addTexture("specular.bmp", SPECULAR_MASK, texture_number++);
+	ShaderProgram bShader = ShaderProgram("diffuseSpec.vert", "diffuseSpec.frag");
+	bottomMaterial->shader = bShader;
 
 
 	//------------Drawables-------------------
-	GLDrawable* triangleMesh = new GLDrawable();
-	triangleMesh->ptype = DRAWABLE;
-	triangleMesh->renderFlag = true;
-	triangleMesh->dtype = MESH;
-	triangleMesh->coords = {	0.0f, 1.0f, 10.0f,		1.0f, 0.0f, 0.0f,
-								1.0f, 0.0f, 10.0f,		0.0f, 1.0f, 0.0f,
-								-1.0f, 0.0f, 10.0f,		0.0f, 0.0f, 1.0f};
-	triangleMesh->generateBuffers(3, 0, 0);
-	triangleMesh->material = tMaterial;
-
 	GLDrawable* planeMesh = new GLDrawable();
 	planeMesh->ptype = DRAWABLE;
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
-	planeMesh->coords = planeCoords;
-	planeMesh->generateBuffers(3, 0, 0);
+	planeMesh->usingEBO = true;
+	planeMesh->coords = planeCoordsOnly;
+	planeMesh->indices = planeIndeces;
 	planeMesh->material = tMaterial;
+	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
+	toGenerate.push_back(planeMesh);
 
 	GLDrawable* squareMesh = new GLDrawable();
 	squareMesh->ptype = DRAWABLE;
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
-	squareMesh->coords = squareCoords;
-	squareMesh->generateBuffers(3, 0, 0);
+	squareMesh->usingEBO = true;
+	squareMesh->coords = squareCoordsOnly;
+	squareMesh->indices = squareIndices;
+	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	squareMesh->material = tMaterial;
+	toGenerate.push_back(squareMesh);
 	
+
 	std::cout << "Loading suzzane head" << std::endl;
 	GLDrawable* suzzane_drawable = new GLDrawable();
 	suzzane_drawable->ptype = DRAWABLE;
 	suzzane_drawable->renderFlag = true;
 	suzzane_drawable->dtype = MESH;
-	suzzane_drawable->coords = createCoordVector("someObj.txt");
-	suzzane_drawable->generateBuffers(3, 3, 0);
-	suzzane_drawable->material = tMaterial;
-
+	std::vector<float> coords = std::vector<float>();
+	std::vector<unsigned int> indices = std::vector<unsigned int>();
+	loadICE("some.ice", coords, indices);
+	suzzane_drawable->usingEBO = true;
+	suzzane_drawable->coords = coords;
+	suzzane_drawable->indices = indices;
+	suzzane_drawable->material = pMaterial;
+	suzzane_drawable->bufferAttributes = glm::vec4(0, 3, 2, 2);
+	toGenerate.push_back(suzzane_drawable);
 
 	//-----------Objects------------
 	GameObject* childCube = new GameObject();
@@ -140,12 +176,13 @@ void loadScene() {
 	childCube->glDrawable = squareMesh;
 	childCube->drawFlag = true;
 
+	/*
 	GameObject* triangle = new GameObject();
 	triangle->name = "Tri";
 	triangle->drawFlag = true;
 	triangle->glDrawable = triangleMesh;
 	triangle->properties.push_back(triangleMesh);
-	triangle->pos.z = -6;
+	triangle->pos.z = -6;*/
 
 	GameObject* parentCube = new GameObject();
 	parentCube->name = "Parent";
@@ -170,21 +207,26 @@ void loadScene() {
 	ground->properties.push_back(planeMesh);
 	ground->pos.z = -12.0f;
 	ground->pos.y = -5;
-	ground->scale = glm::vec3(100, 100, 100);
+	ground->scale = glm::vec3(10, 10, 10);
 	
+	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
+	for (GLDrawable* drawable : toGenerate) {
+		drawable->generateBuffers();
+	}
 
 	//-------------Adding objects to list-----------------
 	objects.push_back(parentCube);
 	objects.push_back(ground);
-	objects.push_back(triangle);
 	objects.push_back(suzaneHead);
 };
 
 int main()
 {
+	//std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
+
 	GLInstance instance;
 	instance.initialize();
-	instance.createWindow();
+	instance.createWindow("IceCaps - Week 2", 720, 1280);
 	instance.initGlad();
 	input = new InputControl(instance.window);
 	glfwSetKeyCallback(instance.window, key_callback);
@@ -201,11 +243,12 @@ int main()
 	glDepthFunc(GL_GEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
+
 	// render loop
 	while (!glfwWindowShouldClose(instance.window))
 	{
 		// render
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 		glClearDepth(0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

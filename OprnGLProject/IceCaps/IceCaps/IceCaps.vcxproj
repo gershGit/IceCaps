@@ -145,6 +145,7 @@
     <ClCompile Include="..\..\Source\OpenGLInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Headers\iceLoader.h" />
     <ClInclude Include="..\..\..\Headers\objLoader.h" />
     <ClInclude Include="..\..\..\Headers\baseShapeCoords.h" />
     <ClInclude Include="..\..\..\Headers\Camera.h" />
@@ -155,6 +156,7 @@
     <ClInclude Include="..\..\..\Headers\Property.h" />
     <ClInclude Include="..\..\..\Headers\Renderer.h" />
     <ClInclude Include="..\..\..\Headers\Shader.h" />
+    <ClInclude Include="..\..\..\Headers\stb_image.h" />
     <ClInclude Include="..\..\Headers\Headers.h" />
     <ClInclude Include="..\..\Headers\OpenGlInstance.h" />
   </ItemGroup>
@@ -163,10 +165,30 @@
     <None Include="..\..\..\Shaders\discoCubeVert.glsl" />
     <None Include="base.frag" />
     <None Include="base.vert" />
+    <None Include="diffuseSpec.frag" />
+    <None Include="diffuseSpec.vert" />
+    <None Include="displacePhong.frag" />
+    <None Include="displacePhong.vert" />
+    <None Include="PBR.frag" />
+    <None Include="PBR.vert" />
+    <None Include="phongFull.frag" />
+    <None Include="phongFull.vert" />
+    <None Include="phongSun.frag" />
+    <None Include="phongSun.vert" />
+    <None Include="standard.frag" />
+    <None Include="standard.vert" />
+    <None Include="texturedSimple.frag" />
+    <None Include="texturedSimple.vert" />
+    <None Include="texturedUnlit.vert" />
+    <None Include="texturedUnlit.frag" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\..\..\Graphics\csci441-spring2018\programs\program3\susan.txt" />
     <Text Include="someObj.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="gf.bmp" />
+    <Image Include="specular.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

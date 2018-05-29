@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\shaders">
+      <UniqueIdentifier>{185f23ad-4c81-4b97-b236-ca0b9440a8ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\textures">
+      <UniqueIdentifier>{df0a960b-cdb9-4361-af34-140897884313}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\models">
+      <UniqueIdentifier>{1e82bbf5-7357-4b21-9815-b8053eeee471}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\Downloads\glad\src\glad.c">
@@ -77,27 +86,89 @@
     <ClInclude Include="..\..\..\Headers\objLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Headers\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\iceLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Shaders\discoCubeFrag.glsl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="..\..\..\Shaders\discoCubeVert.glsl">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="base.vert">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="base.frag">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="..\..\..\Shaders\discoCubeVert.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="..\..\..\Shaders\discoCubeFrag.glsl">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="phongSun.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="phongSun.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="texturedUnlit.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="texturedUnlit.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="texturedSimple.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="texturedSimple.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="diffuseSpec.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="diffuseSpec.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="phongFull.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="phongFull.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="displacePhong.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="displacePhong.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="standard.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="standard.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="PBR.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="PBR.frag">
+      <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="someObj.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\models</Filter>
     </Text>
     <Text Include="..\..\..\..\Graphics\csci441-spring2018\programs\program3\susan.txt">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\models</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="gf.bmp">
+      <Filter>Source Files\textures</Filter>
+    </Image>
+    <Image Include="specular.bmp">
+      <Filter>Source Files\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>
