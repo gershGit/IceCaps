@@ -17,6 +17,7 @@
 #include "Property.h"
 #include "Drawable.h"
 #include "Camera.h"
+#include "RigidBody.h"
 #include <vector>
 
 class GameObject
@@ -58,6 +59,8 @@ public:
 
 	//Determines whether or not the object needs to be considered for drawing
 	bool drawFlag = false;
+	//Determines whether or not the object needs to considered for effects of physics
+	bool usingRigid = false;
 
 	//Vector of properties of the game object
 	//TODO deprecate in favor of specific pointers
@@ -65,6 +68,8 @@ public:
 
 	//Reference to a drawable
 	GLDrawable* glDrawable;
+	//Reference to a rigid body
+	RigidBody* rigidBody;
 	//Reference to a camera
 	GLCamera* camera;
 
@@ -130,6 +135,16 @@ public:
 			return lastTransform;
 		}
 	};
+
+	//Updates the position based on physics applied
+	void updatePhysics(double timestep) {
+		rigidBody->updateAll(pos, timestep);
+		for (GameObject* child : children) {
+			if (child->usingRigid) {
+				child->updatePhysics(timestep);
+			}
+		}
+	}
 
 	//Add a reference to a new child for this object
 	void addChild(GameObject* newChild) {

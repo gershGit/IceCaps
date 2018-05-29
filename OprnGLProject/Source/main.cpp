@@ -11,12 +11,14 @@
 #include "InputControl.h"
 #include "objLoader.h"
 #include "iceLoader.h"
+#include "RigidBody.h"
 #include <cstdlib>
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
 GameObject* mainCamera = new GameObject();
 std::vector<GameObject*> objects;
+double lastTime = 0.0f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -70,7 +72,16 @@ void runUpdates() {
 	}
 };
 void runSimulations() {};
-void calculatePhysics() {};
+void calculatePhysics() {
+	double newTime = glfwGetTime();
+	double timestep = newTime - lastTime;
+	lastTime = newTime;
+	for (GameObject* object : objects) {
+		if (object->usingRigid) {
+			object->updatePhysics(timestep);
+		}
+	}
+};
 void callIntersections() {};
 void renderScene() {
 	for (GameObject* object : objects) {
@@ -191,6 +202,10 @@ void loadScene() {
 	parentCube->drawFlag = true;
 	parentCube->addChild(childCube);
 	parentCube->pos.z = -12.0f;
+	RigidBody* squareRigid = new RigidBody();
+	squareRigid->setStart(parentCube->pos, glm::vec3(0), glm::vec3(0));
+	parentCube->rigidBody = squareRigid;
+	parentCube->usingRigid = true;
 
 	GameObject* suzaneHead = new GameObject();
 	suzaneHead->name = "sh";
@@ -243,7 +258,7 @@ int main()
 	glDepthFunc(GL_GEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
-
+	lastTime = glfwGetTime();
 	// render loop
 	while (!glfwWindowShouldClose(instance.window))
 	{

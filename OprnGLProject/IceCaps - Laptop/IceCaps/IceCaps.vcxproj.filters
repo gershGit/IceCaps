@@ -13,15 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{3bde869d-f9ea-4f6e-9832-1d3e0f61c85e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Textures">
+      <UniqueIdentifier>{7dd7c68d-c9c0-43d7-a521-ac511865b2ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Models">
+      <UniqueIdentifier>{a35673ec-0717-4825-859c-185375ff73af}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\..\Downloads\glad\src\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\OpenGLInstance.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\Drawable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Source\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\Source\Drawable.cpp">
+    <ClCompile Include="..\..\..\Source\InputControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\Source\Material.cpp">
@@ -30,13 +48,7 @@
     <ClCompile Include="..\..\..\Source\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\Downloads\glad\src\glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\Source\InputControl.cpp">
+    <ClCompile Include="..\..\..\Source\RigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,24 +89,92 @@
     <ClInclude Include="..\..\..\Headers\InputControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Headers\RigidBody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\..\Shaders\discoCubeFrag.glsl">
-      <Filter>Source Files</Filter>
+    <None Include="diffuseSpec.frag">
+      <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="..\..\..\Shaders\discoCubeVert.glsl">
-      <Filter>Source Files</Filter>
+    <None Include="diffuseSpec.vert">
+      <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="base.vert">
-      <Filter>Source Files</Filter>
+    <None Include="displacePhong.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="displacePhong.vert">
+      <Filter>Source Files\Shaders</Filter>
     </None>
     <None Include="base.frag">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="base.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="PBR.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="PBR.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phong.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phong.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phongFull.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phongFull.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phongSingle.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phongSun.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="phongSun.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="some.ice">
+      <Filter>Source Files\Models</Filter>
+    </None>
+    <None Include="standard.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="standard.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="texturedSimple.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="texturedSimple.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="texturedUnlit.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="texturedUnlit.vert">
+      <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\IceCaps\IceCaps\someObj.txt">
-      <Filter>Source Files</Filter>
+    <Image Include="gf.bmp">
+      <Filter>Source Files\Textures</Filter>
+    </Image>
+    <Image Include="normal.png">
+      <Filter>Source Files\Textures</Filter>
+    </Image>
+    <Image Include="specular.bmp">
+      <Filter>Source Files\Textures</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="someObj.txt">
+      <Filter>Source Files\Models</Filter>
     </Text>
   </ItemGroup>
 </Project>
