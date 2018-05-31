@@ -9,6 +9,7 @@ public:
 	void render(GameObject* object, GameObject* camera) {
 		//Debugging statement for which object is being rendered
 		//std::cout << "Now rendering " << object->name << std::endl;
+		//object->printPosition();
 
 		//Get a reference to the drawable being rendered
 		GLDrawable* drawableProp = object->glDrawable;

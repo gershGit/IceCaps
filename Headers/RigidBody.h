@@ -5,7 +5,7 @@
 class RigidBody
 {
 private:
-	const float gravity_acceleration = -9.8f;
+	const glm::vec3 gravity_acceleration = glm::vec3(0, -9.8f, 0);
 	glm::vec3 lastAcceleration;
 	glm::vec3 lastVelocity;
 	glm::vec3 lastPosition;
@@ -17,7 +17,7 @@ public:
 	bool is_active = true;
 
 	//Return 
-	void setStart(glm::vec3 position, glm::vec3 velocity, glm::vec3 acceleration);
+	void setStart(glm::vec3 position, glm::vec3 velocity = glm::vec3(0), glm::vec3 acceleration = glm::vec3(0));
 	void updateAll(glm::vec3 &returnPos, float timestep, glm::vec3 addedForce = glm::vec3(0));
 	RigidBody();
 	~RigidBody();

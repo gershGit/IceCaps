@@ -79,10 +79,18 @@ void calculatePhysics() {
 	for (GameObject* object : objects) {
 		if (object->usingRigid) {
 			object->updatePhysics(timestep);
+			object->moved = true;
 		}
 	}
 };
-void callIntersections() {};
+void callIntersections() {
+	for (GameObject* object : objects) {
+		if (object->usingCollider) {
+			object->sCollider->position = object->pos;
+			object->checkCollisions(objects);
+		}
+	}
+};
 void renderScene() {
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
@@ -109,6 +117,7 @@ void loadScene() {
 	mainCam->ptype = CAMERA;
 	mainCam->gameObject = mainCamera;
 	mainCamera->camera = mainCam;
+	mainCamera->pos.y = 2.8f;
 	
 
 	//------------Materials--------------
@@ -202,10 +211,16 @@ void loadScene() {
 	parentCube->drawFlag = true;
 	parentCube->addChild(childCube);
 	parentCube->pos.z = -12.0f;
+	parentCube->pos.y = 20.0f;
 	RigidBody* squareRigid = new RigidBody();
 	squareRigid->setStart(parentCube->pos, glm::vec3(0), glm::vec3(0));
 	parentCube->rigidBody = squareRigid;
 	parentCube->usingRigid = true;
+	SphereCollider* squareCollider = new SphereCollider();
+	squareCollider->position = parentCube->pos;
+	squareCollider->radius = 1;
+	parentCube->usingCollider = true;
+	parentCube->sCollider = squareCollider;
 
 	GameObject* suzaneHead = new GameObject();
 	suzaneHead->name = "sh";
@@ -221,8 +236,8 @@ void loadScene() {
 	ground->glDrawable = planeMesh;
 	ground->properties.push_back(planeMesh);
 	ground->pos.z = -12.0f;
-	ground->pos.y = -5;
-	ground->scale = glm::vec3(10, 10, 10);
+	ground->pos.y = 0;
+	ground->scale = glm::vec3(100, 100, 100);
 	
 	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
 	for (GLDrawable* drawable : toGenerate) {
@@ -233,6 +248,17 @@ void loadScene() {
 	objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(suzaneHead);
+};
+void callStart(GameObject* parent) {
+	parent->onStart();
+	for (GameObject* child : parent->children) {
+		callStart(child);
+	}
+}
+void startScene() {
+	for (GameObject* object : objects) {
+		callStart(object);
+	}
 };
 
 int main()
@@ -259,6 +285,7 @@ int main()
 	glDepthRange(0.0f, 1.0f);
 
 	lastTime = glfwGetTime();
+	startScene();
 	// render loop
 	while (!glfwWindowShouldClose(instance.window))
 	{

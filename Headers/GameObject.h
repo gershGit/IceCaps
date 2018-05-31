@@ -18,6 +18,8 @@
 #include "Drawable.h"
 #include "Camera.h"
 #include "RigidBody.h"
+#include "Collider.h"
+#include "SphereCollider.h"
 #include <vector>
 
 class GameObject
@@ -61,6 +63,8 @@ public:
 	bool drawFlag = false;
 	//Determines whether or not the object needs to considered for effects of physics
 	bool usingRigid = false;
+	//Determines whether or not the object needs to be considered for collisions
+	bool usingCollider = false;
 
 	//Vector of properties of the game object
 	//TODO deprecate in favor of specific pointers
@@ -70,6 +74,10 @@ public:
 	GLDrawable* glDrawable;
 	//Reference to a rigid body
 	RigidBody* rigidBody;
+	//Reference to a collider
+	Collider* collider;
+	//Reference to a sphere collider
+	SphereCollider* sCollider;
 	//Reference to a camera
 	GLCamera* camera;
 
@@ -135,6 +143,10 @@ public:
 			return lastTransform;
 		}
 	};
+	void printTransform() {};
+	void printPosition() {
+		std::cout << pos.x << ", " << pos.y << ", " << pos.z << std::endl;
+	}
 
 	//Updates the position based on physics applied
 	void updatePhysics(double timestep) {
@@ -142,6 +154,20 @@ public:
 		for (GameObject* child : children) {
 			if (child->usingRigid) {
 				child->updatePhysics(timestep);
+			}
+		}
+	}
+
+	//Checks for collisions within the list
+	void checkCollisions(std::vector<GameObject*> objects) {
+		for (GameObject* object : objects) {
+			if (object != this && object->usingCollider) {
+				sCollider->checkCollision(object->sCollider);
+			}
+		}
+		for (GameObject* child : children) {
+			if (child->usingCollider) {
+				checkCollisions(objects);
 			}
 		}
 	}
@@ -154,5 +180,12 @@ public:
 	//Returns the children of this game object
 	std::vector<GameObject*> getChildren() {
 		return children;
+	};
+
+	//Function that controls what every game object must do on frame one
+	void onStart() {
+		if (usingRigid) {
+			rigidBody->setStart(pos);
+		}
 	};
 };
