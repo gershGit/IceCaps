@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Headers\Collider.h" />
     <ClInclude Include="..\..\..\Headers\iceLoader.h" />
+    <ClInclude Include="..\..\..\Headers\ObjectFactory.h" />
     <ClInclude Include="..\..\..\Headers\objLoader.h" />
     <ClInclude Include="..\..\..\Headers\baseShapeCoords.h" />
     <ClInclude Include="..\..\..\Headers\Camera.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="..\..\..\Headers\Property.h" />
     <ClInclude Include="..\..\..\Headers\Renderer.h" />
     <ClInclude Include="..\..\..\Headers\RigidBody.h" />
+    <ClInclude Include="..\..\..\Headers\SceneLoader.h" />
     <ClInclude Include="..\..\..\Headers\Shader.h" />
     <ClInclude Include="..\..\..\Headers\SphereCollider.h" />
     <ClInclude Include="..\..\..\Headers\stb_image.h" />
