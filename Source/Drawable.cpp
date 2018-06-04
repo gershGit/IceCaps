@@ -28,16 +28,12 @@ void GLDrawable::generateBuffers() {
 	}
 
 	// VAO implementation
-	if (bufferAttributes.x > 0 && bufferAttributes.y == 0 && bufferAttributes.z == 0 && bufferAttributes.w == 0) {
+	if (material->type == SIMPLE) {
 		glEnableVertexAttribArray(0); //Position attribute
-		glEnableVertexAttribArray(1); //Color attribute
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 		//Position info stored in vao at position 0
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(0 * sizeof(float)));
-
-		//Color info stored in vao position 1
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(0 * sizeof(float)));
 	}
 	else if (bufferAttributes.x == 0 && bufferAttributes.y > 0 && bufferAttributes.z == 0 && bufferAttributes.w == 0) {
 		glEnableVertexAttribArray(0); //Position attribute

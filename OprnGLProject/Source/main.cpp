@@ -12,12 +12,14 @@
 #include "objLoader.h"
 #include "iceLoader.h"
 #include "RigidBody.h"
+#include "ObjectFactory.h"
 #include <cstdlib>
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
 GameObject* mainCamera = new GameObject();
 std::vector<GameObject*> objects;
+std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -102,11 +104,15 @@ void renderScene() {
 				object->rot.x = nowTime / 2;
 				object->moved = true;
 			}
-			renderer.render(object, mainCamera);
+			renderer.renderObjects(object, mainCamera, lights);
 		}
+	}
+	for (GameObject* object : lights) {
+			renderer.renderLights(object, mainCamera);
 	}
 };
 void loadScene() {
+	CoordsSpawner * mCoordSpawner = new CoordsSpawner();
 	std::vector<GLDrawable*> toGenerate = std::vector<GLDrawable*>();
 	int texture_number = 0;
 
@@ -154,8 +160,8 @@ void loadScene() {
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
 	planeMesh->usingEBO = true;
-	planeMesh->coords = planeCoordsOnly;
-	planeMesh->indices = planeIndeces;
+	planeMesh->coords = mCoordSpawner->planeCoordsOnly;
+	planeMesh->indices = mCoordSpawner->planeIndeces;
 	planeMesh->material = tMaterial;
 	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(planeMesh);
@@ -165,8 +171,8 @@ void loadScene() {
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
 	squareMesh->usingEBO = true;
-	squareMesh->coords = squareCoordsOnly;
-	squareMesh->indices = squareIndices;
+	squareMesh->coords = mCoordSpawner->squareCoordsOnly;
+	squareMesh->indices = mCoordSpawner->squareIndices;
 	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	squareMesh->material = tMaterial;
 	toGenerate.push_back(squareMesh);
@@ -238,6 +244,20 @@ void loadScene() {
 	ground->pos.z = -12.0f;
 	ground->pos.y = 0;
 	ground->scale = glm::vec3(100, 100, 100);
+
+	ObjectFactory* mObjectFactory = new ObjectFactory();
+
+	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, -8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
+	toGenerate.push_back(spawnedLight_0->glDrawable);
+
+	GameObject* spawnedLight_1 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, -14), glm::vec3(0.0f, 1.0f, 0.0f), 1.0, true);
+	toGenerate.push_back(spawnedLight_1->glDrawable);
+
+	GameObject* spawnedLight_2 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(2, 2, -11), glm::vec3(0.0f, 0.0f, 1.0f), 1.0, true);
+	toGenerate.push_back(spawnedLight_2->glDrawable);
+
+	GameObject* spawnedLight_3 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(3, 3, -16), glm::vec3(1.0f, 0.0f, 1.0f), 1.0, true);
+	toGenerate.push_back(spawnedLight_3->glDrawable);
 	
 	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
 	for (GLDrawable* drawable : toGenerate) {
@@ -248,6 +268,13 @@ void loadScene() {
 	objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(suzaneHead);
+
+	lights.push_back(spawnedLight_0);
+	lights.push_back(spawnedLight_1);
+	lights.push_back(spawnedLight_2);
+	lights.push_back(spawnedLight_3);
+
+	free(mCoordSpawner);
 };
 void callStart(GameObject* parent) {
 	parent->onStart();

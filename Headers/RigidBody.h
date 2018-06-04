@@ -1,8 +1,9 @@
 #pragma once
 #include "Headers.h"
+#include "Property.h"
 #include <vector>
 
-class RigidBody
+class RigidBody : Property
 {
 private:
 	const glm::vec3 gravity_acceleration = glm::vec3(0, -9.8f, 0);

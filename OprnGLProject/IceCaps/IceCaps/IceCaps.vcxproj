@@ -141,6 +141,7 @@
     <ClCompile Include="..\..\..\Source\GameObject.cpp" />
     <ClCompile Include="..\..\..\Source\InputControl.cpp" />
     <ClCompile Include="..\..\..\Source\Material.cpp" />
+    <ClCompile Include="..\..\..\Source\ObjectFactory.cpp" />
     <ClCompile Include="..\..\..\Source\RigidBody.cpp" />
     <ClCompile Include="..\..\..\Source\SphereCollider.cpp" />
     <ClCompile Include="..\..\Source\main.cpp" />
@@ -149,6 +150,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Headers\Collider.h" />
     <ClInclude Include="..\..\..\Headers\iceLoader.h" />
+    <ClInclude Include="..\..\..\Headers\Light.h" />
     <ClInclude Include="..\..\..\Headers\ObjectFactory.h" />
     <ClInclude Include="..\..\..\Headers\objLoader.h" />
     <ClInclude Include="..\..\..\Headers\baseShapeCoords.h" />

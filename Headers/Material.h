@@ -24,6 +24,9 @@ public:
 	//Reference to the shader that holds the vertex and fragment (?geometry) shaders
 	ShaderProgram shader;
 
+	//Overall color. Used in combination of textures or for simple shaders
+	glm::vec3 color;
+
 	//Diffuse texture information
 	GLuint diffuse;
 	int diffuseTexNumber;

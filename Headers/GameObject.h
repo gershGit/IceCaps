@@ -20,6 +20,7 @@
 #include "RigidBody.h"
 #include "Collider.h"
 #include "SphereCollider.h"
+#include "Light.h"
 #include <vector>
 
 class GameObject
@@ -80,6 +81,8 @@ public:
 	SphereCollider* sCollider;
 	//Reference to a camera
 	GLCamera* camera;
+	//Reference to a light
+	Light* light;
 
 	//Functions to return a normalized vector pointing in the respective directions from the object
 	glm::vec3 forward() {
