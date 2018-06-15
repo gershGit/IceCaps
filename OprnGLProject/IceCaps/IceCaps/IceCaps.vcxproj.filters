@@ -181,6 +181,18 @@
     <None Include="PBR.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="dialectric.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="dialectric.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="metallic.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="metallic.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="someObj.txt">

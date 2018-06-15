@@ -50,24 +50,15 @@ GameObject* ObjectFactory::createObject(primitive primitive_type) {
 		sphereMesh->renderFlag = true;
 		sphereMesh->dtype = MESH;
 		sphereMesh->usingEBO = true;
-		sphereMesh->coords = mCoordsSpawner->sphereCoords(4);
-		sphereMesh->indices = mCoordsSpawner->sphereIndeces(4);
+		sphereMesh->coords = mCoordsSpawner->sphereCoords(18);
+		sphereMesh->indices = mCoordsSpawner->sphereIndeces(18);
 		sphereMesh->material = purple_material;
 
 		GameObject* sphere = new GameObject();
-		sphere->name = "CUBE";
+		sphere->name = "SPHERE";
 		sphere->properties.push_back(sphereMesh);
 		sphere->glDrawable = sphereMesh;
 		sphere->drawFlag = true;
-		RigidBody* sphereRigid = new RigidBody();
-		sphereRigid->setStart(sphere->pos, glm::vec3(0), glm::vec3(0));
-		sphere->rigidBody = sphereRigid;
-		sphere->usingRigid = true;
-		SphereCollider* sphereCollider = new SphereCollider();
-		sphereCollider->position = sphere->pos;
-		sphereCollider->radius = 1;
-		sphere->usingCollider = true;
-		sphere->sCollider = sphereCollider;
 
 		return sphere;
 	}

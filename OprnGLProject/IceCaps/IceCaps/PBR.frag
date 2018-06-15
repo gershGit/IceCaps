@@ -12,11 +12,11 @@ uniform sampler2D albedoSampler;
 uniform sampler2D metallicSampler;
 uniform sampler2D roughnessSampler;
 uniform sampler2D normalSampler;
-uniform vec3 eyePos;
+uniform vec3 eyeDir;
 
-uniform vec3 sunAngle;			//x,y,z, strength
+uniform vec3 sunAngle;			//x,y,z
 uniform vec4 sunColor;
-uniform vec3 pointLightPos[NR_POINT_LIGHTS];	//x,y,z, strength
+uniform vec3 pointLightPos[NR_POINT_LIGHTS];	//x,y,z
 uniform vec3 pointLightColors[NR_POINT_LIGHTS];
 
 float ambientStrength = 0.2;
@@ -92,7 +92,7 @@ void main() {
 
 	vec3 N = texture(normalSampler, ourTexCoord).rgb;
 	N = normalize(TBN * N);
-	vec3 V = normalize(eyePos - ourFragPos);
+	vec3 V = eyeDir;
 
 	vec3 Lo = vec3(0.0);
 	Lo += CalcSunlight(N, V, roughness, metallic, albedo, F0);

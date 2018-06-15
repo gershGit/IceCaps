@@ -31,23 +31,74 @@ public:
 			glUniform3f(color, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
 		}
 		else if (drawableProp->material->type == PHONG_SIMPLE) {
-			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
 			glm::vec3 eyeVec = camera->forward();
-			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+			//glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+			glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
 
-			GLuint sunPos = glGetUniformLocation(shader.id(), "sunPos");
-			glUniform3f(sunPos, -2, 3, -6);
+			GLuint col = glGetUniformLocation(shader.id(), "aColor");
+			glUniform3f(col, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, -2, -6, -1);
 
 			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
+		}
+		else if (drawableProp->material->type == DIALECTRIC || drawableProp->material->type == METALLIC) {
+			GLuint eyeLoc = glGetUniformLocation(shader.id(), "eyePos");
+			//glm::vec3 eyeVec = camera->forward();
+			glUniform3f(eyeLoc, camera->pos.x, camera->pos.y, camera->pos.z);
+			//glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
+
+			GLuint col = glGetUniformLocation(shader.id(), "aColor");
+			glUniform3f(col, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, -2, -6, -1);
+
+			GLuint sunColor = glGetUniformLocation(shader.id(), "sunColor");
+			glUniform4f(sunColor, 0.8, 0.6, 0.8, 5.0);
+
+			GLuint roughness = glGetUniformLocation(shader.id(), "roughness");
+			glUniform1f(roughness, 0.4);
+
+			GLuint baseReflectance = glGetUniformLocation(shader.id(), "baseReflectance");
+			glUniform1f(baseReflectance, 0.04);
+
+			//TODO ensure this is right and being used
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
 		}
 		else if (drawableProp->material->type == SIMPLE_TEX) {
-			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
 			glm::vec3 eyeVec = camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
-			GLuint sunPos = glGetUniformLocation(shader.id(), "sunPos");
-			glUniform3f(sunPos, -2, 3, -6);
+			GLuint sunPos = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunPos, -2, -9, -3);
 
 			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
@@ -88,12 +139,12 @@ public:
 			glUniform1i(specularImageLoc, drawableProp->material->specularTexNumber);
 		}
 		else if (drawableProp->material->type == SIMPLE_PHONG_TEXTURED) {
-			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
 			glm::vec3 eyeVec = camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
-			GLuint sunPos = glGetUniformLocation(shader.id(), "sunPos");
-			glUniform3f(sunPos, -2, 3, -6);
+			GLuint sunPos = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunPos, -2, -6, 1);
 
 			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
@@ -144,14 +195,14 @@ public:
 			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
 		}
 		else if (drawableProp->material->type == PBR_BASIC) {
-			GLuint eye = glGetUniformLocation(shader.id(), "eye");
+			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
 			glm::vec3 eyeVec = camera->forward();
-			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
-			//glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
+			//glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+			glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
 
 			//Lights
 			GLuint sunAngle = glGetUniformLocation(shader.id(), "sunAngle");
-			glUniform3f(sunAngle, 0, -1, 0);
+			glUniform3f(sunAngle, -2, -9, -3);
 
 			GLuint sunColor = glGetUniformLocation(shader.id(), "sunColor");
 			glUniform4f(sunColor, 1.0, 1.0, 1.0, 1.0);

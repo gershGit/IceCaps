@@ -6,6 +6,7 @@
 #pragma once
 #include <vector>
 #include <math.h>
+#include <cmath>
 
 class CoordsSpawner {
 public:
@@ -427,14 +428,18 @@ public:
 				glm::vec3 nip1jp1 = glm::normalize(glm::vec3(vip1jp1_x, vip1jp1_y, vip1jp1_z));
 
 				//Calculate tangents
-				glm::vec3 v2 = glm::vec3(vijp1_x, vip1jp1_y, vip1jp1_z);
+				glm::vec3 v2 = glm::vec3(vijp1_x, vijp1_y, vijp1_z);
 				glm::vec3 v1 = glm::vec3(vip1j_x, vip1j_y, vip1j_z);
 				glm::vec3 v0 = glm::vec3(vij_x, vij_y, vij_z);
 
 				//TODO fix texture coords
-				glm::vec2 uv2 = glm::vec2(glm::normalize(vijp1_x), glm::normalize(vijp1_y));
-				glm::vec2 uv1 = glm::vec2(glm::normalize(vip1j_x), glm::normalize(vip1j_y));;
-				glm::vec2 uv0 = glm::vec2(glm::normalize(vij_x), glm::normalize(vij_y));;
+				glm::vec3 d2 = glm::normalize(-v2);
+				glm::vec3 d1 = glm::normalize(-v1);
+				glm::vec3 d0 = glm::normalize(-v0);
+
+				glm::vec2 uv2 = glm::vec2(0.5 + (atan2(d2.z, d2.x) / (2 * M_PI)), 0.5 - (asin(d2.y) / M_PI));
+				glm::vec2 uv1 = glm::vec2(0.5 + (atan2(d1.z, d1.x) / (2 * M_PI)), 0.5 - (asin(d1.y) / M_PI));
+				glm::vec2 uv0 = glm::vec2(0.5 + (atan2(d0.z, d0.x) / (2 * M_PI)), 0.5 - (asin(d0.y) / M_PI));
 
 				glm::vec3 deltaPos1 = v1 - v0;
 				glm::vec3 deltaPos2 = v2 - v0;

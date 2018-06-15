@@ -8,7 +8,7 @@
 #include <vector>
 
 //Different types of materials, used to determine a shader and check for necessary info
-enum mType {SIMPLE, PBR_BASIC, GLASS, UNLIT_TEX, SIMPLE_TEX, SIMPLE_DIFFUSE_SPECULAR, SIMPLE_PHONG_TEXTURED, PHONG, PHONG_SIMPLE, SSS, STANDARD};
+enum mType {SIMPLE, PBR_BASIC, GLASS, UNLIT_TEX, SIMPLE_TEX, SIMPLE_DIFFUSE_SPECULAR, SIMPLE_PHONG_TEXTURED, PHONG, PHONG_SIMPLE, SSS, STANDARD, DIALECTRIC, METALLIC};
 
 //Types of textures
 enum tType {DIFFUSE, METAL_MASK, SPECULAR_MASK, NORMAL_MAP, DISPLACEMENT_MAP, ROUGHNESS_MAP, AO_MAP};
@@ -50,6 +50,14 @@ public:
 	GLuint roughness;
 	int roughnessTexNumber;
 
+	//Values for textureless PBR
+	float f_roughness;
+	float f_metallness;
+
 	//Function to properly add a texture to the material
 	int addTexture(const char* file_name, tType texture_type, int texture_number);
+	//Function that auto builds shader based on textures added and material type
+	int buildShader();
+	//Function to set material type
+	void setMaterialType(mType material_type);
 };

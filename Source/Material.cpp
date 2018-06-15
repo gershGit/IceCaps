@@ -55,6 +55,25 @@ int GLMaterial::addTexture(const char * file_name, tType texture_type, int textu
 			return 1;
 		}
 }
+//TODO add all the correct material shaders
+int GLMaterial::buildShader()
+{
+	if (type == DIALECTRIC) {
+		shader = ShaderProgram("dialectric.vert", "dialectric.frag");
+		return 0;
+	}
+	else if (type == METALLIC) {
+		shader = ShaderProgram("metallic.vert", "metallic.frag");
+		return 0;
+	}
+	return 1;
+}
+
+void GLMaterial::setMaterialType(mType material_type)
+{
+	type = material_type;
+	buildShader();
+}
 
 GLMaterial::GLMaterial() {};
 GLMaterial::~GLMaterial() {};

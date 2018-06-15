@@ -98,8 +98,8 @@ void renderScene() {
 		if (object->drawFlag) {
 			double nowTime = fmod(glfwGetTime(),12);
 			
-			if (strcmp(object->name, "Parent") == 0) {
-				object->rot.y = nowTime;
+			if (strcmp(object->name, "SPHERE") == 0) {
+				object->pos.y = sin(nowTime) + 3.0;
 				object->rot.z = nowTime / 6;
 				object->rot.x = nowTime / 2;
 				object->moved = true;
@@ -127,11 +127,18 @@ void loadScene() {
 	
 
 	//------------Materials--------------
+	GLMaterial* sphereMat = new GLMaterial();
+	sphereMat->color = glm::vec3(1.00, 0.71, 0.29);
+	sphereMat->setMaterialType(DIALECTRIC);
+
+	GLMaterial* goldMat = new GLMaterial();
+	goldMat->color = glm::vec3(1.00, 0.71, 0.29);
+	goldMat->setMaterialType(METALLIC);
+
 	GLMaterial* pMaterial = new GLMaterial();
 	pMaterial->type = SIMPLE;
 	ShaderProgram pShader = ShaderProgram("base.vert", "base.frag");
 	pMaterial->shader = pShader;
-
 
 	GLMaterial* sMaterial = new GLMaterial();
 	sMaterial->type = PHONG_SIMPLE;
@@ -189,7 +196,7 @@ void loadScene() {
 	suzzane_drawable->usingEBO = true;
 	suzzane_drawable->coords = coords;
 	suzzane_drawable->indices = indices;
-	suzzane_drawable->material = pMaterial;
+	suzzane_drawable->material = sphereMat;
 	suzzane_drawable->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(suzzane_drawable);
 
@@ -248,9 +255,16 @@ void loadScene() {
 	ObjectFactory* mObjectFactory = new ObjectFactory();
 
 	GameObject* spawnedSphere = mObjectFactory->createObject(SPHERE_PRIMITVE);
+	spawnedSphere->glDrawable->material = goldMat;
 	toGenerate.push_back(spawnedSphere->glDrawable);
-	spawnedSphere->pos.x = 5;
-	spawnedSphere->pos.y = 3;
+	spawnedSphere->pos.z = 12;
+
+	GameObject* spawnedSphere2 = mObjectFactory->createObject(SPHERE_PRIMITVE);
+	spawnedSphere2->glDrawable->material = sphereMat;
+	spawnedSphere2->name = "SPHERE2";
+	toGenerate.push_back(spawnedSphere2->glDrawable);
+	spawnedSphere2->pos.z = 12;
+	spawnedSphere2->pos.y = 6;
 
 	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, 8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_0->glDrawable);
@@ -270,10 +284,11 @@ void loadScene() {
 	}
 
 	//-------------Adding objects to list-----------------
-	objects.push_back(parentCube);
+	//objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(suzaneHead);
 	objects.push_back(spawnedSphere);
+	objects.push_back(spawnedSphere2);
 
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);
