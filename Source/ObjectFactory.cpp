@@ -44,6 +44,33 @@ GameObject* ObjectFactory::createObject(primitive primitive_type) {
 
 		return cube;
 	}
+	else if (primitive_type == SPHERE_PRIMITVE) {
+		GLDrawable* sphereMesh = new GLDrawable();
+		sphereMesh->ptype = DRAWABLE;
+		sphereMesh->renderFlag = true;
+		sphereMesh->dtype = MESH;
+		sphereMesh->usingEBO = true;
+		sphereMesh->coords = mCoordsSpawner->sphereCoords(4);
+		sphereMesh->indices = mCoordsSpawner->sphereIndeces(4);
+		sphereMesh->material = purple_material;
+
+		GameObject* sphere = new GameObject();
+		sphere->name = "CUBE";
+		sphere->properties.push_back(sphereMesh);
+		sphere->glDrawable = sphereMesh;
+		sphere->drawFlag = true;
+		RigidBody* sphereRigid = new RigidBody();
+		sphereRigid->setStart(sphere->pos, glm::vec3(0), glm::vec3(0));
+		sphere->rigidBody = sphereRigid;
+		sphere->usingRigid = true;
+		SphereCollider* sphereCollider = new SphereCollider();
+		sphereCollider->position = sphere->pos;
+		sphereCollider->radius = 1;
+		sphere->usingCollider = true;
+		sphere->sCollider = sphereCollider;
+
+		return sphere;
+	}
 }
 
 GameObject* ObjectFactory::createLight(lightType type_of_light, glm::vec3 position, glm::vec3 color, float strength, bool visible = true) {

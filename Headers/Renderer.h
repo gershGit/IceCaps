@@ -147,6 +147,7 @@ public:
 			GLuint eye = glGetUniformLocation(shader.id(), "eye");
 			glm::vec3 eyeVec = camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+			//glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
 
 			//Lights
 			GLuint sunAngle = glGetUniformLocation(shader.id(), "sunAngle");

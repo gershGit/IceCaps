@@ -2,8 +2,10 @@
 	A header only file containing the coordinate information for various shapes and their related indices
 */
 
+#define _USE_MATH_DEFINES
 #pragma once
 #include <vector>
+#include <math.h>
 
 class CoordsSpawner {
 public:
@@ -304,7 +306,6 @@ public:
 		-1.0f, 0.0f, 1.0f,		0.0, 1.0, 0.0,		0.0, 1.0,
 		1.0f, 0.0f, 1.0f,		0.0, 1.0, 0.0,		1.0, 1.0,
 	};
-
 	//Indices for a plane
 	std::vector<unsigned int> planeIndeces = {
 		0, 2, 1,
@@ -350,7 +351,6 @@ public:
 		-1.0f, -1.0f, 1.0f,		0.0, -1.0, 0.0,		1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		0.0, 0.0,	//Back left bottom		22
 		1.0f, -1.0f, 1.0f,		0.0, -1.0, 0.0,		1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		0.0, 1.0,	//Back right bottom*/	23
 	};
-
 	//Indices for a cube
 	std::vector<unsigned int> squareIndices = {
 		//Front
@@ -377,4 +377,198 @@ public:
 		22, 20, 21,
 		22, 21, 23,
 	};
+
+	//Sphere helper functions
+	double x(float r, float phi, float theta) {
+		return r * cos(theta)*sin(phi);
+	}
+	double y(float r, float phi, float theta) {
+		return r * sin(theta)*sin(phi);
+	}
+	double z(float r, float phi, float theta) {
+		return r * cos(phi);
+	}
+	//Coordinates for a sphere to be indexed
+	std::vector<float> sphereCoords(int n) {
+		std::vector<float> coords = std::vector<float>();
+		int radius = 1;
+		int n_steps = (n % 2 == 0) ? n : n + 1;
+		double step_size = 2 * M_PI / n_steps;
+
+		for (int i = 0; i < n_steps / 2.0; ++i) {
+			for (int j = 0; j < n_steps; ++j) {
+				double phi_i = i * step_size;
+				double phi_ip1 = ((i + 1) % n_steps)*step_size;
+				double theta_j = j * step_size;
+				double theta_jp1 = ((j + 1) % n_steps)*step_size;
+
+				// vertex i,j
+				double vij_x = x(radius, phi_i, theta_j);
+				double vij_y = y(radius, phi_i, theta_j);
+				double vij_z = z(radius, phi_i, theta_j);
+				glm::vec3 nij = glm::normalize(glm::vec3(vij_x, vij_y, vij_z));
+
+				// vertex i+1,j
+				double vip1j_x = x(radius, phi_ip1, theta_j);
+				double vip1j_y = y(radius, phi_ip1, theta_j);
+				double vip1j_z = z(radius, phi_ip1, theta_j);
+				glm::vec3 nip1j(vip1j_x, vip1j_y, vip1j_z);
+
+				// vertex i,j+1
+				double vijp1_x = x(radius, phi_i, theta_jp1);
+				double vijp1_y = y(radius, phi_i, theta_jp1);
+				double vijp1_z = z(radius, phi_i, theta_jp1);
+				glm::vec3 nijp1 = glm::normalize(glm::vec3(vijp1_x, vijp1_y, vijp1_z));
+
+				// vertex i+1,j+1
+				double vip1jp1_x = x(radius, phi_ip1, theta_jp1);
+				double vip1jp1_y = y(radius, phi_ip1, theta_jp1);
+				double vip1jp1_z = z(radius, phi_ip1, theta_jp1);
+				glm::vec3 nip1jp1 = glm::normalize(glm::vec3(vip1jp1_x, vip1jp1_y, vip1jp1_z));
+
+				//Calculate tangents
+				glm::vec3 v2 = glm::vec3(vijp1_x, vip1jp1_y, vip1jp1_z);
+				glm::vec3 v1 = glm::vec3(vip1j_x, vip1j_y, vip1j_z);
+				glm::vec3 v0 = glm::vec3(vij_x, vij_y, vij_z);
+
+				//TODO fix texture coords
+				glm::vec2 uv2 = glm::vec2(glm::normalize(vijp1_x), glm::normalize(vijp1_y));
+				glm::vec2 uv1 = glm::vec2(glm::normalize(vip1j_x), glm::normalize(vip1j_y));;
+				glm::vec2 uv0 = glm::vec2(glm::normalize(vij_x), glm::normalize(vij_y));;
+
+				glm::vec3 deltaPos1 = v1 - v0;
+				glm::vec3 deltaPos2 = v2 - v0;
+
+				glm::vec2 deltaUV1 = uv1 - uv0;
+				glm::vec2 deltaUV2 = uv2 - uv0;
+
+				float r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+				// add triangle
+				coords.push_back(v0.x);
+				coords.push_back(v0.y);
+				coords.push_back(v0.z);
+				coords.push_back(nij.x);
+				coords.push_back(nij.y);
+				coords.push_back(nij.z);
+				coords.push_back(tangent.x);
+				coords.push_back(tangent.y);
+				coords.push_back(tangent.z);
+				coords.push_back(bitangent.x);
+				coords.push_back(bitangent.y);
+				coords.push_back(bitangent.z);
+				coords.push_back(uv0.x);
+				coords.push_back(uv0.y);
+
+				coords.push_back(v1.x);
+				coords.push_back(v1.y);
+				coords.push_back(v1.z);
+				coords.push_back(nip1j.x);
+				coords.push_back(nip1j.y);
+				coords.push_back(nip1j.z);
+				coords.push_back(tangent.x);
+				coords.push_back(tangent.y);
+				coords.push_back(tangent.z);
+				coords.push_back(bitangent.x);
+				coords.push_back(bitangent.y);
+				coords.push_back(bitangent.z);
+				coords.push_back(uv1.x);
+				coords.push_back(uv1.y);
+
+				coords.push_back(v2.x);
+				coords.push_back(v2.y);
+				coords.push_back(v2.z);
+				coords.push_back(nijp1.x);
+				coords.push_back(nijp1.y);
+				coords.push_back(nijp1.z);
+				coords.push_back(tangent.x);
+				coords.push_back(tangent.y);
+				coords.push_back(tangent.z);
+				coords.push_back(bitangent.x);
+				coords.push_back(bitangent.y);
+				coords.push_back(bitangent.z);
+				coords.push_back(uv1.x);
+				coords.push_back(uv1.y);
+
+				v2 = glm::vec3(vip1j_x, vip1j_y, vip1j_z);
+				v1 = glm::vec3(vip1jp1_x, vip1jp1_y, vip1jp1_z);
+				v0 = glm::vec3(vijp1_x, vijp1_y, vijp1_z);
+
+				//TODO fix texture coords
+				uv2 = glm::vec2(glm::normalize(vip1j_x), glm::normalize(vip1j_y));
+				uv1 = glm::vec2(glm::normalize(vip1jp1_x), glm::normalize(vip1jp1_y));;
+				uv0 = glm::vec2(glm::normalize(vijp1_x), glm::normalize(vijp1_y));;
+
+				deltaPos1 = v1 - v0;
+				deltaPos2 = v2 - v0;
+
+				deltaUV1 = uv1 - uv0;
+				deltaUV2 = uv2 - uv0;
+
+				r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
+				tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+				bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+
+				// add triange
+				coords.push_back(v0.x);
+				coords.push_back(v0.y);
+				coords.push_back(v0.z);
+				coords.push_back(nijp1.x);
+				coords.push_back(nijp1.y);
+				coords.push_back(nijp1.z);
+				coords.push_back(tangent.x);
+				coords.push_back(tangent.y);
+				coords.push_back(tangent.z);
+				coords.push_back(bitangent.x);
+				coords.push_back(bitangent.y);
+				coords.push_back(bitangent.z);
+				coords.push_back(uv0.x);
+				coords.push_back(uv0.y);
+
+				coords.push_back(v1.x);
+				coords.push_back(v1.y);
+				coords.push_back(v1.z);
+				coords.push_back(nip1jp1.x);
+				coords.push_back(nip1jp1.y);
+				coords.push_back(nip1jp1.z);
+				coords.push_back(tangent.x);
+				coords.push_back(tangent.y);
+				coords.push_back(tangent.z);
+				coords.push_back(bitangent.x);
+				coords.push_back(bitangent.y);
+				coords.push_back(bitangent.z);
+				coords.push_back(uv1.x);
+				coords.push_back(uv1.y);
+
+				coords.push_back(v2.x);
+				coords.push_back(v2.y);
+				coords.push_back(v2.z);
+				coords.push_back(nip1j.x);
+				coords.push_back(nip1j.y);
+				coords.push_back(nip1j.z);
+				coords.push_back(tangent.x);
+				coords.push_back(tangent.y);
+				coords.push_back(tangent.z);
+				coords.push_back(bitangent.x);
+				coords.push_back(bitangent.y);
+				coords.push_back(bitangent.z);
+				coords.push_back(uv1.x);
+				coords.push_back(uv1.y);
+			}
+		}
+		std::cout << "Total vertices: " << coords.size() / 14 << std::endl;
+		return coords;
+	}
+	//Indeces for a sphere
+	std::vector<unsigned int> sphereIndeces(int n) {
+		std::vector<unsigned int> indices = std::vector<unsigned int>();
+		int n_steps = (n % 2 == 0) ? n : n + 1;
+		for (int i = 0; i < n_steps*n_steps * 2 * 3; i++) {
+			indices.push_back(i);
+		}
+		return indices;
+	}
 };

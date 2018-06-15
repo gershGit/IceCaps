@@ -216,7 +216,7 @@ void loadScene() {
 	parentCube->glDrawable = squareMesh;
 	parentCube->drawFlag = true;
 	parentCube->addChild(childCube);
-	parentCube->pos.z = -12.0f;
+	parentCube->pos.z = 12.0f;
 	parentCube->pos.y = 20.0f;
 	RigidBody* squareRigid = new RigidBody();
 	squareRigid->setStart(parentCube->pos, glm::vec3(0), glm::vec3(0));
@@ -234,7 +234,7 @@ void loadScene() {
 	suzaneHead->glDrawable = suzzane_drawable;
 	suzaneHead->drawFlag = true;
 	suzaneHead->pos.x = -3;
-	suzaneHead->pos.z = -20;
+	suzaneHead->pos.z = 20;
 	
 	GameObject* ground = new GameObject();
 	ground->name = "Ground";
@@ -247,16 +247,21 @@ void loadScene() {
 
 	ObjectFactory* mObjectFactory = new ObjectFactory();
 
-	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, -8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
+	GameObject* spawnedSphere = mObjectFactory->createObject(SPHERE_PRIMITVE);
+	toGenerate.push_back(spawnedSphere->glDrawable);
+	spawnedSphere->pos.x = 5;
+	spawnedSphere->pos.y = 3;
+
+	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, 8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_0->glDrawable);
 
-	GameObject* spawnedLight_1 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, -14), glm::vec3(0.0f, 1.0f, 0.0f), 1.0, true);
+	GameObject* spawnedLight_1 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, 14), glm::vec3(0.0f, 1.0f, 0.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_1->glDrawable);
 
-	GameObject* spawnedLight_2 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(2, 2, -11), glm::vec3(0.0f, 0.0f, 1.0f), 1.0, true);
+	GameObject* spawnedLight_2 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(2, 2, 11), glm::vec3(0.0f, 0.0f, 1.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_2->glDrawable);
 
-	GameObject* spawnedLight_3 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(3, 3, -16), glm::vec3(1.0f, 0.0f, 1.0f), 1.0, true);
+	GameObject* spawnedLight_3 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(3, 3, 16), glm::vec3(1.0f, 0.0f, 1.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_3->glDrawable);
 	
 	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
@@ -268,6 +273,7 @@ void loadScene() {
 	objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(suzaneHead);
+	objects.push_back(spawnedSphere);
 
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);
@@ -317,7 +323,7 @@ int main()
 	while (!glfwWindowShouldClose(instance.window))
 	{
 		// render
-		glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
+		glClearColor(0.1f, 0.1f, 0.22f, 1.0f);
 		glClearDepth(0.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
