@@ -8,10 +8,10 @@
 #include <vector>
 
 //Different types of materials, used to determine a shader and check for necessary info
-enum mType {SIMPLE, PBR_BASIC, GLASS, UNLIT_TEX, SIMPLE_TEX, SIMPLE_DIFFUSE_SPECULAR, SIMPLE_PHONG_TEXTURED, PHONG, PHONG_SIMPLE, SSS, STANDARD, DIALECTRIC, METALLIC};
+enum mType {SIMPLE, PBR_BASIC, GLASS, UNLIT_TEX, SIMPLE_TEX, SIMPLE_DIFFUSE_SPECULAR, SIMPLE_PHONG_TEXTURED, PHONG, PHONG_SIMPLE, SSS, STANDARD, DIALECTRIC, METALLIC, PBR_SIMPLE};
 
 //Types of textures
-enum tType {DIFFUSE, METAL_MASK, SPECULAR_MASK, NORMAL_MAP, DISPLACEMENT_MAP, ROUGHNESS_MAP, AO_MAP};
+enum tType {DIFFUSE, METAL_MASK, SPECULAR_MASK, NORMAL_MAP, DISPLACEMENT_MAP, ROUGHNESS_MAP, AO_MAP, METALLIC_MASK};
 
 class GLMaterial {
 public:
@@ -40,11 +40,11 @@ public:
 	int normalTexNumber;
 
 	//PBR texture information
-	GLuint mettalic;
-	int mettlaicTexNumber;
+	GLuint metallic;
+	int metallicTexNumber;
 
-	GLuint ambient_occlusion;
-	int ambient_occlusionTexNumber;
+	GLuint ao;
+	int aoTexNumber;
 
 	//Roughness texture information
 	GLuint roughness;

@@ -140,6 +140,7 @@
     <ClCompile Include="..\..\..\Source\Drawable.cpp" />
     <ClCompile Include="..\..\..\Source\GameObject.cpp" />
     <ClCompile Include="..\..\..\Source\InputControl.cpp" />
+    <ClCompile Include="..\..\..\Source\IrradianceMap.cpp" />
     <ClCompile Include="..\..\..\Source\Material.cpp" />
     <ClCompile Include="..\..\..\Source\ObjectFactory.cpp" />
     <ClCompile Include="..\..\..\Source\RigidBody.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Headers\Collider.h" />
     <ClInclude Include="..\..\..\Headers\iceLoader.h" />
+    <ClInclude Include="..\..\..\Headers\IrradianceMap.h" />
     <ClInclude Include="..\..\..\Headers\Light.h" />
     <ClInclude Include="..\..\..\Headers\ObjectFactory.h" />
     <ClInclude Include="..\..\..\Headers\objLoader.h" />
@@ -174,6 +176,8 @@
     <None Include="..\..\..\Shaders\discoCubeVert.glsl" />
     <None Include="base.frag" />
     <None Include="base.vert" />
+    <None Include="cubeMap.frag" />
+    <None Include="cubeMap.vert" />
     <None Include="dialectric.frag" />
     <None Include="dialectric.vert" />
     <None Include="diffuseSpec.frag" />
@@ -184,10 +188,14 @@
     <None Include="metallic.vert" />
     <None Include="PBR.frag" />
     <None Include="PBR.vert" />
+    <None Include="PBR_simple.frag" />
+    <None Include="PBR_simple.vert" />
     <None Include="phongFull.frag" />
     <None Include="phongFull.vert" />
     <None Include="phongSun.frag" />
     <None Include="phongSun.vert" />
+    <None Include="skin.frag" />
+    <None Include="skin.vert" />
     <None Include="standard.frag" />
     <None Include="standard.vert" />
     <None Include="texturedSimple.frag" />

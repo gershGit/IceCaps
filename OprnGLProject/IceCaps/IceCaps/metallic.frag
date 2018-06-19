@@ -57,7 +57,7 @@ float geometrySmith(vec3 N, vec3 V, vec3 L){
 vec3 BRDF(vec3 N, vec3 V, vec3 H, vec3 L, vec3 radiance){
 	float D = distributionGGX(N, H);
 	float G = geometrySmith(N, V, L);
-	vec3 F = fresnelSchlick(max(dot(H,V), 0.0), vec3(baseReflectance));
+	vec3 F = fresnelSchlick(max(dot(V,N), 0.0), vec3(baseReflectance));
 
 	vec3 numerator = D*G*F;
 	float denominator = 4.0 * max(dot(N,V), 0.0) * max(dot(N, L), 0.0);

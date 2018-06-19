@@ -5,6 +5,9 @@
 class GLRenderer {
 
 public:
+	GLuint cubeVBO;
+	GLuint cubeVAO;
+	ShaderProgram cubeShader;
 
 	void renderObjects(GameObject* object, GameObject* camera, std::vector<GameObject*> lights) {
 		//Debugging statement for which object is being rendered
@@ -92,6 +95,50 @@ public:
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
 		}
+		else if (drawableProp->material->type == PBR_SIMPLE) {
+			GLuint eyeLoc = glGetUniformLocation(shader.id(), "eyePos");
+			glUniform3f(eyeLoc, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+
+			GLuint metalImageLoc = glGetUniformLocation(shader.id(), "metallicSampler");
+			glUniform1i(metalImageLoc, drawableProp->material->metallicTexNumber);
+
+			GLuint roughnessImageLoc = glGetUniformLocation(shader.id(), "roughnessSampler");
+			glUniform1i(roughnessImageLoc, drawableProp->material->roughnessTexNumber);
+
+			GLuint aoImageLoc = glGetUniformLocation(shader.id(), "aoSampler");
+			glUniform1i(aoImageLoc, drawableProp->material->aoTexNumber);
+
+			GLuint normalImageLoc = glGetUniformLocation(shader.id(), "normalSampler");
+			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, -2, -6, -1);
+
+			GLuint sunColor = glGetUniformLocation(shader.id(), "sunColor");
+			glUniform4f(sunColor, 0.8, 0.6, 0.8, 5.0);
+
+			GLuint baseReflectance = glGetUniformLocation(shader.id(), "baseReflectance");
+			glUniform1f(baseReflectance, 0.04);
+
+			//TODO ensure this is right and being used
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glUniformMatrix4fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
+		}
+
 		else if (drawableProp->material->type == SIMPLE_TEX) {
 			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
 			glm::vec3 eyeVec = camera->forward();
@@ -290,6 +337,87 @@ public:
 			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
 			glBindVertexArray(0);
 		}
+	}
+
+	void renderIBL(Imap* map, GameObject* camera) {
+		// initialize (if necessary)
+		if (cubeVAO == 0)
+		{
+			float vertices[] = {
+				// back face
+				-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+				1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+				1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+				1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
+				-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+				-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
+																	  // front face
+				-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+				1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f, // bottom-right
+				1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+				1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f, // top-right
+				-1.0f,  1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f, // top-left
+				-1.0f, -1.0f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f, // bottom-left
+				// left face
+				-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+				-1.0f,  1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-left
+				-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+				-1.0f, -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-left
+				-1.0f, -1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+				-1.0f,  1.0f,  1.0f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-right
+				// right face
+				1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+				1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+				1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+				1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
+				1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
+				1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+				// bottom face
+				-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+				1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
+				1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+				1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f, // bottom-left
+				-1.0f, -1.0f,  1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f, // bottom-right
+				-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
+				// top face
+				-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+				1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+				1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+				1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
+				-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
+				-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+			};
+			glGenVertexArrays(1, &cubeVAO);
+			glGenBuffers(1, &cubeVBO);
+			// fill buffer
+			glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+			// link vertex attributes
+			glBindVertexArray(cubeVAO);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+
+			cubeShader = ShaderProgram("cubeMap.vert", "cubeMap.frag");
+		}
+		// render Cube
+		cubeShader.use();
+		//glDepthFunc(GL_LEQUAL);
+		GLuint viewLoc = glGetUniformLocation(cubeShader.id(), "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &camera->camera->getViewMatrix()[0][0]);
+		GLuint projLoc = glGetUniformLocation(cubeShader.id(), "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
+		GLuint equirectangularMap = glGetUniformLocation(cubeShader.id(), "equirectangularMap");
+		glUniform1i(equirectangularMap, map->mapTexNumber);
+
+		glBindVertexArray(cubeVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
 	}
 };
 

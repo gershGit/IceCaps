@@ -17,17 +17,29 @@ int GLMaterial::addTexture(const char * file_name, tType texture_type, int textu
 		glGenTextures(1, &specular);
 		glBindTexture(GL_TEXTURE_2D, specular);
 	}
+	else if (texture_type == METALLIC_MASK) {
+		metallicTexNumber = texture_number;
+		glActiveTexture(GL_TEXTURE0 + texture_number);
+		glGenTextures(1, &metallic);
+		glBindTexture(GL_TEXTURE_2D, metallic);
+	}
 	else if (texture_type == NORMAL_MAP) {
 		normalTexNumber = texture_number;
 		glActiveTexture(GL_TEXTURE0 + texture_number);
 		glGenTextures(1, &normal);
 		glBindTexture(GL_TEXTURE_2D, normal);
 	}
-	else if (texture_type == ROUGHNESS_MAP) {
-		normalTexNumber = texture_number;
+	else if (texture_type == AO_MAP) {
+		aoTexNumber = texture_number;
 		glActiveTexture(GL_TEXTURE0 + texture_number);
-		glGenTextures(1, &normal);
-		glBindTexture(GL_TEXTURE_2D, normal);
+		glGenTextures(1, &ao);
+		glBindTexture(GL_TEXTURE_2D, ao);
+	}
+	else if (texture_type == ROUGHNESS_MAP) {
+		roughnessTexNumber = texture_number;
+		glActiveTexture(GL_TEXTURE0 + texture_number);
+		glGenTextures(1, &roughness);
+		glBindTexture(GL_TEXTURE_2D, roughness);
 	}
 		int width, height, nrComponents;
 		stbi_set_flip_vertically_on_load(true);
@@ -64,6 +76,10 @@ int GLMaterial::buildShader()
 	}
 	else if (type == METALLIC) {
 		shader = ShaderProgram("metallic.vert", "metallic.frag");
+		return 0;
+	}
+	else if (type == PBR_SIMPLE) {
+		shader = ShaderProgram("PBR_simple.vert", "PBR_simple.frag");
 		return 0;
 	}
 	return 1;

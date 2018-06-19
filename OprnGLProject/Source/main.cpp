@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include "IrradianceMap.h"
 #include "Headers.h"
 #include "OpenGlInstance.h"
 #include "GameObject.h"
@@ -21,6 +22,7 @@ GameObject* mainCamera = new GameObject();
 std::vector<GameObject*> objects;
 std::vector<GameObject*> lights;
 double lastTime = 0.0f;
+Imap *envMap;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -94,12 +96,13 @@ void callIntersections() {
 	}
 };
 void renderScene() {
+	renderer.renderIBL(envMap, mainCamera);
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
 			double nowTime = fmod(glfwGetTime(),12);
 			
 			if (strcmp(object->name, "SPHERE") == 0) {
-				object->pos.y = sin(nowTime) + 3.0;
+				//object->pos.y = sin(nowTime) + 3.0;
 				object->rot.z = nowTime / 6;
 				object->rot.x = nowTime / 2;
 				object->moved = true;
@@ -109,14 +112,13 @@ void renderScene() {
 	}
 	for (GameObject* object : lights) {
 			renderer.renderLights(object, mainCamera);
-	}
+	}	
 };
 void loadScene() {
 	CoordsSpawner * mCoordSpawner = new CoordsSpawner();
 	std::vector<GLDrawable*> toGenerate = std::vector<GLDrawable*>();
 	int texture_number = 0;
 
-	//TODO fix so that multiple objects have their own vbo and vao correctly
 	GLCamera* mainCam = new GLCamera();
 	mainCam->fov = 45;
 	mainCam->cameraFlag = true;
@@ -125,6 +127,7 @@ void loadScene() {
 	mainCamera->camera = mainCam;
 	mainCamera->pos.y = 2.8f;
 	
+	envMap = new Imap("Textures/Arches_E_PineTree_8k.jpg", texture_number++);
 
 	//------------Materials--------------
 	GLMaterial* sphereMat = new GLMaterial();
@@ -134,6 +137,14 @@ void loadScene() {
 	GLMaterial* goldMat = new GLMaterial();
 	goldMat->color = glm::vec3(1.00, 0.71, 0.29);
 	goldMat->setMaterialType(METALLIC);
+
+	GLMaterial* gfPBR = new GLMaterial();
+	gfPBR->addTexture("Textures/diffuse.png", DIFFUSE, texture_number++);
+	gfPBR->addTexture("Textures/metallic.png", METALLIC_MASK, texture_number++);
+	gfPBR->addTexture("Textures/roughness.png", ROUGHNESS_MAP, texture_number++);
+	gfPBR->addTexture("Textures/ao.png", AO_MAP, texture_number++);
+	gfPBR->addTexture("Textures/normal.png", NORMAL_MAP, texture_number++);
+	gfPBR->setMaterialType(PBR_SIMPLE);
 
 	GLMaterial* pMaterial = new GLMaterial();
 	pMaterial->type = SIMPLE;
@@ -169,7 +180,7 @@ void loadScene() {
 	planeMesh->usingEBO = true;
 	planeMesh->coords = mCoordSpawner->planeCoordsOnly;
 	planeMesh->indices = mCoordSpawner->planeIndeces;
-	planeMesh->material = tMaterial;
+	planeMesh->material = gfPBR;
 	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(planeMesh);
 
@@ -255,9 +266,10 @@ void loadScene() {
 	ObjectFactory* mObjectFactory = new ObjectFactory();
 
 	GameObject* spawnedSphere = mObjectFactory->createObject(SPHERE_PRIMITVE);
-	spawnedSphere->glDrawable->material = goldMat;
+	spawnedSphere->glDrawable->material = gfPBR;
 	toGenerate.push_back(spawnedSphere->glDrawable);
 	spawnedSphere->pos.z = 12;
+	spawnedSphere->pos.y = 3;
 
 	GameObject* spawnedSphere2 = mObjectFactory->createObject(SPHERE_PRIMITVE);
 	spawnedSphere2->glDrawable->material = sphereMat;

@@ -57,6 +57,9 @@
     <ClCompile Include="..\..\..\Source\ObjectFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\IrradianceMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\OpenGlInstance.h">
@@ -117,6 +120,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Headers\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\IrradianceMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -191,6 +197,24 @@
       <Filter>Source Files\shaders</Filter>
     </None>
     <None Include="metallic.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="PBR_simple.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="PBR_simple.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="skin.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="skin.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="cubeMap.vert">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="cubeMap.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
   </ItemGroup>

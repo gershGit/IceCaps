@@ -405,27 +405,35 @@ public:
 
 				// vertex i,j
 				double vij_x = x(radius, phi_i, theta_j);
-				double vij_y = y(radius, phi_i, theta_j);
-				double vij_z = z(radius, phi_i, theta_j);
+				double vij_y = z(radius, phi_i, theta_j);
+				double vij_z = y(radius, phi_i, theta_j);
 				glm::vec3 nij = glm::normalize(glm::vec3(vij_x, vij_y, vij_z));
+				glm::vec3 uv_d0 = glm::normalize(-glm::vec3(vij_x, vij_y, vij_z));
+				glm::vec2 uv_0 = glm::vec2(atan2(uv_d0.x, uv_d0.z) / (2 * M_PI) + 0.5, uv_d0.y * 0.5 + 0.5);
 
 				// vertex i+1,j
 				double vip1j_x = x(radius, phi_ip1, theta_j);
-				double vip1j_y = y(radius, phi_ip1, theta_j);
-				double vip1j_z = z(radius, phi_ip1, theta_j);
+				double vip1j_y = z(radius, phi_ip1, theta_j);
+				double vip1j_z = y(radius, phi_ip1, theta_j);
 				glm::vec3 nip1j(vip1j_x, vip1j_y, vip1j_z);
+				glm::vec3 uv_d1 = glm::normalize(-glm::vec3(vip1j_x, vip1j_y, vip1j_z));
+				glm::vec2 uv_1 = glm::vec2(atan2(uv_d1.x, uv_d1.z) / (2 * M_PI) + 0.5, uv_d1.y * 0.5 + 0.5);
 
 				// vertex i,j+1
 				double vijp1_x = x(radius, phi_i, theta_jp1);
-				double vijp1_y = y(radius, phi_i, theta_jp1);
-				double vijp1_z = z(radius, phi_i, theta_jp1);
+				double vijp1_y = z(radius, phi_i, theta_jp1);
+				double vijp1_z = y(radius, phi_i, theta_jp1);
 				glm::vec3 nijp1 = glm::normalize(glm::vec3(vijp1_x, vijp1_y, vijp1_z));
+				glm::vec3 uv_d2 = glm::normalize(-glm::vec3(vijp1_x, vijp1_y, vijp1_z));
+				glm::vec2 uv_2 = glm::vec2(atan2(uv_d2.x, uv_d2.z) / (2 * M_PI) + 0.5, uv_d2.y * 0.5 + 0.5);
 
 				// vertex i+1,j+1
 				double vip1jp1_x = x(radius, phi_ip1, theta_jp1);
-				double vip1jp1_y = y(radius, phi_ip1, theta_jp1);
-				double vip1jp1_z = z(radius, phi_ip1, theta_jp1);
+				double vip1jp1_y = z(radius, phi_ip1, theta_jp1);
+				double vip1jp1_z = y(radius, phi_ip1, theta_jp1);
 				glm::vec3 nip1jp1 = glm::normalize(glm::vec3(vip1jp1_x, vip1jp1_y, vip1jp1_z));
+				glm::vec3 uv_d3 = glm::normalize(-glm::vec3(vip1jp1_x, vip1jp1_y, vip1jp1_z));
+				glm::vec2 uv_3 = glm::vec2(atan2(uv_d3.x, uv_d3.z) / (2 * M_PI) + 0.5, uv_d3.y * 0.5 + 0.5);
 
 				//Calculate tangents
 				glm::vec3 v2 = glm::vec3(vijp1_x, vijp1_y, vijp1_z);
@@ -437,9 +445,9 @@ public:
 				glm::vec3 d1 = glm::normalize(-v1);
 				glm::vec3 d0 = glm::normalize(-v0);
 
-				glm::vec2 uv2 = glm::vec2(0.5 + (atan2(d2.z, d2.x) / (2 * M_PI)), 0.5 - (asin(d2.y) / M_PI));
-				glm::vec2 uv1 = glm::vec2(0.5 + (atan2(d1.z, d1.x) / (2 * M_PI)), 0.5 - (asin(d1.y) / M_PI));
-				glm::vec2 uv0 = glm::vec2(0.5 + (atan2(d0.z, d0.x) / (2 * M_PI)), 0.5 - (asin(d0.y) / M_PI));
+				glm::vec2 uv2 = glm::vec2(atan2(d2.x, d2.z) / (2 * M_PI) + 0.5, d2.y * 0.5 + 0.5);
+				glm::vec2 uv1 = glm::vec2(atan2(d1.x, d1.z) / (2 * M_PI) + 0.5, d1.y * 0.5 + 0.5);
+				glm::vec2 uv0 = glm::vec2(atan2(d0.x, d0.z) / (2 * M_PI) + 0.5, d0.y * 0.5 + 0.5);
 
 				glm::vec3 deltaPos1 = v1 - v0;
 				glm::vec3 deltaPos2 = v2 - v0;
@@ -494,17 +502,21 @@ public:
 				coords.push_back(bitangent.x);
 				coords.push_back(bitangent.y);
 				coords.push_back(bitangent.z);
-				coords.push_back(uv1.x);
-				coords.push_back(uv1.y);
+				coords.push_back(uv2.x);
+				coords.push_back(uv2.y);
 
 				v2 = glm::vec3(vip1j_x, vip1j_y, vip1j_z);
 				v1 = glm::vec3(vip1jp1_x, vip1jp1_y, vip1jp1_z);
 				v0 = glm::vec3(vijp1_x, vijp1_y, vijp1_z);
 
 				//TODO fix texture coords
-				uv2 = glm::vec2(glm::normalize(vip1j_x), glm::normalize(vip1j_y));
-				uv1 = glm::vec2(glm::normalize(vip1jp1_x), glm::normalize(vip1jp1_y));;
-				uv0 = glm::vec2(glm::normalize(vijp1_x), glm::normalize(vijp1_y));;
+				d2 = glm::normalize(-v2);
+				d1 = glm::normalize(-v1);
+				d0 = glm::normalize(-v0);
+
+				uv2 = glm::vec2(atan2(d2.x, d2.z) / (2 * M_PI) + 0.5, d2.y * 0.5 + 0.5);
+				uv1 = glm::vec2(atan2(d1.x, d1.z) / (2 * M_PI) + 0.5, d1.y * 0.5 + 0.5);
+				uv0 = glm::vec2(atan2(d0.x, d0.z) / (2 * M_PI) + 0.5, d0.y * 0.5 + 0.5);
 
 				deltaPos1 = v1 - v0;
 				deltaPos2 = v2 - v0;
@@ -560,8 +572,8 @@ public:
 				coords.push_back(bitangent.x);
 				coords.push_back(bitangent.y);
 				coords.push_back(bitangent.z);
-				coords.push_back(uv1.x);
-				coords.push_back(uv1.y);
+				coords.push_back(uv2.x);
+				coords.push_back(uv2.y);
 			}
 		}
 		std::cout << "Total vertices: " << coords.size() / 14 << std::endl;
