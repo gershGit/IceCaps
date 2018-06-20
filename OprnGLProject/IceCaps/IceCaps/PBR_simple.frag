@@ -4,6 +4,7 @@
 in vec3 ourFragPos;
 in vec2 ourTexCoords;
 in mat3 TBN;
+in vec3 linearPos;
 
 out vec4 fragColor;
 

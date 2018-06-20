@@ -4,14 +4,14 @@
 
 #pragma once
 #include "Headers.h"
-//#include "GameObject.h"
 
-enum collider_type {SPHERE_COLLIDER, BOX_COLLIDER, MESH_COLLIDER};
-struct Collision  {
-	//GameObject* collisionObject;
+class GameObject;
+struct collisionInfo {
+	GameObject* collisionObject;
+	bool collision;
 	glm::vec3 collisionPosition;
 };
-
+enum collider_type {SPHERE_COLLIDER, BOX_COLLIDER, MESH_COLLIDER};
 
 class Collider {
 public:

@@ -82,6 +82,10 @@ int GLMaterial::buildShader()
 		shader = ShaderProgram("PBR_simple.vert", "PBR_simple.frag");
 		return 0;
 	}
+	else if (type == PBR_BASIC) {
+		shader = ShaderProgram("PBR.vert", "PBR.frag");
+		return 0;
+	}
 	return 1;
 }
 

@@ -38,6 +38,7 @@ public:
 private:
 	//Private matrix used to return the position quickly when an object hasn't moved
 	glm::mat4 lastTransform;
+	std::vector<collisionInfo> collisions;
 
 public:
 	//Name of the object, primarily used for debugging
@@ -165,7 +166,10 @@ public:
 	void checkCollisions(std::vector<GameObject*> objects) {
 		for (GameObject* object : objects) {
 			if (object != this && object->usingCollider) {
-				sCollider->checkCollision(object->sCollider);
+				collisionInfo cInfo = sCollider->checkCollision(object->sCollider);
+				if (cInfo.collision) {
+					collisions.push_back(cInfo);
+				}
 			}
 		}
 		for (GameObject* child : children) {
@@ -191,4 +195,8 @@ public:
 			rigidBody->setStart(pos);
 		}
 	};
+
+	void onCollision() {
+
+	}
 };

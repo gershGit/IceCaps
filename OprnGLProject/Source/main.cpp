@@ -23,6 +23,7 @@ std::vector<GameObject*> objects;
 std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 Imap *envMap;
+Imap *irrMap;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -48,15 +49,19 @@ int compareByCoordSize(const void * d1, const void * d2) {
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
 		objects[0]->pos.y += 0.01f;
+		objects[0]->moved = true;
 	}
 	if (input->isDown(DOWN_ARROW_KEY)) {
 		objects[0]->pos.y -= 0.01f;
+		objects[0]->moved = true;
 	}
 	if (input->isDown(LEFT_ARROW_KEY)) {
 		objects[0]->pos.x -= 0.01f;
+		objects[0]->moved = true;
 	}
 	if (input->isDown(RIGHT_ARROW_KEY)) {
 		objects[0]->pos.x += 0.01f;
+		objects[0]->moved = true;
 	}
 	if (input->isDown(W_KEY)) {
 		mainCamera->pos -= mainCamera->forward() * 0.01f;
@@ -96,7 +101,7 @@ void callIntersections() {
 	}
 };
 void renderScene() {
-	renderer.renderIBL(envMap, mainCamera);
+	glDepthFunc(GL_LEQUAL);
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
 			double nowTime = fmod(glfwGetTime(),12);
@@ -107,12 +112,13 @@ void renderScene() {
 				object->rot.x = nowTime / 2;
 				object->moved = true;
 			}
-			renderer.renderObjects(object, mainCamera, lights);
+			renderer.renderObjects(object, mainCamera, lights, irrMap, envMap);
 		}
 	}
 	for (GameObject* object : lights) {
 			renderer.renderLights(object, mainCamera);
 	}	
+	renderer.renderIBL(envMap, mainCamera);
 };
 void loadScene() {
 	CoordsSpawner * mCoordSpawner = new CoordsSpawner();
@@ -128,6 +134,7 @@ void loadScene() {
 	mainCamera->pos.y = 2.8f;
 	
 	envMap = new Imap("Textures/Arches_E_PineTree_8k.jpg", texture_number++);
+	irrMap = new Imap("Textures/Arches_E_PineTree_Env.hdr", texture_number++);
 
 	//------------Materials--------------
 	GLMaterial* sphereMat = new GLMaterial();
@@ -144,7 +151,7 @@ void loadScene() {
 	gfPBR->addTexture("Textures/roughness.png", ROUGHNESS_MAP, texture_number++);
 	gfPBR->addTexture("Textures/ao.png", AO_MAP, texture_number++);
 	gfPBR->addTexture("Textures/normal.png", NORMAL_MAP, texture_number++);
-	gfPBR->setMaterialType(PBR_SIMPLE);
+	gfPBR->setMaterialType(PBR_BASIC);
 
 	GLMaterial* pMaterial = new GLMaterial();
 	pMaterial->type = SIMPLE;
@@ -270,6 +277,11 @@ void loadScene() {
 	toGenerate.push_back(spawnedSphere->glDrawable);
 	spawnedSphere->pos.z = 12;
 	spawnedSphere->pos.y = 3;
+	SphereCollider* lowSphere = new SphereCollider();
+	lowSphere->position = spawnedSphere->pos;
+	lowSphere->radius = 1;
+	spawnedSphere->usingCollider = true;
+	spawnedSphere->sCollider = lowSphere;
 
 	GameObject* spawnedSphere2 = mObjectFactory->createObject(SPHERE_PRIMITVE);
 	spawnedSphere2->glDrawable->material = sphereMat;
@@ -277,6 +289,12 @@ void loadScene() {
 	toGenerate.push_back(spawnedSphere2->glDrawable);
 	spawnedSphere2->pos.z = 12;
 	spawnedSphere2->pos.y = 6;
+	SphereCollider *highSphere = new SphereCollider();
+	highSphere->position = spawnedSphere->pos;
+	highSphere->radius = 1;
+	spawnedSphere2->usingCollider = true;
+	spawnedSphere2->sCollider = highSphere;
+
 
 	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, 8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_0->glDrawable);
@@ -341,7 +359,7 @@ int main()
 	//glFrontFace(GL_CCW);
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
-	glDepthFunc(GL_GEQUAL);
+	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
 	lastTime = glfwGetTime();
@@ -351,7 +369,7 @@ int main()
 	{
 		// render
 		glClearColor(0.1f, 0.1f, 0.22f, 1.0f);
-		glClearDepth(0.0f);
+		//glClearDepth(1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//input->setFlags();

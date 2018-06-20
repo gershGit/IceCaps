@@ -6,16 +6,19 @@
 #include "Headers.h"
 #include "Collider.h"
 
+class GameObject;
+
 class SphereCollider : Collider
 {
 public:
+	GameObject * object;
 	glm::vec3 position;
 	float radius;	
 
 	SphereCollider();
 	~SphereCollider();
 
-	bool checkCollision(SphereCollider* collider);
+	collisionInfo checkCollision(SphereCollider* collider);
 
 	//bool checkCollision(Collider* collider) override;
 };

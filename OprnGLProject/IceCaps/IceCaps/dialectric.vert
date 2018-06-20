@@ -16,7 +16,7 @@ float near = 0.1;
 float far = 100;
 
 float LinearizeDepth(float depth){
-	return (1/depth - 1/near) / (1/far - 1/near);
+	return depth/far;
 }
 
 void main() {
