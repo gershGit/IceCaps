@@ -1,3 +1,7 @@
+/*
+	Class to render objects one by one
+*/
+
 #include "Headers.h"
 #include "GameObject.h"
 #include "Drawable.h"
@@ -5,6 +9,7 @@
 class GLRenderer {
 
 public:
+	//Environment information
 	GLuint cubeVBO;
 	GLuint cubeVAO;
 	ShaderProgram cubeShader;

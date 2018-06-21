@@ -11,6 +11,7 @@ SphereCollider::~SphereCollider()
 {
 }
 
+//Sphere-Sphere collision
 collisionInfo SphereCollider::checkCollision(SphereCollider * collider)
 {
 	glm::vec3 closest_point = collider->position + glm::normalize(position - collider->position)*collider->radius;
@@ -26,6 +27,7 @@ collisionInfo SphereCollider::checkCollision(SphereCollider * collider)
 	return collisionInfo();
 }
 
+//Sphere-AABB collision
 collisionInfo SphereCollider::checkCollision(BoxCollider * collider)
 {
 	//AABB only atm
@@ -70,6 +72,7 @@ collisionInfo SphereCollider::checkCollision(BoxCollider * collider)
 	return collisionInfo();
 }
 
+//Sphere-Mesh collision
 collisionInfo SphereCollider::checkCollision(MeshCollider * collider)
 {
 	return collisionInfo();

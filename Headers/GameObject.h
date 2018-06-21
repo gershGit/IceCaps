@@ -163,6 +163,7 @@ public:
 	}
 
 	//Checks for collisions within the list
+	//TODO only check for collisions with objects further in the list so collisions aren't recomputed
 	void checkCollisions(std::vector<GameObject*> objects) {
 		for (GameObject* object : objects) {
 			if (object != this && object->usingCollider) {
@@ -196,6 +197,8 @@ public:
 		}
 	};
 
+	//Function called on every collision
+	//TODO make this call a virtual function
 	void onCollision() {
 
 	}

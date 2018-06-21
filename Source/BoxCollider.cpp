@@ -1,3 +1,7 @@
+/*
+	Implementation of AABB collider
+*/
+
 #include "..\Headers\BoxCollider.h"
 #include "SphereCollider.h"
 
@@ -11,6 +15,7 @@ BoxCollider::~BoxCollider()
 {
 }
 
+//Sphere-AABB collision
 collisionInfo BoxCollider::checkCollision(SphereCollider * collider)
 {
 	//AABB only atm
@@ -55,6 +60,7 @@ collisionInfo BoxCollider::checkCollision(SphereCollider * collider)
 	return collisionInfo();
 }
 
+//AABB-AABB collision
 collisionInfo BoxCollider::checkCollision(BoxCollider * collider)
 {
 	//AABB only atm
@@ -100,6 +106,7 @@ collisionInfo BoxCollider::checkCollision(BoxCollider * collider)
 	return collisionInfo();
 }
 
+//Mesh-AABB collision
 collisionInfo BoxCollider::checkCollision(MeshCollider * collider)
 {
 	return collisionInfo();

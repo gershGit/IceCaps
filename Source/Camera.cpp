@@ -1,3 +1,7 @@
+/*
+	Implementation of a camera
+*/
+
 #define _USE_MATH_DEFINES
 
 #include "Camera.h"
