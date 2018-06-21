@@ -219,14 +219,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="someObj.txt">
-      <Filter>Source Files\models</Filter>
-    </Text>
-    <Text Include="..\..\..\..\Graphics\csci441-spring2018\programs\program3\susan.txt">
-      <Filter>Source Files\models</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
     <Image Include="gf.bmp">
       <Filter>Source Files\textures</Filter>
     </Image>

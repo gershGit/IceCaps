@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\..\..\..\Downloads\glad\src\glad.c" />
+    <ClCompile Include="..\..\..\Source\BoxCollider.cpp" />
     <ClCompile Include="..\..\..\Source\Camera.cpp" />
     <ClCompile Include="..\..\..\Source\Drawable.cpp" />
     <ClCompile Include="..\..\..\Source\GameObject.cpp" />
@@ -149,6 +150,7 @@
     <ClCompile Include="..\..\Source\OpenGLInstance.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\Headers\BoxCollider.h" />
     <ClInclude Include="..\..\..\Headers\Collider.h" />
     <ClInclude Include="..\..\..\Headers\iceLoader.h" />
     <ClInclude Include="..\..\..\Headers\IrradianceMap.h" />
@@ -202,10 +204,6 @@
     <None Include="texturedSimple.vert" />
     <None Include="texturedUnlit.vert" />
     <None Include="texturedUnlit.frag" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="..\..\..\..\Graphics\csci441-spring2018\programs\program3\susan.txt" />
-    <Text Include="someObj.txt" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="gf.bmp" />

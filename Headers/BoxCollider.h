@@ -1,10 +1,11 @@
 #include "Headers.h"
 #include "Collider.h"
 
-class SphereCollider : public Collider {
+class BoxCollider : public Collider {
 public:
 	glm::vec3 position;
-	float radius;
+	glm::vec3 scale;
+	glm::vec3 rotation;
 
 	collisionInfo checkCollision(SphereCollider* collider);
 	collisionInfo checkCollision(BoxCollider* collider);

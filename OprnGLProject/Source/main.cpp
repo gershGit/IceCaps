@@ -48,20 +48,20 @@ int compareByCoordSize(const void * d1, const void * d2) {
 
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
-		objects[0]->pos.y += 0.01f;
-		objects[0]->moved = true;
+		objects[2]->pos.y += 0.01f;
+		objects[2]->moved = true;
 	}
 	if (input->isDown(DOWN_ARROW_KEY)) {
-		objects[0]->pos.y -= 0.01f;
-		objects[0]->moved = true;
+		objects[2]->pos.y -= 0.01f;
+		objects[2]->moved = true;
 	}
 	if (input->isDown(LEFT_ARROW_KEY)) {
-		objects[0]->pos.x -= 0.01f;
-		objects[0]->moved = true;
+		objects[2]->pos.x -= 0.01f;
+		objects[2]->moved = true;
 	}
 	if (input->isDown(RIGHT_ARROW_KEY)) {
-		objects[0]->pos.x += 0.01f;
-		objects[0]->moved = true;
+		objects[2]->pos.x += 0.01f;
+		objects[2]->moved = true;
 	}
 	if (input->isDown(W_KEY)) {
 		mainCamera->pos -= mainCamera->forward() * 0.01f;
@@ -294,6 +294,12 @@ void loadScene() {
 	highSphere->radius = 1;
 	spawnedSphere2->usingCollider = true;
 	spawnedSphere2->sCollider = highSphere;
+	RigidBody *sphere2rigid = new RigidBody();
+	sphere2rigid->mass = 1;
+	sphere2rigid->is_active = true;
+	sphere2rigid->setStart(spawnedSphere2->pos);
+	spawnedSphere2->usingRigid = true;
+	spawnedSphere2->rigidBody = sphere2rigid;
 
 
 	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, 8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
