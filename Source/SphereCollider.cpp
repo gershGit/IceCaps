@@ -1,11 +1,9 @@
 #include "..\Headers\SphereCollider.h"
 #include "BoxCollider.h"
 
-
 SphereCollider::SphereCollider()
 {
 }
-
 
 SphereCollider::~SphereCollider()
 {

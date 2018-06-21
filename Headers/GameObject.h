@@ -1,6 +1,6 @@
 /*
 	The class all game objects must use
-	The main purpose is positioning of an object 
+	The main purpose is positioning of an object
 	This class uses references to others to fill out necessary information
 */
 
@@ -88,7 +88,7 @@ public:
 	//Functions to return a normalized vector pointing in the respective directions from the object
 	glm::vec3 forward() {
 		glm::quat q = glm::quat(rot);
-		glm::vec3 forwardVec(2*(q.x*q.z + q.w*q.y), 2 * (q.y*q.z - q.w*q.x), 1 - 2 * (q.x*q.x + q.y*q.y));
+		glm::vec3 forwardVec(2 * (q.x*q.z + q.w*q.y), 2 * (q.y*q.z - q.w*q.x), 1 - 2 * (q.x*q.x + q.y*q.y));
 
 		return glm::normalize(forwardVec);
 	};
@@ -100,7 +100,7 @@ public:
 	};
 	glm::vec3 right() {
 		glm::quat q = glm::quat(rot);
-		glm::vec3 rightVec(1- 2 * (q.y*q.y + q.z*q.z), 2 * (q.x*q.y + q.w*q.z), 2 * (q.x*q.z - q.w*q.y));
+		glm::vec3 rightVec(1 - 2 * (q.y*q.y + q.z*q.z), 2 * (q.x*q.y + q.w*q.z), 2 * (q.x*q.z - q.w*q.y));
 
 		return glm::normalize(-rightVec);
 	};
@@ -121,9 +121,9 @@ public:
 
 			//Generate a scale matrix from the scale vector, defaulting to 1
 			glm::mat4 myScale = glm::mat4();
-			myScale[0][0] = scale.x>0 ? scale.x : 1;
-			myScale[1][1] = scale.y>0 ? scale.y : 1;
-			myScale[2][2] = scale.z>0 ? scale.z : 1;
+			myScale[0][0] = scale.x > 0 ? scale.x : 1;
+			myScale[1][1] = scale.y > 0 ? scale.y : 1;
+			myScale[2][2] = scale.z > 0 ? scale.z : 1;
 			myScale[3][3] = 1;
 
 			//Update the boolean for quicker returns
@@ -200,6 +200,5 @@ public:
 	//Function called on every collision
 	//TODO make this call a virtual function
 	void onCollision() {
-
 	}
 };

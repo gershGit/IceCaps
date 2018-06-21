@@ -2,9 +2,7 @@
 
 GLDrawable::GLDrawable()
 {
-	
 }
-
 
 GLDrawable::~GLDrawable()
 {
@@ -19,7 +17,7 @@ void GLDrawable::generateBuffers() {
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, coords.size() * sizeof(float), coords.data(), GL_STATIC_DRAW);
-	
+
 	//EBO creation
 	if (usingEBO) {
 		glGenBuffers(1, &ebo);
@@ -86,7 +84,6 @@ void GLDrawable::generateBuffers() {
 
 		//UV info stored in vao at position 1
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-
 	}
 	else if (bufferAttributes.x == 0 && bufferAttributes.y > 0 && bufferAttributes.z > 0 && bufferAttributes.w == 0) {
 		glEnableVertexAttribArray(0); //Position attribute
@@ -103,7 +100,7 @@ void GLDrawable::generateBuffers() {
 		//UV info stored in vao at position 2
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	}
-	else if (material->type==STANDARD || material->type==PBR_BASIC || material->type==PHONG_SIMPLE || material->type==SIMPLE_TEX || material->type==DIALECTRIC || material->type == METALLIC || material->type == PBR_SIMPLE) {
+	else if (material->type == STANDARD || material->type == PBR_BASIC || material->type == PHONG_SIMPLE || material->type == SIMPLE_TEX || material->type == DIALECTRIC || material->type == METALLIC || material->type == PBR_SIMPLE) {
 		glEnableVertexAttribArray(0); //Position attribute
 		glEnableVertexAttribArray(1); //Normal attribute
 		glEnableVertexAttribArray(2); //Tangent attribute

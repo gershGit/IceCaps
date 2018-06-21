@@ -76,7 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OprnGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OpenGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>use_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -90,7 +90,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OprnGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OpenGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>use_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -106,7 +106,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OprnGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OpenGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>use_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -124,7 +124,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OprnGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Documents\GitHub\IceCaps\Source;D:\Documents\GitHub\IceCaps\Headers;D:\Documents\GitHub\IceCaps\OpenGLProject\Headers;D:\Documents\Visual Studio 2017\Libraries\KHR;D:\Documents\Visual Studio 2017\Libraries\glad;D:\Documents\Visual Studio 2017\Libraries\glm;D:\Documents\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>use_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
@@ -135,7 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\Downloads\glad\src\glad.c" />
+    <ClCompile Include="..\..\..\..\..\Visual Studio 2017\Libraries\glad\src\glad.c" />
     <ClCompile Include="..\..\..\Source\BoxCollider.cpp" />
     <ClCompile Include="..\..\..\Source\Camera.cpp" />
     <ClCompile Include="..\..\..\Source\Drawable.cpp" />
@@ -143,6 +143,8 @@
     <ClCompile Include="..\..\..\Source\InputControl.cpp" />
     <ClCompile Include="..\..\..\Source\IrradianceMap.cpp" />
     <ClCompile Include="..\..\..\Source\Material.cpp" />
+    <ClCompile Include="..\..\..\Source\NetClient.cpp" />
+    <ClCompile Include="..\..\..\Source\NetServer.cpp" />
     <ClCompile Include="..\..\..\Source\ObjectFactory.cpp" />
     <ClCompile Include="..\..\..\Source\RigidBody.cpp" />
     <ClCompile Include="..\..\..\Source\SphereCollider.cpp" />
@@ -155,6 +157,8 @@
     <ClInclude Include="..\..\..\Headers\iceLoader.h" />
     <ClInclude Include="..\..\..\Headers\IrradianceMap.h" />
     <ClInclude Include="..\..\..\Headers\Light.h" />
+    <ClInclude Include="..\..\..\Headers\NetClient.h" />
+    <ClInclude Include="..\..\..\Headers\NetServer.h" />
     <ClInclude Include="..\..\..\Headers\ObjectFactory.h" />
     <ClInclude Include="..\..\..\Headers\objLoader.h" />
     <ClInclude Include="..\..\..\Headers\baseShapeCoords.h" />

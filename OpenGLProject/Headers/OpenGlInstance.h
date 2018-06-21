@@ -6,7 +6,7 @@
 
 class GLInstance {
 private:
-	
+
 public:
 	//Window information and reference
 	int W_HEIGHT = 600;

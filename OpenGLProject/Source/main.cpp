@@ -15,6 +15,8 @@
 #include "RigidBody.h"
 #include "ObjectFactory.h"
 #include <cstdlib>
+#include "NetServer.h"
+#include "NetClient.h"
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -24,6 +26,7 @@ std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 Imap *envMap;
 Imap *irrMap;
+bool isServer = false;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -38,13 +41,51 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
 	mainCamera->moved = true;
 }
 int compareByCoordSize(const void * d1, const void * d2) {
-	GLDrawable* draw1 = *(GLDrawable**) d1;
+	GLDrawable* draw1 = *(GLDrawable**)d1;
 	GLDrawable* draw2 = *(GLDrawable**)d2;
 	if (draw1->coords.size() > draw2->coords.size()) return -1;
 	if (draw1->coords.size() == draw2->coords.size()) return 0;
 	if (draw1->coords.size() < draw2->coords.size()) return 1;
 }
 
+DWORD WINAPI createServer(void *data) {
+	std::cout << "Attempting to establish a network" << std::endl;
+	NetServer myNet = NetServer();
+	int res = myNet.initialize();
+	std::cout << "Initialization success? --> " << res << std::endl;
+	res = myNet.createServer();
+	std::cout << "Creation success? --> " << res << std::endl;
+	res = myNet.startListen();
+	std::cout << "Listen success? --> " << res << std::endl;
+	res = myNet.sendRecieve();
+	std::cout << "Send/Recieve success? --> " << res << std::endl;
+	return 0;
+}
+DWORD WINAPI createClient(void *data) {
+	std::cout << "Attempting to create a client" << std::endl;
+	NetClient myClient = NetClient();
+	int res = myClient.Initialize();
+	std::cout << "Initialization success? --> " << res << std::endl;
+	res = myClient.ConnectSocket();
+	std::cout << "Connection success? --> " << res << std::endl;
+	res = myClient.SendData("Hello from client!!!");
+	std::cout << "Send success? --> " << res << std::endl;
+	res = myClient.Kill();
+	std::cout << "Kill success? --> " << res << std::endl;
+	return 0;
+}
+void createServerOnThread() {
+	HANDLE thread = CreateThread(NULL, 0, createServer, NULL, 0, NULL);
+	if (!thread) {
+		printf("Thread creation failed\n");
+	}
+}
+void createClientOnThread() {
+	HANDLE thread = CreateThread(NULL, 0, createClient, NULL, 0, NULL);
+	if (!thread) {
+		printf("Thread creation failed\n");
+	}
+}
 
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
@@ -104,8 +145,8 @@ void renderScene() {
 	glDepthFunc(GL_LEQUAL);
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
-			double nowTime = fmod(glfwGetTime(),12);
-			
+			double nowTime = fmod(glfwGetTime(), 12);
+
 			if (strcmp(object->name, "SPHERE") == 0) {
 				//object->pos.y = sin(nowTime) + 3.0;
 				object->rot.z = nowTime / 6;
@@ -116,8 +157,8 @@ void renderScene() {
 		}
 	}
 	for (GameObject* object : lights) {
-			renderer.renderLights(object, mainCamera);
-	}	
+		renderer.renderLights(object, mainCamera);
+	}
 	renderer.renderIBL(envMap, mainCamera);
 };
 void loadScene() {
@@ -132,7 +173,7 @@ void loadScene() {
 	mainCam->gameObject = mainCamera;
 	mainCamera->camera = mainCam;
 	mainCamera->pos.y = 2.8f;
-	
+
 	envMap = new Imap("Textures/Arches_E_PineTree_8k.jpg", texture_number++);
 	irrMap = new Imap("Textures/Arches_E_PineTree_Env.hdr", texture_number++);
 
@@ -178,7 +219,6 @@ void loadScene() {
 	ShaderProgram bShader = ShaderProgram("diffuseSpec.vert", "diffuseSpec.frag");
 	bottomMaterial->shader = bShader;
 
-
 	//------------Drawables-------------------
 	GLDrawable* planeMesh = new GLDrawable();
 	planeMesh->ptype = DRAWABLE;
@@ -201,7 +241,6 @@ void loadScene() {
 	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	squareMesh->material = tMaterial;
 	toGenerate.push_back(squareMesh);
-	
 
 	std::cout << "Loading suzzane head" << std::endl;
 	GLDrawable* suzzane_drawable = new GLDrawable();
@@ -260,7 +299,7 @@ void loadScene() {
 	suzaneHead->drawFlag = true;
 	suzaneHead->pos.x = -3;
 	suzaneHead->pos.z = 20;
-	
+
 	GameObject* ground = new GameObject();
 	ground->name = "Ground";
 	ground->drawFlag = true;
@@ -288,7 +327,7 @@ void loadScene() {
 	spawnedSphere2->name = "SPHERE2";
 	toGenerate.push_back(spawnedSphere2->glDrawable);
 	spawnedSphere2->pos.z = 12;
-	spawnedSphere2->pos.y = 6;
+	spawnedSphere2->pos.y = 20;
 	SphereCollider *highSphere = new SphereCollider();
 	highSphere->position = spawnedSphere->pos;
 	highSphere->radius = 1;
@@ -301,7 +340,6 @@ void loadScene() {
 	spawnedSphere2->usingRigid = true;
 	spawnedSphere2->rigidBody = sphere2rigid;
 
-
 	GameObject* spawnedLight_0 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(-2, 4, 8), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_0->glDrawable);
 
@@ -313,7 +351,7 @@ void loadScene() {
 
 	GameObject* spawnedLight_3 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(3, 3, 16), glm::vec3(1.0f, 0.0f, 1.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_3->glDrawable);
-	
+
 	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
 	for (GLDrawable* drawable : toGenerate) {
 		drawable->generateBuffers();
@@ -347,7 +385,12 @@ void startScene() {
 
 int main()
 {
-	//std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
+	isServer = true;
+	createServerOnThread();
+
+	createClientOnThread();
+
+	std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
 
 	GLInstance instance;
 	instance.initialize();
@@ -399,7 +442,7 @@ int main()
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-	// make sure the viewport matches the new window dimensions; note that width and 
+	// make sure the viewport matches the new window dimensions; note that width and
 	// height will be significantly larger than specified on retina displays.
 	glViewport(0, 0, width, height);
 }

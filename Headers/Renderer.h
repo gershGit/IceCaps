@@ -7,7 +7,6 @@
 #include "Drawable.h"
 
 class GLRenderer {
-
 public:
 	//Environment information
 	GLuint cubeVBO;
@@ -233,7 +232,6 @@ public:
 			glUniform4f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), 0.1, 0.1, 1.0, 0.5);
 			glUniform4f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), 0.1, 0.1, 1.0, 0.3);
 
-
 			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
 
@@ -301,7 +299,7 @@ public:
 		}
 
 		// Bind the VAO of the object ot access the correct info
-		glBindVertexArray(drawableProp->vao);	
+		glBindVertexArray(drawableProp->vao);
 
 		//Render by indices or vertices based on if an ebo has been created
 		if (drawableProp->usingEBO) {
@@ -312,7 +310,7 @@ public:
 			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
 			glBindVertexArray(0);
 		}
-		
+
 		//Render all the children of this object at the same time to ensure all objects, not only top level ones are rendered
 		for (GameObject* child : object->children) {
 			renderObjects(child, camera, lights, irradianceMap, environmentMap);
@@ -364,7 +362,7 @@ public:
 				// back face
 				-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
 				1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
-				1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right         
+				1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f, // bottom-right
 				1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
 				-1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
 				-1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f, // top-left
@@ -385,10 +383,10 @@ public:
 				// right face
 				1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
 				1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
-				1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right         
+				1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f, // top-right
 				1.0f, -1.0f, -1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f, // bottom-right
 				1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f, // top-left
-				1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left     
+				1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f, // bottom-left
 				// bottom face
 				-1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f, // top-right
 				1.0f, -1.0f, -1.0f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f, // top-left
@@ -399,10 +397,10 @@ public:
 				// top face
 				-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
 				1.0f,  1.0f , 1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
-				1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right     
+				1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f, // top-right
 				1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f, // bottom-right
 				-1.0f,  1.0f, -1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f, // top-left
-				-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
+				-1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left
 			};
 			glGenVertexArrays(1, &cubeVAO);
 			glGenBuffers(1, &cubeVBO);
@@ -437,4 +435,3 @@ public:
 		glBindVertexArray(0);
 	}
 };
-

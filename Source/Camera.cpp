@@ -13,7 +13,6 @@ GLCamera::GLCamera()
 {
 }
 
-
 GLCamera::~GLCamera()
 {
 }

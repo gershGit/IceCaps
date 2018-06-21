@@ -8,6 +8,10 @@
 
 class SphereCollider : public Collider {
 public:
+	SphereCollider();
+	~SphereCollider();
+
+public:
 	//Information on the shape of the collider
 	glm::vec3 position;
 	float radius;

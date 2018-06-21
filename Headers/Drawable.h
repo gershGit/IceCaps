@@ -11,7 +11,7 @@
 //Types of objects. This is important for raytracing in particular
 enum dType { MESH, SPHERE };
 
-class GLDrawable: public Property
+class GLDrawable : public Property
 {
 private:
 

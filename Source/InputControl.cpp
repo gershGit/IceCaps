@@ -142,39 +142,48 @@ bool InputControl::isDown(key_name name)
 		if (up_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == DOWN_ARROW_KEY) {
+	}
+	else if (name == DOWN_ARROW_KEY) {
 		if (down_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == RIGHT_ARROW_KEY) {
+	}
+	else if (name == RIGHT_ARROW_KEY) {
 		if (right_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == LEFT_ARROW_KEY) {
+	}
+	else if (name == LEFT_ARROW_KEY) {
 		if (left_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == W_KEY) {
+	}
+	else if (name == W_KEY) {
 		if (w_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == S_KEY) {
+	}
+	else if (name == S_KEY) {
 		if (s_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == A_KEY) {
+	}
+	else if (name == A_KEY) {
 		if (a_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == D_KEY) {
+	}
+	else if (name == D_KEY) {
 		if (d_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == Q_KEY) {
+	}
+	else if (name == Q_KEY) {
 		if (q_key.state == DOWN) {
 			return true;
 		}
-	} else if (name == E_KEY) {
+	}
+	else if (name == E_KEY) {
 		if (e_key.state == DOWN) {
 			return true;
 		}

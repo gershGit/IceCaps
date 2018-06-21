@@ -7,7 +7,6 @@
 #include "Headers.h"
 #include "GameObject.h"
 
-
 class SceneLoader {
 private:
 	//Lists of references to reduce memory duplication

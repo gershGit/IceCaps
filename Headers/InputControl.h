@@ -6,16 +6,17 @@
 
 //Names of the unique keys
 enum key_name {
-		NO_KEY_NAME = 0, UNIQUE_KEY_1,
-		Q_KEY, E_KEY, R_KEY, T_KEY, Y_KEY, U_KEY, I_KEY, O_KEY, P_KEY,
+	NO_KEY_NAME = 0, UNIQUE_KEY_1,
+	Q_KEY, E_KEY, R_KEY, T_KEY, Y_KEY, U_KEY, I_KEY, O_KEY, P_KEY,
 
-		LEFT_ARROW_KEY, RIGHT_ARROW_KEY, UP_ARROW_KEY, DOWN_ARROW_KEY, 
-		W_KEY, S_KEY, A_KEY, D_KEY,
-		BRACKET_OPEN_KEY, BRACKET_CLOSED_KEY, };
+	LEFT_ARROW_KEY, RIGHT_ARROW_KEY, UP_ARROW_KEY, DOWN_ARROW_KEY,
+	W_KEY, S_KEY, A_KEY, D_KEY,
+	BRACKET_OPEN_KEY, BRACKET_CLOSED_KEY,
+};
 
 //Enumeration of the different state a key could be in
 enum key_state {
-	UP = 0, DOWN =1 , REPEAT = 2
+	UP = 0, DOWN = 1, REPEAT = 2
 };
 
 //Structure to refer to a key

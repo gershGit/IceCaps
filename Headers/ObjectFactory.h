@@ -8,8 +8,8 @@
 #include "baseShapeCoords.h"
 
 //Enumerations for primitives and lights
-enum primitive {CUBE_PRIMITIVE, LIGHT_CUBE, SPHERE_PRIMITVE, PLANE_PRIMITIVE};
-enum lightType {POINT_LIGHT};
+enum primitive { CUBE_PRIMITIVE, LIGHT_CUBE, SPHERE_PRIMITVE, PLANE_PRIMITIVE };
+enum lightType { POINT_LIGHT };
 
 class ObjectFactory {
 private:
@@ -37,5 +37,4 @@ public:
 	//Sets properties onto objects and materials
 	void setMaterial(GameObject* object, GLMaterial* material);
 	void setDrawable(GLMaterial* material, GLDrawable* drawable);
-	
 };

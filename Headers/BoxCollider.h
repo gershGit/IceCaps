@@ -8,6 +8,9 @@
 
 class BoxCollider : public Collider {
 public:
+	BoxCollider();
+	~BoxCollider();
+public:
 	//Position and scale used for determining edges of bounding box
 	glm::vec3 position;
 	glm::vec3 scale;

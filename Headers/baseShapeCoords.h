@@ -19,15 +19,13 @@ public:
 										1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f, //Front right bottom
 										1.0f, 1.0f, -1.0f,		1.0f, 1.0f, 1.0f, //Front right top
 
-
 										//Back face
 										-1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 0.0f, //Back left top
 										-1.0f, -1.0f, 1.0f,		1.0f, 1.0f, 0.0f, //Back left bottom
 										1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, //Back right bottom
 										-1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 0.0f, //Back left top
 										1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, //Back right bottom
-										1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f, //Back right top 
-
+										1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f, //Back right top
 
 										//Left face
 										-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f, //Front left top
@@ -44,7 +42,6 @@ public:
 										1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f, //Back right top
 										1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f, //Front right bottom
 										1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, //Back right bottom */
-
 
 										//Top face
 										-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f, //Front left top
@@ -73,15 +70,13 @@ public:
 		1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f,		0.0, 0.0, -1.0,	//Front right bottom
 		1.0f, 1.0f, -1.0f,		1.0f, 1.0f, 1.0f,		0.0, 0.0, -1.0,	//Front right top
 
-
 		//Back face
 		-1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 0.0f,		0.0, 0.0, 1.0, //Back left top
 		-1.0f, -1.0f, 1.0f,		1.0f, 1.0f, 0.0f,		0.0, 0.0, 1.0, //Back left bottom
 		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0, //Back right bottom
 		-1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 0.0f,		0.0, 0.0, 1.0, //Back left top
 		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0, //Back right bottom
-		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f,		0.0, 0.0, 1.0, //Back right top 
-
+		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f,		0.0, 0.0, 1.0, //Back right top
 
 		//Left face
 		-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f,		-1.0, 0.0, 0.0, //Front left top
@@ -97,8 +92,7 @@ public:
 		1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f, 		1.0, 0.0, 0.0, //Front right bottom
 		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f, 		1.0, 0.0, 0.0, //Back right top
 		1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f, 		1.0, 0.0, 0.0, //Front right bottom
-		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, 		1.0, 0.0, 0.0, //Back right bottom 
-
+		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, 		1.0, 0.0, 0.0, //Back right bottom
 
 		//Top face
 		-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f, 		0.0, 1.0, 0.0, //Front left top
@@ -127,15 +121,13 @@ public:
 		1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f,		1.0, -1.0,	//Front right bottom
 		1.0f, 1.0f, -1.0f,		1.0f, 1.0f, 1.0f,		1.0, 1.0,	//Front right top
 
-
 		//Back face
 		-1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 0.0f,		-1.0, 1.0, //Back left top
 		-1.0f, -1.0f, 1.0f,		1.0f, 1.0f, 0.0f,		-1.0, -1.0, //Back left bottom
 		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f,		1.0, -1.0, //Back right bottom
 		-1.0f, 1.0f, 1.0f,		0.0f, 0.0f, 0.0f,		-1.0, 1.0, //Back left top
 		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f,		-1.0, -1.0, //Back right bottom
-		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f,		1.0, 1.0, //Back right top 
-
+		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f,		1.0, 1.0, //Back right top
 
 		//Left face
 		-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f,		1.0, 1.0, //Front left top
@@ -151,8 +143,7 @@ public:
 		1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f, 		1.0, -1.0, //Front right bottom
 		1.0f, 1.0f, 1.0f,		1.0f, 0.0f, 1.0f, 		-1.0, 1.0, //Back right top
 		1.0f, -1.0f, -1.0f,		0.0f, 0.0f, 1.0f, 		1.0, -1.0, //Front right bottom
-		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, 		-1.0, -1.0, //Back right bottom 
-
+		1.0f, -1.0f, 1.0f,		0.0f, 1.0f, 1.0f, 		-1.0, -1.0, //Back right bottom
 
 		//Top face
 		-1.0f, 1.0f, -1.0f,		1.0f, 0.0f, 0.0f, 		1.0, -1.0, //Front left top
@@ -181,15 +172,13 @@ public:
 		1.0f, -1.0f, -1.0f,		1.0, -1.0,	//Front right bottom
 		1.0f, 1.0f, -1.0f,		1.0, 1.0,	//Front right top
 
-
 		//Back face
 		-1.0f, 1.0f, 1.0f,		-1.0, 1.0, //Back left top
 		-1.0f, -1.0f, 1.0f,		-1.0, -1.0, //Back left bottom
 		1.0f, -1.0f, 1.0f,		1.0, -1.0, //Back right bottom
 		-1.0f, 1.0f, 1.0f,		-1.0, 1.0, //Back left top
 		1.0f, -1.0f, 1.0f,		-1.0, -1.0, //Back right bottom
-		1.0f, 1.0f, 1.0f,		1.0, 1.0, //Back right top 
-
+		1.0f, 1.0f, 1.0f,		1.0, 1.0, //Back right top
 
 		//Left face
 		-1.0f, 1.0f, -1.0f,		1.0, 1.0, //Front left top
@@ -205,8 +194,7 @@ public:
 		1.0f, -1.0f, -1.0f,		1.0, -1.0, //Front right bottom
 		1.0f, 1.0f, 1.0f,		-1.0, 1.0, //Back right top
 		1.0f, -1.0f, -1.0f,		1.0, -1.0, //Front right bottom
-		1.0f, -1.0f, 1.0f,		-1.0, -1.0, //Back right bottom 
-
+		1.0f, -1.0f, 1.0f,		-1.0, -1.0, //Back right bottom
 
 		//Top face
 		-1.0f, 1.0f, -1.0f,		1.0, -1.0, //Front left top
@@ -235,15 +223,13 @@ public:
 		1.0f, -1.0f, -1.0f,		0.0, 0.0, -1.0,		1.0, 0.0,	//Front right bottom
 		1.0f, 1.0f, -1.0f,		0.0, 0.0, -1.0,		1.0, 1.0,	//Front right top
 
-
 		//Back face
 		-1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 1.0,	//Back left top
 		-1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 0.0,	//Back left bottom
 		1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		1.0, 0.0,	//Back right bottom
 		-1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		0.0, 1.0,	//Back left top
 		1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		1.0, 0.0,	//Back right bottom
-		1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		1.0, 1.0,	//Back right top 
-
+		1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		1.0, 1.0,	//Back right top
 
 		//Left face
 		-1.0f, 1.0f, -1.0f,		-1.0, 0.0, 0.0,		1.0, 1.0,	//Front left top
@@ -259,8 +245,7 @@ public:
 		1.0f, -1.0f, -1.0f,		1.0, 0.0, 0.0,		1.0, 0.0,	//Front right bottom
 		1.0f, 1.0f, 1.0f,		1.0, 0.0, 0.0,		0.0, 1.0,	//Back right top
 		1.0f, -1.0f, -1.0f,		1.0, 0.0, 0.0,		1.0, 0.0,	//Front right bottom
-		1.0f, -1.0f, 1.0f,		1.0, 0.0, 0.0,		0.0, 0.0,	//Back right bottom 
-
+		1.0f, -1.0f, 1.0f,		1.0, 0.0, 0.0,		0.0, 0.0,	//Back right bottom
 
 		//Top face
 		-1.0f, 1.0f, -1.0f,		0.0, 1.0, 0.0,		1.0, 0.0,	//Front left top
@@ -290,7 +275,6 @@ public:
 		1.0f, 0.0f, 1.0f,		0.0f, 1.0f, 1.0f,
 	};
 
-
 	//----------------------------------------------Above this line is deprecated ---------------------------------------------------------------------
 	//Coordinates for a plane to be indexed
 	std::vector<float> planeCoordsOnly = {
@@ -313,7 +297,6 @@ public:
 		2, 3, 1,
 	};
 
-
 	//Coordinates for a cube to be indexed
 	std::vector<float> squareCoordsOnly = {
 		//Front face			Normal				Tangent				Bitangent			UV
@@ -326,7 +309,7 @@ public:
 		-1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		-1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		1.0, 1.0,	//Back left top			4
 		-1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		-1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		1.0, 0.0,	//Back left bottom		5
 		1.0f, -1.0f, 1.0f,		0.0, 0.0, 1.0,		-1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		0.0, 0.0,	//Back right bottom		6
-		1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		-1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		0.0, 1.0,	//Back right top 		7	
+		1.0f, 1.0f, 1.0f,		0.0, 0.0, 1.0,		-1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		0.0, 1.0,	//Back right top 		7
 
 		//Left face
 		-1.0f, 1.0f, -1.0f,		-1.0, 0.0, 0.0,		1.0, 0.0, 0.0,		0.0, 1.0, 0.0,		1.0, 1.0,	//Front left top		8
@@ -527,7 +510,6 @@ public:
 				r = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV1.y * deltaUV2.x);
 				tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
 				bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
 
 				// add triange
 				coords.push_back(v0.x);

@@ -5,11 +5,9 @@
 #include "..\Headers\BoxCollider.h"
 #include "SphereCollider.h"
 
-
 BoxCollider::BoxCollider()
 {
 }
-
 
 BoxCollider::~BoxCollider()
 {
@@ -65,10 +63,10 @@ collisionInfo BoxCollider::checkCollision(BoxCollider * collider)
 {
 	//AABB only atm
 	glm::vec3 closest_point = glm::vec3(0);
-	if (collider->position.x + collider->scale.x/2 < position.x - scale.x / 2) {
+	if (collider->position.x + collider->scale.x / 2 < position.x - scale.x / 2) {
 		closest_point.x = position.x - scale.x / 2;
 	}
-	else if (collider->position.x - collider->scale.x/2 > position.x + scale.x / 2) {
+	else if (collider->position.x - collider->scale.x / 2 > position.x + scale.x / 2) {
 		closest_point.x = position.x + scale.x / 2;
 	}
 	else {

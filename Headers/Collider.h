@@ -17,7 +17,7 @@ struct collisionInfo {
 	bool collision;					//True when a collision occured
 	glm::vec3 collisionPosition;	//Vector of the point at which the collision occured
 };
-enum collider_type {SPHERE_COLLIDER, BOX_COLLIDER, MESH_COLLIDER};
+enum collider_type { SPHERE_COLLIDER, BOX_COLLIDER, MESH_COLLIDER };
 
 class Collider {
 public:
@@ -30,7 +30,7 @@ public:
 	~Collider() {};
 
 	//Virtual functions to ensure all subclasses are required to handle all types of collisions
-	virtual collisionInfo checkCollision(SphereCollider* collider);
-	virtual collisionInfo checkCollision(BoxCollider* collider);
-	virtual collisionInfo checkCollision(MeshCollider* collider);
+	virtual collisionInfo checkCollision(SphereCollider* collider) { return collisionInfo(); };
+	virtual collisionInfo checkCollision(BoxCollider* collider) { return collisionInfo(); };
+	virtual collisionInfo checkCollision(MeshCollider* collider) { return collisionInfo(); };
 };

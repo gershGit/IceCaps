@@ -8,7 +8,7 @@
 class GameObject;
 
 //Type of property of the game object
-enum pType {PHYSICS_BODY, LIGHT, CAMERA, DRAWABLE};
+enum pType { PHYSICS_BODY, LIGHT, CAMERA, DRAWABLE };
 
 class Property {
 public:
