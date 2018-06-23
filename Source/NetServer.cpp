@@ -2,8 +2,9 @@
 
 
 
-NetServer::NetServer()
+NetServer::NetServer(std::vector<const char*> * messageList)
 {
+	mList = messageList;
 }
 
 
@@ -54,6 +55,37 @@ int NetServer::createServer()
 		return 1;
 	}
 	freeaddrinfo(result);
+
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
+
+	int iResult = getaddrinfo(NULL, SEND_PORT, &hints, &result);
+	if (iResult != 0) {
+		printf("getaddrinfo failed: %d\n", iResult);
+		WSACleanup();
+		return 1;
+	}
+
+	SendSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (SendSocket == INVALID_SOCKET) {
+		printf("Error at socket creation: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		WSACleanup();
+		return 1;
+	}
+
+	iResult = bind(SendSocket, result->ai_addr, (int)result->ai_addrlen);
+	if (iResult == SOCKET_ERROR) {
+		printf("Bind failed with error: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(SendSocket);
+		WSACleanup();
+		return 1;
+	}
+	freeaddrinfo(result);
 	return 0;
 }
 
@@ -67,10 +99,25 @@ int NetServer::startListen() {
 		return 1;
 	}
 
-	ClientSocket = accept(ListenSocket, NULL, NULL);
-	if (ClientSocket == INVALID_SOCKET) {
+	ListenSocket = accept(ListenSocket, NULL, NULL);
+	if (ListenSocket == INVALID_SOCKET) {
 		printf("Accept failed: %d\n", WSAGetLastError());
 		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	if (listen(SendSocket, SOMAXCONN) == SOCKET_ERROR) {
+		printf("Listen failed with error: %ld\n", WSAGetLastError());
+		closesocket(ListenSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	SendSocket = accept(SendSocket, NULL, NULL);
+	if (SendSocket == INVALID_SOCKET) {
+		printf("Accept failed: %d\n", WSAGetLastError());
+		closesocket(SendSocket);
 		WSACleanup();
 		return 1;
 	}
@@ -85,15 +132,16 @@ int NetServer::sendRecieve()
 
 	//Infinite recieve
 	do {
-		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+		iResult = recv(ListenSocket, recvbuf, recvbuflen, 0);
 		if (iResult > 0) {
 			printf("Bytes received: %d\n", iResult);
+			mList->push_back(recvbuf);
 
 			//Echo the buffer back to the sender
-			iSendResult = send(ClientSocket, recvbuf, iResult, 0);
+			iSendResult = send(ListenSocket, recvbuf, iResult, 0);
 			if (iSendResult == SOCKET_ERROR) {
 				printf("send failed: %d\n", WSAGetLastError());
-				closesocket(ClientSocket);
+				closesocket(ListenSocket);
 				WSACleanup();
 				return 1;
 			}
@@ -104,21 +152,21 @@ int NetServer::sendRecieve()
 		}
 		else {
 			printf("Receive failed: %d\n", WSAGetLastError());
-			closesocket(ClientSocket);
+			closesocket(ListenSocket);
 			WSACleanup();
 			return 1;
 		}
 	} while (iResult > 0);
 
-	iResult = shutdown(ClientSocket, SD_SEND);
+	iResult = shutdown(ListenSocket, SD_SEND);
 	if (iResult == SOCKET_ERROR) {
 		printf("Shutdown failed: %d\n", WSAGetLastError());
-		closesocket(ClientSocket);
+		closesocket(ListenSocket);
 		WSACleanup();
 		return 1;
 	}
 
-	closesocket(ClientSocket);
+	closesocket(ListenSocket);
 	WSACleanup();
 
 	return 0;

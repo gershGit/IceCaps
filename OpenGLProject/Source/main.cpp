@@ -17,6 +17,8 @@
 #include <cstdlib>
 #include "NetServer.h"
 #include "NetClient.h"
+#include <string>
+#include <cstring>
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -26,7 +28,8 @@ std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 Imap *envMap;
 Imap *irrMap;
-bool isServer = false;
+std::vector<const char *> messageOutList = std::vector < const char *>();
+std::vector<const char *> messageInList = std::vector < const char *>();
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -48,37 +51,19 @@ int compareByCoordSize(const void * d1, const void * d2) {
 	if (draw1->coords.size() < draw2->coords.size()) return 1;
 }
 
-DWORD WINAPI createServer(void *data) {
-	std::cout << "Attempting to establish a network" << std::endl;
-	NetServer myNet = NetServer();
-	int res = myNet.initialize();
-	std::cout << "Initialization success? --> " << res << std::endl;
-	res = myNet.createServer();
-	std::cout << "Creation success? --> " << res << std::endl;
-	res = myNet.startListen();
-	std::cout << "Listen success? --> " << res << std::endl;
-	res = myNet.sendRecieve();
-	std::cout << "Send/Recieve success? --> " << res << std::endl;
-	return 0;
-}
 DWORD WINAPI createClient(void *data) {
 	std::cout << "Attempting to create a client" << std::endl;
-	NetClient myClient = NetClient();
+	NetClient myClient = NetClient(&messageInList);
 	int res = myClient.Initialize();
 	std::cout << "Initialization success? --> " << res << std::endl;
 	res = myClient.ConnectSocket();
 	std::cout << "Connection success? --> " << res << std::endl;
-	res = myClient.SendData("Hello from client!!!");
+	std::string myData = "Hello from client!!!";
+	res = myClient.SendData(myData.c_str());
 	std::cout << "Send success? --> " << res << std::endl;
 	res = myClient.Kill();
 	std::cout << "Kill success? --> " << res << std::endl;
 	return 0;
-}
-void createServerOnThread() {
-	HANDLE thread = CreateThread(NULL, 0, createServer, NULL, 0, NULL);
-	if (!thread) {
-		printf("Thread creation failed\n");
-	}
 }
 void createClientOnThread() {
 	HANDLE thread = CreateThread(NULL, 0, createClient, NULL, 0, NULL);
@@ -141,6 +126,14 @@ void callIntersections() {
 		}
 	}
 };
+void sendMessages() {
+	for (GameObject* object : objects) {
+		if (object->moved) {
+			std::string info = object->name;
+			messageOutList.push_back(info.c_str());
+		}
+	}
+}
 void renderScene() {
 	glDepthFunc(GL_LEQUAL);
 	for (GameObject* object : objects) {
@@ -385,9 +378,6 @@ void startScene() {
 
 int main()
 {
-	isServer = true;
-	createServerOnThread();
-
 	createClientOnThread();
 
 	std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
