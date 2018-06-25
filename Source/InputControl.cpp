@@ -123,6 +123,17 @@ void InputControl::setFlag(int key, int scancode, int action, int mods)
 			q_key.state = UP;
 		}
 	}
+	if (key == GLFW_KEY_P) {
+		if (action == GLFW_PRESS) {
+			p_key.state = DOWN;
+		}
+		else if (action == GLFW_REPEAT) {
+			p_key.state = DOWN;
+		}
+		else if (action == GLFW_RELEASE) {
+			p_key.state = UP;
+		}
+	}
 	if (key == GLFW_KEY_E) {
 		if (action == GLFW_PRESS) {
 			e_key.state = DOWN;
@@ -185,6 +196,11 @@ bool InputControl::isDown(key_name name)
 	}
 	else if (name == E_KEY) {
 		if (e_key.state == DOWN) {
+			return true;
+		}
+	}
+	else if (name == P_KEY) {
+		if (p_key.state == DOWN) {
 			return true;
 		}
 	}

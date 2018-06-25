@@ -40,6 +40,7 @@ private:
 	key d_key;
 	key q_key;
 	key e_key;
+	key p_key;
 public:
 	//Reference to a window to capture the input from
 	GLFWwindow * inputWindow;

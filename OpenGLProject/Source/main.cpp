@@ -19,6 +19,8 @@
 #include "NetClient.h"
 #include <string>
 #include <cstring>
+#include <mutex>
+#include <functional>
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -30,6 +32,9 @@ Imap *envMap;
 Imap *irrMap;
 std::vector<const char *> messageOutList = std::vector < const char *>();
 std::vector<const char *> messageInList = std::vector < const char *>();
+std::mutex messageIn_mutex;
+std::mutex messageOut_mutex;
+NetClient myClient = NetClient(&messageInList, &messageOutList, &messageIn_mutex, &messageOut_mutex);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -51,25 +56,27 @@ int compareByCoordSize(const void * d1, const void * d2) {
 	if (draw1->coords.size() < draw2->coords.size()) return 1;
 }
 
-DWORD WINAPI createClient(void *data) {
+DWORD WINAPI createClientReceiver(void *data) {
 	std::cout << "Attempting to create a client" << std::endl;
-	NetClient myClient = NetClient(&messageInList);
-	int res = myClient.Initialize();
+	NetClient myThreadedClient = NetClient(&messageInList, &messageOutList, &messageIn_mutex, &messageOut_mutex);
+	int res = myThreadedClient.Initialize();
 	std::cout << "Initialization success? --> " << res << std::endl;
-	res = myClient.ConnectSocket();
-	std::cout << "Connection success? --> " << res << std::endl;
-	std::string myData = "Hello from client!!!";
-	res = myClient.SendData(myData.c_str());
-	std::cout << "Send success? --> " << res << std::endl;
-	res = myClient.Kill();
-	std::cout << "Kill success? --> " << res << std::endl;
+	res = myThreadedClient.receiveLoop();
 	return 0;
 }
 void createClientOnThread() {
-	HANDLE thread = CreateThread(NULL, 0, createClient, NULL, 0, NULL);
-	if (!thread) {
-		printf("Thread creation failed\n");
-	}
+	std::cout << "Attempting to create a client" << std::endl;
+	myClient = NetClient(&messageInList, &messageOutList, &messageIn_mutex, &messageOut_mutex);
+	int res = myClient.Initialize();
+	std::cout << "Initialization success? --> " << res << std::endl;
+
+	HANDLE thread = CreateThread(NULL, 0, createClientReceiver, NULL, 0, NULL);
+
+	res = myClient.ConnectSocket();
+	std::cout << "Connection success? --> " << res << std::endl;
+	std::string myData = "IP: <this ip>";
+	res = myClient.SendTest(myData.c_str());
+	std::cout << "Send success? --> " << res << std::endl;
 }
 
 void runUpdates() {
@@ -105,6 +112,9 @@ void runUpdates() {
 		mainCamera->pos -= mainCamera->right() * 0.01f;
 		mainCamera->moved = true;
 	}
+	if (input->isDown(P_KEY)) {
+		myClient.SendTest("New Test");
+	}
 };
 void runSimulations() {};
 void calculatePhysics() {
@@ -127,6 +137,7 @@ void callIntersections() {
 	}
 };
 void sendMessages() {
+	std::lock_guard<std::mutex> lock(messageOut_mutex);
 	for (GameObject* object : objects) {
 		if (object->moved) {
 			std::string info = object->name;
@@ -384,7 +395,7 @@ int main()
 
 	GLInstance instance;
 	instance.initialize();
-	instance.createWindow("IceCaps - Week 2", 720, 1280);
+	instance.createWindow("IceCaps - Week 7", 720, 1280);
 	instance.initGlad();
 	input = new InputControl(instance.window);
 	glfwSetKeyCallback(instance.window, key_callback);

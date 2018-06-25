@@ -22,23 +22,27 @@ InputControl* input;
 std::vector<GameObject*> objects;
 std::vector<GameObject*> lights;
 double lastTime = 0.0f;
-std::vector<const char *> messages;
+std::vector<std::string> messagesIn;
+std::vector<std::string> messagesOut;
+std::mutex mutex_in;
+std::mutex mutex_out;
+std::vector<sockaddr_in> clients = std::vector<sockaddr_in>();
+NetSender mySender = NetSender(&messagesOut, &mutex_out, &clients);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 DWORD WINAPI createServer(void *data) {
-	messages = std::vector<const char *>();
+	messagesIn = std::vector<std::string>();
+	messagesOut = std::vector<std::string>();
 	std::cout << "Attempting to establish a network" << std::endl;
-	NetServer myNet = NetServer(&messages);
+	NetServer myNet = NetServer(&messagesIn, &mutex_in, &clients);
 	int res = myNet.initialize();
 	std::cout << "Initialization success? --> " << res << std::endl;
-	res = myNet.createServer();
+	res = myNet.AddSocket();
 	std::cout << "Creation success? --> " << res << std::endl;
-	res = myNet.startListen();
-	std::cout << "Listen success? --> " << res << std::endl;
-	res = myNet.sendRecieve();
-	std::cout << "Send/Recieve success? --> " << res << std::endl;
+	res = myNet.StartListen();
+	std::cout << "Listening success? --> " << res << std::endl;
 	return 0;
 }
 void createServerOnThread() {
@@ -49,10 +53,11 @@ void createServerOnThread() {
 }
 
 void handleMessages() {
-	for (const char * message : messages) {
-		printf("Recieved: %s", message);
+	for (std::string message : messagesIn) {
+		std::cout << "Received Message of length: " << message.length() << "\n\t" << message << std::endl;
+		messagesOut.push_back(message);
 	}
-	messages.clear();
+	messagesIn.clear();
 }
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
@@ -107,6 +112,16 @@ void callIntersections() {
 void renderScene() {
 	//Server does not render
 };
+void sendInfo() {
+	/*HANDLE thread = CreateThread(NULL, 0, mySender.SendAll, NULL, 0, NULL);
+	if (!thread) {
+		printf("Send thread creation failed\n");
+	}*/
+	mySender.SendAll();
+	std::lock_guard<std::mutex> lock(mutex_out);
+	messagesOut.clear();
+}
+
 void loadScene() {
 	//-----------Objects------------
 	GameObject* childCube = new GameObject();
@@ -201,12 +216,13 @@ void startScene() {
 
 int main()
 {
-	messages = std::vector<const char *>();
+	messagesIn = std::vector<std::string>();
 	createServerOnThread();
+	mySender.initialize();
 
 	GLInstance instance;
 	instance.initialize();
-	instance.createWindow("IceCaps - Server Running", 720, 1280);
+	instance.createWindow("IceCaps - Server Running", 24, 100);
 	instance.initGlad();
 	input = new InputControl(instance.window);
 	glfwSetKeyCallback(instance.window, key_callback);
@@ -216,13 +232,14 @@ int main()
 
 	lastTime = glfwGetTime();
 	startScene();
+	glfwHideWindow(instance.window);
 	// render loop
 	while (!glfwWindowShouldClose(instance.window))
 	{
 		// render
-		glClearColor(0.1f, 0.1f, 0.22f, 1.0f);
+		//glClearColor(0.1f, 0.1f, 0.22f, 1.0f);
 		//glClearDepth(1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//input->setFlags();
 		instance.processInput(instance.window);
@@ -231,7 +248,8 @@ int main()
 		calculatePhysics();
 		runUpdates();
 		callIntersections();
-		renderScene();
+		//renderScene();
+		sendInfo();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwPollEvents();
