@@ -196,6 +196,7 @@ public:
 
 	//Function that controls what every game object must do on frame one
 	void onStart() {
+        moved=true;
 		if (usingRigid) {
 			rigidBody->setStart(pos);
 		}
