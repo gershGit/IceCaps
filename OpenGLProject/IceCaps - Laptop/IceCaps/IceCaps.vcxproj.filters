@@ -51,6 +51,24 @@
     <ClCompile Include="..\..\..\Source\RigidBody.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\NetClient.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\NetServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\BoxCollider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\IrradianceMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\ObjectFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\Source\SphereCollider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\OpenGlInstance.h">
@@ -92,72 +110,135 @@
     <ClInclude Include="..\..\..\Headers\RigidBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\Headers\NetClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\NetServer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\BoxCollider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Collider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\iceLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\IrradianceMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\ObjectFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\SceneLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\SphereCollider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="diffuseSpec.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="diffuseSpec.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="displacePhong.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="displacePhong.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="base.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="base.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="PBR.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="PBR.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phong.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phong.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phongFull.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phongFull.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phongSingle.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phongSun.frag">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
-    <None Include="phongSun.vert">
-      <Filter>Source Files\Shaders</Filter>
-    </None>
     <None Include="some.ice">
       <Filter>Source Files\Models</Filter>
     </None>
-    <None Include="standard.frag">
+    <None Include="..\..\IceCaps\IceCaps\base.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="standard.vert">
+    <None Include="..\..\IceCaps\IceCaps\base.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="texturedSimple.frag">
+    <None Include="..\..\IceCaps\IceCaps\cubeMap.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="texturedSimple.vert">
+    <None Include="..\..\IceCaps\IceCaps\cubeMap.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="texturedUnlit.frag">
+    <None Include="..\..\IceCaps\IceCaps\dialectric.frag">
       <Filter>Source Files\Shaders</Filter>
     </None>
-    <None Include="texturedUnlit.vert">
+    <None Include="..\..\IceCaps\IceCaps\dialectric.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\diffuseSpec.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\diffuseSpec.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\displacePhong.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\displacePhong.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\metallic.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\metallic.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\PBR.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\PBR.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\PBR_simple.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\PBR_simple.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phong.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phong.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phongFull.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phongFull.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phongSingle.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phongSun.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\phongSun.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\skin.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\skin.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\some.ice">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\standard.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\standard.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\texturedSimple.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\texturedSimple.vert">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\texturedUnlit.frag">
+      <Filter>Source Files\Shaders</Filter>
+    </None>
+    <None Include="..\..\IceCaps\IceCaps\texturedUnlit.vert">
       <Filter>Source Files\Shaders</Filter>
     </None>
   </ItemGroup>

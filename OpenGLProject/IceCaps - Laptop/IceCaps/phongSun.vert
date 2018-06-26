@@ -1,8 +1,8 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-layout (location = 2) in vec3 aNormal;
+layout (location = 1) in vec3 aNormal;
 
+uniform vec3 aColor;
 uniform mat3 itModel;
 uniform mat4 model;
 uniform mat4 projection;

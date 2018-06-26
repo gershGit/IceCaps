@@ -41,6 +41,10 @@ private:
 	std::vector<collisionInfo> collisions;
 
 public:
+	//Online information
+	bool online_playerOwned = false;
+	bool online_serverOwned = false;
+
 	//Name of the object, primarily used for debugging
 	const char* name = "UNNAMED";
 
@@ -59,7 +63,7 @@ public:
 	glm::mat4 parentTransform;
 
 	//Bool to determine when a new transformation matrix must be created
-	bool moved = true;
+	bool moved = false;
 
 	//Determines whether or not the object needs to be considered for drawing
 	bool drawFlag = false;

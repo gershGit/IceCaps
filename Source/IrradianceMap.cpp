@@ -3,6 +3,7 @@
 #include "stb_image.h"
 
 Imap::Imap(const char * fileName, int texturenumber) {
+	std::cout << "Loading environment map..." << std::endl;
 	mapTexNumber = texturenumber;
 	glActiveTexture(GL_TEXTURE0 + texturenumber);
 	glGenTextures(1, &envMap);

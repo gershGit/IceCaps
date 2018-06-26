@@ -8,7 +8,7 @@ in vec3 ourFragPos;
 
 uniform sampler2D diffuseSampler;
 uniform sampler2D specularSampler;
-uniform vec3 eyePos;
+uniform vec3 eyeDir;
 
 uniform vec3 sunAngle;			//x,y,z, strength
 uniform vec4 sunColor;
@@ -69,7 +69,7 @@ void main() {
     vec3 diffuse = diff * lightColor;
 
 	//Blinn phong
-	vec3 viewDir = normalize(-ourFragPos);
+	vec3 viewDir = eyeDir;
 	vec3 halfDir = normalize(lightDir + viewDir);
 	float specAngle = max(dot(halfDir, normal), 0.0);
 	vec3 specular = pow(specAngle, shininess/4.0) * specularStrength * lightColor;

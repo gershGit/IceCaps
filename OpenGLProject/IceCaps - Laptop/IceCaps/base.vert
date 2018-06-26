@@ -1,11 +1,10 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aColor;
-layout (location = 2) in vec3 aNormal;
 
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
+uniform vec3 aColor;
 
 out vec3 ourColor;
 
@@ -13,7 +12,7 @@ float near = 0.1;
 float far = 100;
 
 float LinearizeDepth(float depth){
-	return (1/depth - 1/near) / (1/far - 1/near);
+	return depth/far;
 }
 
 void main() {

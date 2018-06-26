@@ -52,10 +52,16 @@ void createServerOnThread() {
 	}
 }
 
+void handleMessage(std::string message) {
+	if (message[0] == '+') {
+		std::cout << "Adding object" << std::endl;
+	}
+}
+
 void handleMessages() {
 	for (std::string message : messagesIn) {
 		std::cout << "Received Message of length: " << message.length() << "\n\t" << message << std::endl;
-		messagesOut.push_back(message);
+		handleMessage(message);
 	}
 	messagesIn.clear();
 }
@@ -117,6 +123,9 @@ void sendInfo() {
 	if (!thread) {
 		printf("Send thread creation failed\n");
 	}*/
+	if (glfwGetTime() - lastTime > 10) {
+		messagesOut.push_back("GAME OVER");
+	}
 	mySender.SendAll();
 	std::lock_guard<std::mutex> lock(mutex_out);
 	messagesOut.clear();

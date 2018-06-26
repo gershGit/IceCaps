@@ -11,7 +11,6 @@ NetClient::NetClient(std::vector<const char *> *mInList, std::vector<const char 
 	messageOut_mutex = mOut_mutex;
 }
 
-
 NetClient::~NetClient()
 {
 }
@@ -50,7 +49,7 @@ int NetClient::receiveLoop() {
 	sockaddr_in ReceiveAddress;
 	ReceiveAddress.sin_family = AF_INET;
 	ReceiveAddress.sin_port = htons(Default_Port_In);
-	InetPton(AF_INET, "10.0.0.17", &ReceiveAddress.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, "10.0.0.29", &ReceiveAddress.sin_addr.S_un.S_addr);
 
 	ULONG blockingMode = 0;
 	iResult = ioctlsocket(ReceiveSocket, FIONBIO, &blockingMode);
@@ -121,7 +120,7 @@ int NetClient::SendTest(const char *data) {
 
 	server.sin_family = AF_INET;
 	server.sin_port = htons(Default_Port);
-	InetPton(AF_INET, "10.0.0.17", &server.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, "10.0.0.29", &server.sin_addr.S_un.S_addr);
 
 	int iResult = sendto(SendSocket, data, (int)strlen(data)+1, 0, (SOCKADDR *) &server, server_length);
 	if (iResult == SOCKET_ERROR) {

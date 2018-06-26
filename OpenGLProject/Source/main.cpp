@@ -26,6 +26,7 @@ InputControl* input;
 GLRenderer renderer = GLRenderer();
 GameObject* mainCamera = new GameObject();
 std::vector<GameObject*> objects;
+std::vector<GameObject*> online_playerObjects;
 std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 Imap *envMap;
@@ -79,6 +80,23 @@ void createClientOnThread() {
 	std::cout << "Send success? --> " << res << std::endl;
 }
 
+void handleMessage(std::string message) {
+	if (message[0] == '+') {
+		std::cout << "Creating object" << std::endl;
+	}
+}
+
+void handleMessages(){
+	for (GameObject* object : objects) {
+		object->moved = false;
+	}
+	std::lock_guard<std::mutex> lock(messageIn_mutex);
+	for (std::string message : messageInList) {
+		handleMessage(message);
+		std::cout << "Handling: " << message << std::endl;
+	}
+	messageInList.clear();
+}
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
 		objects[2]->pos.y += 0.01f;
@@ -113,7 +131,7 @@ void runUpdates() {
 		mainCamera->moved = true;
 	}
 	if (input->isDown(P_KEY)) {
-		myClient.SendTest("New Test");
+		//myClient.SendTest("New Test");
 	}
 };
 void runSimulations() {};
@@ -138,12 +156,13 @@ void callIntersections() {
 };
 void sendMessages() {
 	std::lock_guard<std::mutex> lock(messageOut_mutex);
-	for (GameObject* object : objects) {
+	for (GameObject* object : online_playerObjects) {
 		if (object->moved) {
 			std::string info = object->name;
 			messageOutList.push_back(info.c_str());
 		}
 	}
+	myClient.SendData();
 }
 void renderScene() {
 	glDepthFunc(GL_LEQUAL);
@@ -155,7 +174,7 @@ void renderScene() {
 				//object->pos.y = sin(nowTime) + 3.0;
 				object->rot.z = nowTime / 6;
 				object->rot.x = nowTime / 2;
-				object->moved = true;
+				//object->moved = true;
 			}
 			renderer.renderObjects(object, mainCamera, lights, irrMap, envMap);
 		}
@@ -325,6 +344,7 @@ void loadScene() {
 	lowSphere->radius = 1;
 	spawnedSphere->usingCollider = true;
 	spawnedSphere->sCollider = lowSphere;
+	spawnedSphere->online_playerOwned = true;
 
 	GameObject* spawnedSphere2 = mObjectFactory->createObject(SPHERE_PRIMITVE);
 	spawnedSphere2->glDrawable->material = sphereMat;
@@ -374,6 +394,11 @@ void loadScene() {
 	lights.push_back(spawnedLight_3);
 
 	free(mCoordSpawner);
+	for (GameObject* obj : objects) {
+		if (obj->online_playerOwned) {
+			online_playerObjects.push_back(obj);
+		}
+	}
 };
 void callStart(GameObject* parent) {
 	parent->onStart();
@@ -423,11 +448,13 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//input->setFlags();
+		handleMessages();
 		instance.processInput(instance.window);
+		runUpdates();
 		runSimulations();
 		calculatePhysics();
-		runUpdates();
 		callIntersections();
+		sendMessages();
 		renderScene();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
