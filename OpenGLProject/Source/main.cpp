@@ -31,8 +31,8 @@ std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 Imap *envMap;
 Imap *irrMap;
-std::vector<const char *> messageOutList = std::vector < const char *>();
-std::vector<const char *> messageInList = std::vector < const char *>();
+std::vector<std::string> messageOutList = std::vector <std::string>();
+std::vector<std::string> messageInList = std::vector < std::string>();
 std::mutex messageIn_mutex;
 std::mutex messageOut_mutex;
 NetClient myClient = NetClient(&messageInList, &messageOutList, &messageIn_mutex, &messageOut_mutex);
@@ -131,7 +131,7 @@ void runUpdates() {
 		mainCamera->moved = true;
 	}
 	if (input->isDown(P_KEY)) {
-		//myClient.SendTest("New Test");
+		myClient.SendTest("New Test");
 	}
 };
 void runSimulations() {};
@@ -158,8 +158,9 @@ void sendMessages() {
 	std::lock_guard<std::mutex> lock(messageOut_mutex);
 	for (GameObject* object : online_playerObjects) {
 		if (object->moved) {
-			std::string info = object->name;
-			messageOutList.push_back(info.c_str());
+			std::string info = std::string(object->name);
+			info += " " + std::to_string(object->pos.x) + " " + std::to_string(object->pos.y) + " " + std::to_string(object->pos.z) + "\n";
+			messageOutList.push_back(info);
 		}
 	}
 	myClient.SendData();

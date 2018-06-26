@@ -18,8 +18,8 @@ private:
 	unsigned short Default_Port_In = 27017;
 	const char* addressTemp = "10.0.0.17";
 	WSAData wsaData;
-	std::vector<const char *> *messageInList;
-	std::vector<const char *> *messageOutList;
+	std::vector<std::string> *messageInList;
+	std::vector<std::string> *messageOutList;
 	std::mutex *messageIn_mutex;
 	std::mutex *messageOut_mutex;
 
@@ -28,7 +28,7 @@ public:
 	SOCKET ReceiveSocket = INVALID_SOCKET;
 	struct addrinfo *result = NULL, *ptr = NULL, hints;
 
-	NetClient(std::vector<const char *> *mInList, std::vector<const char *> *mOutList, std::mutex *mIn_mutex, std::mutex *mOut_mutex);
+	NetClient(std::vector<std::string> *mInList, std::vector<std::string> *mOutList, std::mutex *mIn_mutex, std::mutex *mOut_mutex);
 	~NetClient();
 	int Initialize();
 	int receiveLoop();

@@ -34,6 +34,14 @@ public:
 		parentTransform[2][2] = 1.0f;
 		parentTransform[3][3] = 1.0f;
 	};
+	GameObject(unsigned int gID) {
+		children = std::vector<GameObject*>();
+		parentTransform[0][0] = 1.0f;
+		parentTransform[1][1] = 1.0f;
+		parentTransform[2][2] = 1.0f;
+		parentTransform[3][3] = 1.0f;
+		globalId = gID;
+	};
 	~GameObject() {};
 private:
 	//Private matrix used to return the position quickly when an object hasn't moved
@@ -42,6 +50,7 @@ private:
 
 public:
 	//Online information
+	unsigned int globalId = 0;
 	bool online_playerOwned = false;
 	bool online_serverOwned = false;
 
@@ -63,7 +72,7 @@ public:
 	glm::mat4 parentTransform;
 
 	//Bool to determine when a new transformation matrix must be created
-	bool moved = false;
+	bool moved = true;
 
 	//Determines whether or not the object needs to be considered for drawing
 	bool drawFlag = false;
@@ -196,7 +205,6 @@ public:
 
 	//Function that controls what every game object must do on frame one
 	void onStart() {
-        moved=true;
 		if (usingRigid) {
 			rigidBody->setStart(pos);
 		}

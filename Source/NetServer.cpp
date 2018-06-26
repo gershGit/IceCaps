@@ -159,7 +159,7 @@ int NetSender::initialize()
 
 int NetSender::AddSocket(sockaddr_in clientinfo)
 {
-	printf("Adding socket");
+	printf("--Adding socket\n");
 	SendSockets.push_back(socket(clientinfo.sin_family, SOCK_DGRAM, 0));
 
 	/*
@@ -196,7 +196,7 @@ int NetSender::SendAll()
 	sockaddr_in sendInfo;
 	sendInfo.sin_family = AF_INET;
 	sendInfo.sin_port = htons(Default_Port);
-	InetPton(AF_INET, "10.0.0.29", &sendInfo.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, "10.0.0.17", &sendInfo.sin_addr.S_un.S_addr);
 
 
 	

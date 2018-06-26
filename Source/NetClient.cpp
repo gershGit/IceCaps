@@ -3,7 +3,7 @@
 
 
 
-NetClient::NetClient(std::vector<const char *> *mInList, std::vector<const char *> *mOutList, std::mutex *mIn_mutex, std::mutex *mOut_mutex)
+NetClient::NetClient(std::vector<std::string> *mInList, std::vector<std::string> *mOutList, std::mutex *mIn_mutex, std::mutex *mOut_mutex)
 {
 	messageInList = mInList;
 	messageOutList = mOutList;
@@ -49,7 +49,7 @@ int NetClient::receiveLoop() {
 	sockaddr_in ReceiveAddress;
 	ReceiveAddress.sin_family = AF_INET;
 	ReceiveAddress.sin_port = htons(Default_Port_In);
-	InetPton(AF_INET, "10.0.0.29", &ReceiveAddress.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, "10.0.0.17", &ReceiveAddress.sin_addr.S_un.S_addr);
 
 	ULONG blockingMode = 0;
 	iResult = ioctlsocket(ReceiveSocket, FIONBIO, &blockingMode);
@@ -99,16 +99,24 @@ int NetClient::ConnectSocket() {
 
 int NetClient::SendData() {
 	int iResult;
-	for (const char * message : *messageOutList) {
-		iResult = send(SendSocket, message, (int)strlen(message), 0);
+	sockaddr_in server;
+	int server_length = sizeof(server);
+
+	server.sin_family = AF_INET;
+	server.sin_port = htons(Default_Port);
+	InetPton(AF_INET, "10.0.0.17", &server.sin_addr.S_un.S_addr);
+
+	for (std::string message : *messageOutList) {
+		iResult = sendto(SendSocket, message.c_str(), (int)strlen(message.c_str()) + 1, 0, (SOCKADDR *)&server, server_length);
 		if (iResult == SOCKET_ERROR) {
 			printf("Send failed: %d\n", WSAGetLastError());
 			closesocket(SendSocket);
 			WSACleanup();
 			return 1;
 		}
-		printf("Bytes Sent: %ld\n", iResult);
+		printf("Bytes Sent: %s\n", message.c_str());
 	}	
+	messageOutList->clear();
 	return 0;
 }
 
@@ -120,7 +128,7 @@ int NetClient::SendTest(const char *data) {
 
 	server.sin_family = AF_INET;
 	server.sin_port = htons(Default_Port);
-	InetPton(AF_INET, "10.0.0.29", &server.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, "10.0.0.17", &server.sin_addr.S_un.S_addr);
 
 	int iResult = sendto(SendSocket, data, (int)strlen(data)+1, 0, (SOCKADDR *) &server, server_length);
 	if (iResult == SOCKET_ERROR) {
@@ -129,7 +137,7 @@ int NetClient::SendTest(const char *data) {
 		WSACleanup();
 		return 1;
 	}
-	printf("Bytes Sent: %ld\n", iResult);
+	printf("Bytes Sent: %s\n", data);
 	return 0;
 }
 
