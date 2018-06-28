@@ -94,23 +94,64 @@ int NetServer::AddSocket()
 	return 0;
 }
 
-int join_source_group(int sd, unsigned int grpaddr, unsigned int srcaddr, unsigned int iaddr) {
-	struct ip_mreq_source imr;
+int join_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
+	struct ip_mreq imr;
 	imr.imr_multiaddr.S_un.S_addr = grpaddr;
-	imr.imr_sourceaddr.S_un.S_addr = srcaddr;
 	imr.imr_interface.S_un.S_addr = iaddr;
-	return setsockopt(sd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP, (char *)&imr, sizeof(imr));
+	return setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&imr, sizeof(imr));
 }
 
-int leave_source_group(int sd, unsigned int grpaddr, unsigned int srcaddr, unsigned int iaddr) {
-	struct ip_mreq_source imr;
+int leave_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
+	struct ip_mreq imr;
 	imr.imr_multiaddr.S_un.S_addr = grpaddr;
-	imr.imr_sourceaddr.S_un.S_addr = srcaddr;
 	imr.imr_interface.S_un.S_addr = iaddr;
-	return setsockopt(sd, IPPROTO_IP, IP_DROP_SOURCE_MEMBERSHIP, (char*)&imr, sizeof(imr));
+	return setsockopt(sd, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char*)&imr, sizeof(imr));
+}
+
+int receiveClients() {
+	return 0;
 }
 
 int NetServer::OpenGame() {
+	SOCKET tempServerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (tempServerSocket == INVALID_SOCKET) {
+		printf("Error at socket creation: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		WSACleanup();
+		return 1;
+	}
+
+	unsigned int grpaddr;
+	InetPton(AF_INET, "239.0.0.5", &grpaddr);
+	sockaddr_in multiAddress;
+	multiAddress.sin_family = AF_INET;
+	multiAddress.sin_port = htons(Default_Port);
+	multiAddress.sin_addr.S_un.S_addr = grpaddr;
+
+	int iResult = join_group(tempServerSocket, grpaddr, INADDR_ANY);
+	if (iResult == SOCKET_ERROR) {
+		printf("Join group failed with error: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(ListenSockets.back());
+		WSACleanup();
+		return 1;
+	}
+
+	std::string broadcastServerMessage = std::string("Make Server") + std::string();
+	iResult = sendto(tempServerSocket, broadcastServerMessage.c_str(), (int)strlen(broadcastServerMessage.c_str()) + 1, 0, (SOCKADDR*)&multiAddress, sizeof(multiAddress));
+	if (iResult == SOCKET_ERROR) {
+		printf("Send server broadcast failed: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(ListenSockets.back());
+		WSACleanup();
+		return 1;
+	}
+
+	sockaddr_in recvInfo;
+	char recvBuffer[128];
+	iResult = recvfrom(tempServerSocket, recvBuffer, sizeof(recvBuffer), (SOCKADDR *)&recvInfo, sizeof(recvInfo));
+
+	receiveClients();
 	return 0;
 }
 

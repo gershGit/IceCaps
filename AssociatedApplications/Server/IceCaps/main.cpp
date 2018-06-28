@@ -32,7 +32,7 @@ NetSender mySender = NetSender(&messagesOut, &mutex_out, &clients);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-DWORD WINAPI createServer(void *data) {
+DWORD WINAPI startServer(void *data) {
 	messagesIn = std::vector<std::string>();
 	messagesOut = std::vector<std::string>();
 	std::cout << "Attempting to establish a network" << std::endl;
@@ -44,6 +44,23 @@ DWORD WINAPI createServer(void *data) {
 	res = myNet.StartListen();
 	std::cout << "Listening success? --> " << res << std::endl;
 	return 0;
+}
+DWORD WINAPI createServer(void *data) {
+	std::cout << "Attempting to establish a network" << std::endl;
+	NetServer myNet = NetServer(&messagesIn, &mutex_in, &clients);
+	int res = myNet.initialize();
+	std::cout << "Initialization success? --> " << res << std::endl;
+	res = myNet.OpenGame();
+	std::cout << "Open Game success? --> " << res << std::endl;
+	//res = myNet.StartListen();
+	//std::cout << "Listening success? --> " << res << std::endl;
+	return 0;
+}
+void startServerOnThread() {
+	HANDLE thread = CreateThread(NULL, 0, startServer, NULL, 0, NULL);
+	if (!thread) {
+		printf("Thread creation failed\n");
+	}
 }
 void createServerOnThread() {
 	HANDLE thread = CreateThread(NULL, 0, createServer, NULL, 0, NULL);
@@ -238,6 +255,7 @@ int main()
 {
 	messagesIn = std::vector<std::string>();
 	createServerOnThread();
+	//startServerOnThread();
 	mySender.initialize();
 
 	GLInstance instance;
