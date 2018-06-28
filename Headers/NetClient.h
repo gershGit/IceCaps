@@ -32,6 +32,7 @@ public:
 	~NetClient();
 	int Initialize();
 	int receiveLoop();
+	int FindGame();
 	int ConnectSocket();
 	int SendData();
 	int SendTest(const char * data);

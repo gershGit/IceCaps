@@ -114,11 +114,11 @@ void runUpdates() {
 		objects[2]->moved = true;
 	}
 	if (input->isDown(W_KEY)) {
-		mainCamera->pos -= mainCamera->forward() * 0.01f;
+		mainCamera->pos += mainCamera->forward() * 0.01f;
 		mainCamera->moved = true;
 	}
 	if (input->isDown(S_KEY)) {
-		mainCamera->pos += mainCamera->forward() * 0.01f;
+		mainCamera->pos -= mainCamera->forward() * 0.01f;
 		mainCamera->moved = true;
 	}
 	if (input->isDown(A_KEY)) {
@@ -141,9 +141,16 @@ void runUpdates() {
 			RigidBody *sphere3rigid = new RigidBody();
 			sphere3rigid->mass = 1;
 			sphere3rigid->is_active = true;
-			sphere3rigid->setStart(nBall->pos, mainCamera->forward()*3.0f);
+			sphere3rigid->setStart(nBall->pos, mainCamera->forward()*30.0f);
 			nBall->usingRigid = true;
 			nBall->rigidBody = sphere3rigid;
+			SphereCollider *coll = new SphereCollider();
+			coll->position = nBall->pos;
+			coll->radius = 1;
+			nBall->sCollider = coll;
+			nBall->usingCollider = true;
+			nBall->glDrawable->generateBuffers();
+			nBall->onStart();
 			objects.push_back(nBall);
 			std::string netInfo = "+ " + std::to_string(nBall->globalId) + " @ " + std::to_string(nBall->pos.x) + " " + std::to_string(nBall->pos.y) + " " + std::to_string(nBall->pos.z) + "\n\t";
 			netInfo += "R: " + std::to_string(mainCamera->forward().x*3) + " " + std::to_string(mainCamera->forward().y * 3) + " " + std::to_string(mainCamera->forward().z * 3);
@@ -184,6 +191,7 @@ void sendMessages() {
 }
 void renderScene() {
 	glDepthFunc(GL_LEQUAL);
+	renderer.viewMatrix = mainCamera->camera->getViewMatrix();
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
 			double nowTime = fmod(glfwGetTime(), 12);

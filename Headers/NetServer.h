@@ -37,6 +37,7 @@ public:
 
 	int initialize();
 	int AddSocket();
+	int OpenGame();
 	int StartListen();
 	int KillAll();
 	int KillSocket(SOCKET to_kill);

@@ -12,6 +12,7 @@ public:
 	GLuint cubeVBO;
 	GLuint cubeVAO;
 	ShaderProgram cubeShader;
+	glm::mat4 viewMatrix;
 
 	void renderObjects(GameObject* object, GameObject* camera, std::vector<GameObject*> lights, Imap* irradianceMap, Imap* environmentMap) {
 		//Debugging statement for which object is being rendered
@@ -28,7 +29,7 @@ public:
 		GLuint loc = glGetUniformLocation(shader.id(), "model");
 		glUniformMatrix4fv(loc, 1, GL_FALSE, &object->getTransform()[0][0]);
 		GLuint viewLoc = glGetUniformLocation(shader.id(), "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &camera->camera->getViewMatrix()[0][0]);
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		GLuint projLoc = glGetUniformLocation(shader.id(), "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
 
@@ -39,7 +40,7 @@ public:
 		}
 		else if (drawableProp->material->type == PHONG_SIMPLE) {
 			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
-			glm::vec3 eyeVec = camera->forward();
+			glm::vec3 eyeVec = -camera->forward();
 			//glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 			glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
 
@@ -145,7 +146,7 @@ public:
 
 		else if (drawableProp->material->type == SIMPLE_TEX) {
 			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
-			glm::vec3 eyeVec = camera->forward();
+			glm::vec3 eyeVec = -camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
 			GLuint sunPos = glGetUniformLocation(shader.id(), "sunAngle");
@@ -177,7 +178,7 @@ public:
 			glUniform4f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), 0.1, 0.1, 1.0, 0.3);
 
 			GLuint eye = glGetUniformLocation(shader.id(), "eye");
-			glm::vec3 eyeVec = camera->forward();
+			glm::vec3 eyeVec = -camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
 			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
@@ -191,7 +192,7 @@ public:
 		}
 		else if (drawableProp->material->type == SIMPLE_PHONG_TEXTURED) {
 			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
-			glm::vec3 eyeVec = camera->forward();
+			glm::vec3 eyeVec = -camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
 			GLuint sunPos = glGetUniformLocation(shader.id(), "sunAngle");
@@ -211,7 +212,7 @@ public:
 		}
 		else if (drawableProp->material->type == STANDARD) {
 			GLuint eye = glGetUniformLocation(shader.id(), "eye");
-			glm::vec3 eyeVec = camera->forward();
+			glm::vec3 eyeVec = -camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
 			//Lights

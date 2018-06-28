@@ -94,6 +94,26 @@ int NetServer::AddSocket()
 	return 0;
 }
 
+int join_source_group(int sd, unsigned int grpaddr, unsigned int srcaddr, unsigned int iaddr) {
+	struct ip_mreq_source imr;
+	imr.imr_multiaddr.S_un.S_addr = grpaddr;
+	imr.imr_sourceaddr.S_un.S_addr = srcaddr;
+	imr.imr_interface.S_un.S_addr = iaddr;
+	return setsockopt(sd, IPPROTO_IP, IP_ADD_SOURCE_MEMBERSHIP, (char *)&imr, sizeof(imr));
+}
+
+int leave_source_group(int sd, unsigned int grpaddr, unsigned int srcaddr, unsigned int iaddr) {
+	struct ip_mreq_source imr;
+	imr.imr_multiaddr.S_un.S_addr = grpaddr;
+	imr.imr_sourceaddr.S_un.S_addr = srcaddr;
+	imr.imr_interface.S_un.S_addr = iaddr;
+	return setsockopt(sd, IPPROTO_IP, IP_DROP_SOURCE_MEMBERSHIP, (char*)&imr, sizeof(imr));
+}
+
+int NetServer::OpenGame() {
+	return 0;
+}
+
 int NetServer::StartListen() {
 	//std::thread(ReceiveLoop, ListenSockets.back(), messageInList, messageInMutex);
 	ReceiveLoop(ListenSockets.back(), messageInList, messageInMutex);

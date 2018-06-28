@@ -19,7 +19,7 @@ collisionInfo SphereCollider::checkCollision(SphereCollider * collider)
 		collisionInfo collision;
 		collision.collision = true;
 		collision.collisionObject = collider->object;
-		//std::cout << "Collision!!!" << std::endl;
+		std::cout << "Collision!!!" << std::endl;
 		return collision;
 	}
 	return collisionInfo();

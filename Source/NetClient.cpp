@@ -80,6 +80,11 @@ int NetClient::receiveLoop() {
 	return 0;
 }
 
+int NetClient::FindGame()
+{
+	return 0;
+}
+
 int NetClient::ConnectSocket() {
 	//Send socket
 	ptr = result;

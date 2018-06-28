@@ -105,7 +105,7 @@ public:
 		glm::quat q = glm::quat(rot);
 		glm::vec3 forwardVec(2 * (q.x*q.z + q.w*q.y), 2 * (q.y*q.z - q.w*q.x), 1 - 2 * (q.x*q.x + q.y*q.y));
 
-		return glm::normalize(forwardVec);
+		return glm::normalize(-forwardVec);
 	};
 	glm::vec3 up() {
 		glm::quat q = glm::quat(rot);
@@ -215,9 +215,7 @@ public:
 	//Function that controls what every game object must do on frame one
 	//TODO make this call a virtual function
 	void onStart() {
-		if (usingRigid) {
-			rigidBody->setStart(pos);
-		}
+		
 	};
 
 	//Function called on every collision
