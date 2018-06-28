@@ -6,7 +6,7 @@
 
 //Names of the unique keys
 enum key_name {
-	NO_KEY_NAME = 0, UNIQUE_KEY_1,
+	NO_KEY_NAME = 0, UNIQUE_KEY_1, SPACE_KEY,
 	Q_KEY, E_KEY, R_KEY, T_KEY, Y_KEY, U_KEY, I_KEY, O_KEY, P_KEY,
 
 	LEFT_ARROW_KEY, RIGHT_ARROW_KEY, UP_ARROW_KEY, DOWN_ARROW_KEY,
@@ -41,6 +41,7 @@ private:
 	key q_key;
 	key e_key;
 	key p_key;
+	key space_key;
 public:
 	//Reference to a window to capture the input from
 	GLFWwindow * inputWindow;

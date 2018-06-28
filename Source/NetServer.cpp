@@ -162,25 +162,6 @@ int NetSender::AddSocket(sockaddr_in clientinfo)
 	printf("--Adding socket\n");
 	SendSockets.push_back(socket(clientinfo.sin_family, SOCK_DGRAM, 0));
 
-	/*
-	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_DGRAM;
-	hints.ai_protocol = IPPROTO_UDP;
-
-	sockaddr_in ReceiveAddress;
-	ReceiveAddress.sin_family = AF_INET;
-	ReceiveAddress.sin_port = htons(Default_Port);
-	ReceiveAddress.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
-
-	int iResult = bind(SendSockets.back(), (SOCKADDR *)& ReceiveAddress, sizeof(ReceiveAddress));
-	if (iResult == SOCKET_ERROR) {
-		printf("Bind failed with error: %ld\n", WSAGetLastError());
-		freeaddrinfo(result);
-		closesocket(SendSockets.back());
-		WSACleanup();
-		return 1;
-	}*/
 	return 0;
 }
 
@@ -202,7 +183,7 @@ int NetSender::SendAll()
 	
 	for (int i = 0; i < clients->size(); i++) {
 		for (std::string message : *messageOutList) {
-			//TODO figure out why client info isn't correct
+			
 			int iResult = sendto(socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP), message.c_str(), (int)strlen(message.c_str()) + 1, 0, (SOCKADDR*)&sendInfo, sizeof(sendInfo));
 
 			//int iResult = sendto(socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP), message.c_str(), (int)strlen(message.c_str()) + 1, 0, (SOCKADDR *)&clients[i], sizeof(clients[i]));

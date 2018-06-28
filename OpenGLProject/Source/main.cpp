@@ -36,6 +36,8 @@ std::vector<std::string> messageInList = std::vector < std::string>();
 std::mutex messageIn_mutex;
 std::mutex messageOut_mutex;
 NetClient myClient = NetClient(&messageInList, &messageOutList, &messageIn_mutex, &messageOut_mutex);
+int trackingInt = 0;
+ObjectFactory* mObjectFactory;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -87,9 +89,6 @@ void handleMessage(std::string message) {
 }
 
 void handleMessages(){
-	for (GameObject* object : objects) {
-		object->moved = false;
-	}
 	std::lock_guard<std::mutex> lock(messageIn_mutex);
 	for (std::string message : messageInList) {
 		handleMessage(message);
@@ -132,6 +131,24 @@ void runUpdates() {
 	}
 	if (input->isDown(P_KEY)) {
 		myClient.SendTest("New Test");
+	}
+	if (input->isDown(SPACE_KEY)) {
+		if (trackingInt == 0) {
+			GameObject* nBall = mObjectFactory->createObject(SPHERE_PRIMITVE, trackingInt++);
+			nBall->pos = mainCamera->pos;
+			nBall->moved = true;
+			nBall->name = "nBALL";
+			RigidBody *sphere3rigid = new RigidBody();
+			sphere3rigid->mass = 1;
+			sphere3rigid->is_active = true;
+			sphere3rigid->setStart(nBall->pos, mainCamera->forward()*3.0f);
+			nBall->usingRigid = true;
+			nBall->rigidBody = sphere3rigid;
+			objects.push_back(nBall);
+			std::string netInfo = "+ " + std::to_string(nBall->globalId) + " @ " + std::to_string(nBall->pos.x) + " " + std::to_string(nBall->pos.y) + " " + std::to_string(nBall->pos.z) + "\n\t";
+			netInfo += "R: " + std::to_string(mainCamera->forward().x*3) + " " + std::to_string(mainCamera->forward().y * 3) + " " + std::to_string(mainCamera->forward().z * 3);
+			messageOutList.push_back(netInfo);
+		}
 	}
 };
 void runSimulations() {};
@@ -263,7 +280,7 @@ void loadScene() {
 	squareMesh->coords = mCoordSpawner->squareCoordsOnly;
 	squareMesh->indices = mCoordSpawner->squareIndices;
 	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
-	squareMesh->material = tMaterial;
+	squareMesh->material = gfPBR;
 	toGenerate.push_back(squareMesh);
 
 	std::cout << "Loading suzzane head" << std::endl;
@@ -290,13 +307,6 @@ void loadScene() {
 	childCube->glDrawable = squareMesh;
 	childCube->drawFlag = true;
 
-	/*
-	GameObject* triangle = new GameObject();
-	triangle->name = "Tri";
-	triangle->drawFlag = true;
-	triangle->glDrawable = triangleMesh;
-	triangle->properties.push_back(triangleMesh);
-	triangle->pos.z = -6;*/
 
 	GameObject* parentCube = new GameObject();
 	parentCube->name = "Parent";
@@ -305,6 +315,7 @@ void loadScene() {
 	parentCube->drawFlag = true;
 	parentCube->addChild(childCube);
 	parentCube->pos.z = 12.0f;
+	parentCube->pos.x = -8.0f;
 	parentCube->pos.y = 20.0f;
 	RigidBody* squareRigid = new RigidBody();
 	squareRigid->setStart(parentCube->pos, glm::vec3(0), glm::vec3(0));
@@ -333,7 +344,7 @@ void loadScene() {
 	ground->pos.y = 0;
 	ground->scale = glm::vec3(100, 100, 100);
 
-	ObjectFactory* mObjectFactory = new ObjectFactory();
+	mObjectFactory = new ObjectFactory();
 
 	GameObject* spawnedSphere = mObjectFactory->createObject(SPHERE_PRIMITVE);
 	spawnedSphere->glDrawable->material = gfPBR;
@@ -383,7 +394,7 @@ void loadScene() {
 	}
 
 	//-------------Adding objects to list-----------------
-	//objects.push_back(parentCube);
+	objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(suzaneHead);
 	objects.push_back(spawnedSphere);

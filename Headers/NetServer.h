@@ -9,7 +9,7 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 #define DEFAULT_PORT "8081"
-#define DEFAULT_BUF_LEN 64
+#define DEFAULT_BUF_LEN 128
 
 class NetServer
 {

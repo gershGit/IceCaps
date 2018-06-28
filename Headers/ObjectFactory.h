@@ -29,6 +29,7 @@ public:
 
 	//Creation of objects with varying parameters
 	GameObject* createObject(primitive primitive_type);
+	GameObject* createObject(primitive primitive_type, int id);
 	GameObject * createLight(lightType type_of_light, glm::vec3 position, glm::vec3 color, float strength, bool visible);
 	GameObject* createObject(GLDrawable* drawable = nullptr, GLMaterial* material = nullptr);
 	GameObject* createObject(std::vector<float> coordinates);

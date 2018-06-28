@@ -9,7 +9,7 @@
 #define DEFAULT_PORT "8081"
 #define DEFAULT_PORT_INT 8081
 #define RECEIVE_PORT "8082"
-#define DEFAULT_BUF_LEN 64
+#define DEFAULT_BUF_LEN 128
 
 class NetClient
 {

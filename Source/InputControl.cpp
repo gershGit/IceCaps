@@ -1,5 +1,6 @@
 #include "InputControl.h"
 
+//TODO fill this all in
 InputControl::InputControl(GLFWwindow * inputWindow)
 {
 }
@@ -145,6 +146,17 @@ void InputControl::setFlag(int key, int scancode, int action, int mods)
 			e_key.state = UP;
 		}
 	}
+	if (key == GLFW_KEY_SPACE) {
+		if (action == GLFW_PRESS) {
+			space_key.state = DOWN;
+		}
+		else if (action == GLFW_REPEAT) {
+			space_key.state = DOWN;
+		}
+		else if (action == GLFW_RELEASE) {
+			space_key.state = UP;
+		}
+	}
 }
 
 bool InputControl::isDown(key_name name)
@@ -201,6 +213,11 @@ bool InputControl::isDown(key_name name)
 	}
 	else if (name == P_KEY) {
 		if (p_key.state == DOWN) {
+			return true;
+		}
+	}
+	else if (name == SPACE_KEY) {
+		if (space_key.state == DOWN) {
 			return true;
 		}
 	}

@@ -106,8 +106,6 @@ void calculatePhysics() {
 			object->moved = true;
 		}
 	}
-};
-void callIntersections() {
 	for (GameObject* object : objects) {
 		if (object->usingCollider) {
 			object->sCollider->position = object->pos;
@@ -115,14 +113,25 @@ void callIntersections() {
 		}
 	}
 };
+void callIntersections() {
+	for (GameObject* object : objects) {
+		if (object->usingCollider) {
+			object->sCollider->position = object->pos;
+			object->handleCollisions();
+		}
+	}
+};
 void renderScene() {
 	//Server does not render
 };
 void sendInfo() {
-	/*HANDLE thread = CreateThread(NULL, 0, mySender.SendAll, NULL, 0, NULL);
-	if (!thread) {
-		printf("Send thread creation failed\n");
-	}*/
+	for (GameObject* object : objects) {
+		for (collisionInfo info : object->collisions) {
+			std::string collision_message = std::string("X- ");
+			collision_message += std::string(object->name) + "-" + std::string(info.collisionObject->name);
+			messagesOut.push_back(collision_message);
+		}
+	}
 	if (glfwGetTime() - lastTime > 10) {
 		messagesOut.push_back("GAME OVER");
 	}
@@ -172,6 +181,7 @@ void loadScene() {
 	SphereCollider* lowSphere = new SphereCollider();
 	lowSphere->position = spawnedSphere->pos;
 	lowSphere->radius = 1;
+	lowSphere->object = spawnedSphere;
 	spawnedSphere->usingCollider = true;
 	spawnedSphere->sCollider = lowSphere;
 
@@ -182,6 +192,7 @@ void loadScene() {
 	SphereCollider *highSphere = new SphereCollider();
 	highSphere->position = spawnedSphere->pos;
 	highSphere->radius = 1;
+	highSphere->object = spawnedSphere2;
 	spawnedSphere2->usingCollider = true;
 	spawnedSphere2->sCollider = highSphere;
 	RigidBody *sphere2rigid = new RigidBody();
@@ -256,9 +267,9 @@ int main()
 		runSimulations();
 		calculatePhysics();
 		runUpdates();
+		sendInfo();
 		callIntersections();
 		//renderScene();
-		sendInfo();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwPollEvents();

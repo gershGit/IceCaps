@@ -46,9 +46,11 @@ public:
 private:
 	//Private matrix used to return the position quickly when an object hasn't moved
 	glm::mat4 lastTransform;
-	std::vector<collisionInfo> collisions;
 
 public:
+	//Vector storing all collisions that need to be resolved for this object
+	std::vector<collisionInfo> collisions;
+
 	//Online information
 	unsigned int globalId = 0;
 	bool online_playerOwned = false;
@@ -193,6 +195,13 @@ public:
 		}
 	}
 
+	void handleCollisions() {
+		for (collisionInfo info : collisions) {
+			//TODO add collision movement info using rigid bodies
+		}
+		collisions.clear();
+	}
+
 	//Add a reference to a new child for this object
 	void addChild(GameObject* newChild) {
 		children.push_back(newChild);
@@ -204,6 +213,7 @@ public:
 	};
 
 	//Function that controls what every game object must do on frame one
+	//TODO make this call a virtual function
 	void onStart() {
 		if (usingRigid) {
 			rigidBody->setStart(pos);
@@ -214,4 +224,6 @@ public:
 	//TODO make this call a virtual function
 	void onCollision() {
 	}
+
+	//TODO call update every frame and update a virtual function
 };
