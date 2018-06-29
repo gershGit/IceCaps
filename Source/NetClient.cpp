@@ -15,6 +15,16 @@ NetClient::~NetClient()
 {
 }
 
+void NetClient::linkGameList(std::vector<Game> * gListPtr)
+{
+	gamesList = gListPtr;
+}
+
+void NetClient::linkServerAddress(sockaddr_in * serverPtr)
+{
+	serverAddress = serverPtr;
+}
+
 int NetClient::Initialize() {
 	int iResult;
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -27,7 +37,7 @@ int NetClient::Initialize() {
 	hints.ai_socktype = SOCK_DGRAM;
 	hints.ai_protocol = IPPROTO_UDP;
 
-	iResult = getaddrinfo(addressTemp, DEFAULT_PORT, &hints, &result);
+	iResult = getaddrinfo(addressTemp.c_str(), DEFAULT_PORT, &hints, &result);
 	if (iResult != 0) {
 		printf("Get address info failed: %d\n", iResult);
 		WSACleanup();
@@ -49,7 +59,7 @@ int NetClient::receiveLoop() {
 	sockaddr_in ReceiveAddress;
 	ReceiveAddress.sin_family = AF_INET;
 	ReceiveAddress.sin_port = htons(Default_Port_In);
-	InetPton(AF_INET, "10.0.0.17", &ReceiveAddress.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, addressTemp.c_str(), &ReceiveAddress.sin_addr.S_un.S_addr);
 
 	ULONG blockingMode = 0;
 	iResult = ioctlsocket(ReceiveSocket, FIONBIO, &blockingMode);
@@ -80,9 +90,156 @@ int NetClient::receiveLoop() {
 	return 0;
 }
 
-int NetClient::FindGame()
-{
+int join_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
+	struct ip_mreq imr;
+	imr.imr_multiaddr.S_un.S_addr = grpaddr;
+	imr.imr_interface.S_un.S_addr = iaddr;
+	return setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&imr, sizeof(imr));
+}
+
+int leave_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
+	struct ip_mreq imr;
+	imr.imr_multiaddr.S_un.S_addr = grpaddr;
+	imr.imr_interface.S_un.S_addr = iaddr;
+	return setsockopt(sd, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char*)&imr, sizeof(imr));
+}
+
+int NetClient::AddGame(Game game_in) {
+	for (Game possible_duplicate : *gamesList) {
+		if (possible_duplicate.name == game_in.name) {
+			return 1;
+		}
+	}
+	gamesList->push_back(game_in);
 	return 0;
+}
+
+int NetClient::FindGame(std::string playerName)
+{
+	SOCKET tempClientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+	if (tempClientSocket == INVALID_SOCKET) {
+		printf("Error at socket creation: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		WSACleanup();
+		return 1;
+	}
+
+	struct timeval read_timeout;
+	read_timeout.tv_sec = 0;
+	read_timeout.tv_usec = 10;
+	setsockopt(tempClientSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&read_timeout, sizeof read_timeout);
+
+	unsigned int grpaddr;
+	InetPton(AF_INET, "239.0.0.5", &grpaddr);
+	sockaddr_in multiAddress;
+	multiAddress.sin_family = AF_INET;
+	multiAddress.sin_port = htons(Default_Port);
+	multiAddress.sin_addr.S_un.S_addr = grpaddr;
+
+	int iResult = join_group(tempClientSocket, grpaddr, INADDR_ANY);
+	if (iResult == SOCKET_ERROR) {
+		printf("Join group failed with error: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(tempClientSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	std::string queryMessage = std::string("Query Games") + playerName;
+	std::cout << queryMessage.c_str() << std::endl;
+	iResult = sendto(tempClientSocket, queryMessage.c_str(), (int)strlen(queryMessage.c_str()) + 1, 0, (SOCKADDR*)&multiAddress, sizeof(multiAddress));
+	if (iResult == SOCKET_ERROR) {
+		printf("Send query broadcast failed: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(tempClientSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	printf("Now Receiving Game(s) Information\n");
+	char recvbuf[DEFAULT_BUF_LEN];
+	int iResult, iSendResult;
+	int recvbuflen = DEFAULT_BUF_LEN;
+	struct sockaddr_in server;
+	int server_length = (int)sizeof(server);
+
+	//Infinite recieve until servers are done
+	while (true) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		iResult = recvfrom(tempClientSocket, recvbuf, recvbuflen, 0, (SOCKADDR *)&server, &server_length);
+		if (iResult > 0) {
+			std::string str = std::string(recvbuf, iResult);
+			if (str[0] == 'S') {
+				Game newGame;
+				char * pch;
+				pch = strtok(recvbuf, " ");
+				pch = strtok(NULL, " ");
+				newGame.pcName = std::string(pch);
+				pch = strtok(NULL, " ");
+				newGame.name = std::string(pch);
+				pch = strtok(NULL, " ");
+				pch = strtok(NULL, " ");
+				newGame.address_as_string = std::string(pch);
+				newGame.server_addr = server;
+				AddGame(newGame);
+			}
+		}
+		else if (iResult == 0) {
+			printf("Connection closing...\n");
+		}
+		else {
+			printf("Receive failed: %d\n", WSAGetLastError());
+			closesocket(tempClientSocket);
+			WSACleanup();
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int NetClient::JoinGame(Game game_to_join) {
+	SOCKET tempClientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+
+	*serverAddress = game_to_join.server_addr;
+
+	if (tempClientSocket == INVALID_SOCKET) {
+		printf("Error at socket creation: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		WSACleanup();
+		return 1;
+	}
+
+	struct timeval read_timeout;
+	read_timeout.tv_sec = 0;
+	read_timeout.tv_usec = 10;
+	setsockopt(tempClientSocket, SOL_SOCKET, SO_RCVTIMEO, (const char *)&read_timeout, sizeof read_timeout);
+
+	unsigned int grpaddr;
+	InetPton(AF_INET, "239.0.0.5", &grpaddr);
+	sockaddr_in multiAddress;
+	multiAddress.sin_family = AF_INET;
+	multiAddress.sin_port = htons(Default_Port);
+	multiAddress.sin_addr.S_un.S_addr = grpaddr;
+
+	int iResult = join_group(tempClientSocket, grpaddr, INADDR_ANY);
+	if (iResult == SOCKET_ERROR) {
+		printf("Join group failed with error: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(tempClientSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	std::string joinMessage = std::string("Join ") + game_to_join.name;
+	std::cout << joinMessage.c_str() << std::endl;
+	iResult = sendto(tempClientSocket, joinMessage.c_str(), (int)strlen(joinMessage.c_str()) + 1, 0, (SOCKADDR*)&multiAddress, sizeof(multiAddress));
+	if (iResult == SOCKET_ERROR) {
+		printf("Join broadcast failed: %ld\n", WSAGetLastError());
+		freeaddrinfo(result);
+		closesocket(tempClientSocket);
+		WSACleanup();
+		return 1;
+	}
 }
 
 int NetClient::ConnectSocket() {
@@ -109,7 +266,7 @@ int NetClient::SendData() {
 
 	server.sin_family = AF_INET;
 	server.sin_port = htons(Default_Port);
-	InetPton(AF_INET, "10.0.0.17", &server.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, addressTemp.c_str(), &server.sin_addr.S_un.S_addr);
 
 	for (std::string message : *messageOutList) {
 		iResult = sendto(SendSocket, message.c_str(), (int)strlen(message.c_str()) + 1, 0, (SOCKADDR *)&server, server_length);
@@ -133,7 +290,7 @@ int NetClient::SendTest(const char *data) {
 
 	server.sin_family = AF_INET;
 	server.sin_port = htons(Default_Port);
-	InetPton(AF_INET, "10.0.0.17", &server.sin_addr.S_un.S_addr);
+	InetPton(AF_INET, addressTemp.c_str(), &server.sin_addr.S_un.S_addr);
 
 	int iResult = sendto(SendSocket, data, (int)strlen(data)+1, 0, (SOCKADDR *) &server, server_length);
 	if (iResult == SOCKET_ERROR) {

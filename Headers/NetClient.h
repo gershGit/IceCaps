@@ -11,17 +11,26 @@
 #define RECEIVE_PORT "8082"
 #define DEFAULT_BUF_LEN 128
 
+struct Game {
+	std::string name;
+	std::string pcName;
+	sockaddr_in server_addr;
+	std::string address_as_string;
+};
+
 class NetClient
 {
 private:
 	unsigned short Default_Port = 27015;
 	unsigned short Default_Port_In = 27017;
-	const char* addressTemp = "10.0.0.17";
+	std::string addressTemp = "10.0.0.17";
+	sockaddr_in * serverAddress;
 	WSAData wsaData;
 	std::vector<std::string> *messageInList;
 	std::vector<std::string> *messageOutList;
 	std::mutex *messageIn_mutex;
 	std::mutex *messageOut_mutex;
+	std::vector<Game> * gamesList;
 
 public:
 	SOCKET SendSocket = INVALID_SOCKET;
@@ -30,9 +39,14 @@ public:
 
 	NetClient(std::vector<std::string> *mInList, std::vector<std::string> *mOutList, std::mutex *mIn_mutex, std::mutex *mOut_mutex);
 	~NetClient();
+
+	void linkGameList(std::vector<Game> * gListPtr);
+	void linkServerAddress(sockaddr_in * serverPtr);
 	int Initialize();
 	int receiveLoop();
-	int FindGame();
+	int AddGame(Game game_in);
+	int FindGame(std::string playerName);
+	int JoinGame(Game game_to_join);
 	int ConnectSocket();
 	int SendData();
 	int SendTest(const char * data);

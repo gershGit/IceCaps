@@ -1,8 +1,26 @@
 #include "..\Headers\NetServer.h"
 
-int NetServer::AddClient(sockaddr_in client_in) {
+int NetServer::AddClient(clientInfo client_in) {
+	std::cout << "Adding client at " << client_in.client_sockaddr.sin_addr.S_un.S_addr << std::endl;
+	for (clientInfo client : *clients) {
+		if (client.client_sockaddr.sin_addr.S_un.S_addr == client_in.client_sockaddr.sin_addr.S_un.S_addr) {
+			return 1;
+		}
+	}
 	clients->push_back(client_in);
 	return 0;
+}
+
+int NetServer::DropClient(clientInfo client_in) {
+	std::cout << "Adding client at " << client_in.client_sockaddr.sin_addr.S_un.S_addr << std::endl;
+	std::vector<clientInfo> myClients = *clients;
+	for (int i = 0; i < clients->size(); i++) {
+		if (myClients[i].client_sockaddr.sin_addr.S_un.S_addr == client_in.client_sockaddr.sin_addr.S_un.S_addr) {
+			clients->erase(clients->begin() + i);
+			return 0;
+		}
+	}
+	return 1;
 }
 
 int NetServer::ReceiveLoop(SOCKET receiveSocket, std::vector<std::string> *messageInList, std::mutex *messageIn_mutex) {
@@ -21,7 +39,11 @@ int NetServer::ReceiveLoop(SOCKET receiveSocket, std::vector<std::string> *messa
 			std::lock_guard<std::mutex> lock(*messageIn_mutex);
 			std::string str = std::string(recvbuf, iResult);
 			if (str[0] == 'I') {
-				AddClient(client);
+				clientInfo newClient;
+				newClient.name = "TODOFIXTHISNAME";
+				newClient.clientID = -1;
+				newClient.client_sockaddr = client;
+				AddClient(newClient);
 			}
 			messageInList->push_back(str);
 		}
@@ -37,7 +59,7 @@ int NetServer::ReceiveLoop(SOCKET receiveSocket, std::vector<std::string> *messa
 	} while (iResult > 0);
 }
 
-NetServer::NetServer(std::vector<std::string> * mInList, std::mutex * mInMutex, std::vector<sockaddr_in> * clients_in)
+NetServer::NetServer(std::vector<std::string> * mInList, std::mutex * mInMutex, std::vector<clientInfo> * clients_in)
 {
 	messageInList = mInList;
 	messageInMutex = mInMutex;
@@ -46,6 +68,11 @@ NetServer::NetServer(std::vector<std::string> * mInList, std::mutex * mInMutex, 
 
 NetServer::~NetServer()
 {
+}
+
+void NetServer::setGameStarted(bool * ref)
+{
+	gameStarted = ref;
 }
 
 int NetServer::initialize()
@@ -108,11 +135,60 @@ int leave_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
 	return setsockopt(sd, IPPROTO_IP, IP_DROP_MEMBERSHIP, (char*)&imr, sizeof(imr));
 }
 
-int receiveClients() {
+int NetServer::ReceiveClients(SOCKET multiSocket, std::string myName, sockaddr_in sendAddress, std::string broadcastServerMessage) {
+	printf("Now Receiving Clients to open game\n");
+	char recvbuf[DEFAULT_BUF_LEN];
+	int iResult, iSendResult;
+	int recvbuflen = DEFAULT_BUF_LEN;
+	struct sockaddr_in client;
+	int client_length = (int)sizeof(client);
+
+	//Infinite recieve
+	do {
+		iResult = recvfrom(multiSocket, recvbuf, recvbuflen, 0, (SOCKADDR *)&client, &client_length);
+		if (iResult > 0) {
+			std::string str = std::string(recvbuf, iResult);
+			std::size_t found = str.find(myName);
+			if (str[0] == 'J' && found!=std::string::npos) {
+				clientInfo newClient;
+				newClient.name = "TODOFIXTHISNAME";
+				newClient.clientID = -1;
+				newClient.client_sockaddr = client;
+				AddClient(newClient);
+			}
+			else if (str[0] == 'L' && found != std::string::npos) {
+				clientInfo newClient;
+				newClient.client_sockaddr = client;
+				AddClient(newClient);
+				DropClient(newClient);
+			}
+			else if (str[0] == 'Q') {
+				iResult = sendto(multiSocket, broadcastServerMessage.c_str(), (int)strlen(broadcastServerMessage.c_str()) + 1, 0, (SOCKADDR*)&sendAddress, sizeof(sendAddress));
+				if (iResult == SOCKET_ERROR) {
+					printf("Send server broadcast failed: %ld\n", WSAGetLastError());
+					freeaddrinfo(result);
+					closesocket(ListenSockets.back());
+					WSACleanup();
+					return 1;
+				}
+			}
+			messageInList->push_back(str);
+		}
+		else if (iResult == 0) {
+			printf("Connection closing...\n");
+		}
+		else {
+			printf("Receive failed: %d\n", WSAGetLastError());
+			closesocket(multiSocket);
+			WSACleanup();
+			return 1;
+		}
+	} while (iResult > 0 && !gameStarted);
+	leave_group(multiSocket, sendAddress.sin_addr.S_un.S_addr, INADDR_ANY);
 	return 0;
 }
 
-int NetServer::OpenGame() {
+int NetServer::OpenGame(std::string myGameName) {
 	SOCKET tempServerSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (tempServerSocket == INVALID_SOCKET) {
 		printf("Error at socket creation: %ld\n", WSAGetLastError());
@@ -132,26 +208,42 @@ int NetServer::OpenGame() {
 	if (iResult == SOCKET_ERROR) {
 		printf("Join group failed with error: %ld\n", WSAGetLastError());
 		freeaddrinfo(result);
-		closesocket(ListenSockets.back());
+		closesocket(tempServerSocket);
 		WSACleanup();
 		return 1;
 	}
 
-	std::string broadcastServerMessage = std::string("Make Server") + std::string();
+	char myBuffer[64];
+	if (gethostname(myBuffer, sizeof(myBuffer)) == SOCKET_ERROR) {
+		printf("Failed getting local IP. Check connection. Error: %ld\n", WSAGetLastError());
+		return 1;
+	}
+
+	struct hostent *phe = gethostbyname(myBuffer);
+	if (phe == 0) {
+		printf("Error on host lookup. Ensure your pc exists: %ld\n", WSAGetLastError());
+		return 1;
+	}
+
+	int iter = 0;
+	for (int i = 0; phe->h_addr_list[i] != 0; ++i) {
+		iter++;
+	}
+
+	struct in_addr addr;
+	memcpy(&addr, phe->h_addr_list[iter-1], sizeof(struct in_addr));
+	std::string broadcastServerMessage = std::string("Server: ") + myBuffer + " " + myGameName + " @: " + std::string(inet_ntoa(addr));
+	std::cout << broadcastServerMessage.c_str() << std::endl;
 	iResult = sendto(tempServerSocket, broadcastServerMessage.c_str(), (int)strlen(broadcastServerMessage.c_str()) + 1, 0, (SOCKADDR*)&multiAddress, sizeof(multiAddress));
 	if (iResult == SOCKET_ERROR) {
 		printf("Send server broadcast failed: %ld\n", WSAGetLastError());
 		freeaddrinfo(result);
-		closesocket(ListenSockets.back());
+		closesocket(tempServerSocket);
 		WSACleanup();
 		return 1;
-	}
+	}	
 
-	sockaddr_in recvInfo;
-	char recvBuffer[128];
-	iResult = recvfrom(tempServerSocket, recvBuffer, sizeof(recvBuffer), (SOCKADDR *)&recvInfo, sizeof(recvInfo));
-
-	receiveClients();
+	ReceiveClients(tempServerSocket, myGameName, multiAddress, broadcastServerMessage);
 	return 0;
 }
 
@@ -190,7 +282,7 @@ int NetServer::KillSocket(SOCKET to_kill) {
 	return 0;
 }
 
-NetSender::NetSender(std::vector<std::string>* mOutList, std::mutex * mOutMutex, std::vector<sockaddr_in>* clients_in)
+NetSender::NetSender(std::vector<std::string>* mOutList, std::mutex * mOutMutex, std::vector<clientInfo>* clients_in)
 {
 	messageOutList = mOutList;
 	messageOutMutex = mOutMutex;
@@ -218,10 +310,10 @@ int NetSender::initialize()
 	return 0;
 }
 
-int NetSender::AddSocket(sockaddr_in clientinfo)
+int NetSender::AddSocket(clientInfo clientinfo)
 {
 	printf("--Adding socket\n");
-	SendSockets.push_back(socket(clientinfo.sin_family, SOCK_DGRAM, 0));
+	SendSockets.push_back(socket(clientinfo.client_sockaddr.sin_family, SOCK_DGRAM, 0));
 
 	return 0;
 }

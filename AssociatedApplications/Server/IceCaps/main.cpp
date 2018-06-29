@@ -22,11 +22,13 @@ InputControl* input;
 std::vector<GameObject*> objects;
 std::vector<GameObject*> lights;
 double lastTime = 0.0f;
+bool gameStarted = false;
+sockaddr_in * serverAddress;
 std::vector<std::string> messagesIn;
 std::vector<std::string> messagesOut;
 std::mutex mutex_in;
 std::mutex mutex_out;
-std::vector<sockaddr_in> clients = std::vector<sockaddr_in>();
+std::vector<clientInfo> clients = std::vector<clientInfo>();
 NetSender mySender = NetSender(&messagesOut, &mutex_out, &clients);
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -48,9 +50,10 @@ DWORD WINAPI startServer(void *data) {
 DWORD WINAPI createServer(void *data) {
 	std::cout << "Attempting to establish a network" << std::endl;
 	NetServer myNet = NetServer(&messagesIn, &mutex_in, &clients);
+	myNet.setGameStarted(&gameStarted);
 	int res = myNet.initialize();
 	std::cout << "Initialization success? --> " << res << std::endl;
-	res = myNet.OpenGame();
+	res = myNet.OpenGame(std::string("YASSSS"));
 	std::cout << "Open Game success? --> " << res << std::endl;
 	//res = myNet.StartListen();
 	//std::cout << "Listening success? --> " << res << std::endl;
