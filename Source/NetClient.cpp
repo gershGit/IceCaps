@@ -90,14 +90,14 @@ int NetClient::receiveLoop() {
 	return 0;
 }
 
-int join_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
+int NetClient::join_group_client(int sd, unsigned int grpaddr, unsigned int iaddr) {
 	struct ip_mreq imr;
 	imr.imr_multiaddr.S_un.S_addr = grpaddr;
 	imr.imr_interface.S_un.S_addr = iaddr;
 	return setsockopt(sd, IPPROTO_IP, IP_ADD_MEMBERSHIP, (char *)&imr, sizeof(imr));
 }
 
-int leave_group(int sd, unsigned int grpaddr, unsigned int iaddr) {
+int NetClient::leave_group_client(int sd, unsigned int grpaddr, unsigned int iaddr) {
 	struct ip_mreq imr;
 	imr.imr_multiaddr.S_un.S_addr = grpaddr;
 	imr.imr_interface.S_un.S_addr = iaddr;
@@ -136,7 +136,7 @@ int NetClient::FindGame(std::string playerName)
 	multiAddress.sin_port = htons(Default_Port);
 	multiAddress.sin_addr.S_un.S_addr = grpaddr;
 
-	int iResult = join_group(tempClientSocket, grpaddr, INADDR_ANY);
+	int iResult = join_group_client(tempClientSocket, grpaddr, INADDR_ANY);
 	if (iResult == SOCKET_ERROR) {
 		printf("Join group failed with error: %ld\n", WSAGetLastError());
 		freeaddrinfo(result);
@@ -158,7 +158,7 @@ int NetClient::FindGame(std::string playerName)
 
 	printf("Now Receiving Game(s) Information\n");
 	char recvbuf[DEFAULT_BUF_LEN];
-	int iResult, iSendResult;
+	int iSendResult;
 	int recvbuflen = DEFAULT_BUF_LEN;
 	struct sockaddr_in server;
 	int server_length = (int)sizeof(server);
@@ -221,7 +221,7 @@ int NetClient::JoinGame(Game game_to_join) {
 	multiAddress.sin_port = htons(Default_Port);
 	multiAddress.sin_addr.S_un.S_addr = grpaddr;
 
-	int iResult = join_group(tempClientSocket, grpaddr, INADDR_ANY);
+	int iResult = join_group_client(tempClientSocket, grpaddr, INADDR_ANY);
 	if (iResult == SOCKET_ERROR) {
 		printf("Join group failed with error: %ld\n", WSAGetLastError());
 		freeaddrinfo(result);

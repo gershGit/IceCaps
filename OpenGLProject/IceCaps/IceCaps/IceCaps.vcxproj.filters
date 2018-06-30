@@ -19,8 +19,14 @@
     <Filter Include="Source Files\textures">
       <UniqueIdentifier>{df0a960b-cdb9-4361-af34-140897884313}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\models">
-      <UniqueIdentifier>{1e82bbf5-7357-4b21-9815-b8053eeee471}</UniqueIdentifier>
+    <Filter Include="Header Files\Network">
+      <UniqueIdentifier>{035f8843-d404-4612-9157-d298cc3f72e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Objects">
+      <UniqueIdentifier>{79fb6ed7-047b-4f33-b090-75fb45b1d27b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{06245593-e2c6-4ea2-8ea8-0547ba021301}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,77 +77,77 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Headers\OpenGlInstance.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Headers\Headers.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\GameObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Property.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Drawable.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Material.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Renderer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\baseShapeCoords.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Headers\InputControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\Headers\objLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\stb_image.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\iceLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\RigidBody.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Collider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\SphereCollider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\ObjectFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\SceneLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\IrradianceMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\Headers\BoxCollider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\Headers\NetClient.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Network</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\Headers\NetServer.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Network</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\baseShapeCoords.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\BoxCollider.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Camera.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Collider.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\GameObject.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\iceLoader.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\objLoader.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\RigidBody.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\SphereCollider.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\ObjectFactory.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\SceneLoader.h">
+      <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\stb_image.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Shader.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Renderer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\OpenGlInstance.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Material.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Light.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\IrradianceMap.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Drawable.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\Property.h">
+      <Filter>Header Files\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

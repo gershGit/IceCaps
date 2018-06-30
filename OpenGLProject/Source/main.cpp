@@ -253,6 +253,16 @@ void loadScene() {
 	ShaderProgram sShader = ShaderProgram("phongSun.vert", "phongSun.frag");
 	sMaterial->shader = sShader;
 
+	GLMaterial * roboMaterial = new GLMaterial();
+	roboMaterial->addTexture("Textures/robo_diffuse.png", DIFFUSE, texture_number++);
+	roboMaterial->addTexture("Textures/robo_metallic.png", METALLIC_MASK, texture_number++);
+	roboMaterial->addTexture("Textures/robo_roughness.png", ROUGHNESS_MAP, texture_number++);
+	roboMaterial->addTexture("Textures/robo_ao.png", AO_MAP, texture_number++);
+	roboMaterial->addTexture("Textures/robo_normal.png", NORMAL_MAP, texture_number++);
+	roboMaterial->setMaterialType(PBR_BASIC);
+	ShaderProgram roboShader = ShaderProgram("PBR.vert", "PBR.frag");
+	roboMaterial->shader = roboShader;
+
 	GLMaterial* tMaterial = new GLMaterial();
 	tMaterial->type = PBR_BASIC;
 	int addResult = tMaterial->addTexture("Textures/diffuse.png", DIFFUSE, texture_number++);
@@ -279,6 +289,18 @@ void loadScene() {
 	planeMesh->material = gfPBR;
 	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
 	toGenerate.push_back(planeMesh);
+
+	GLDrawable* roboMesh = new GLDrawable();
+	roboMesh->ptype = DRAWABLE;
+	roboMesh->renderFlag = true;
+	roboMesh->dtype = MESH;
+	std::vector<float> coords_robo = std::vector<float>();
+	std::vector<unsigned int> indices_robo = std::vector<unsigned int>();
+	loadICE("robo.ice", roboMesh->coords, roboMesh->indices);
+	roboMesh->usingEBO = true;
+	roboMesh->material = roboMaterial;
+	roboMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
+	toGenerate.push_back(roboMesh);
 
 	GLDrawable* squareMesh = new GLDrawable();
 	squareMesh->ptype = DRAWABLE;
@@ -336,12 +358,20 @@ void loadScene() {
 	parentCube->sCollider = squareCollider;
 
 	GameObject* suzaneHead = new GameObject();
-	suzaneHead->name = "sh";
+	suzaneHead->name = "SUZANNE HEAD";
 	suzaneHead->properties.push_back(suzzane_drawable);
 	suzaneHead->glDrawable = suzzane_drawable;
 	suzaneHead->drawFlag = true;
 	suzaneHead->pos.x = -3;
 	suzaneHead->pos.z = 20;
+
+	GameObject* robo1 = new GameObject();
+	robo1->name = "Player_Model";
+	robo1->glDrawable = roboMesh;
+	robo1->drawFlag = true;
+	robo1->pos.x = 3;
+	robo1->pos.z = 20;
+	robo1->pos.y = 4;
 
 	GameObject* ground = new GameObject();
 	ground->name = "Ground";
@@ -407,6 +437,7 @@ void loadScene() {
 	objects.push_back(suzaneHead);
 	objects.push_back(spawnedSphere);
 	objects.push_back(spawnedSphere2);
+	objects.push_back(robo1);
 
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);

@@ -44,6 +44,8 @@ public:
 	void linkServerAddress(sockaddr_in * serverPtr);
 	int Initialize();
 	int receiveLoop();
+	int join_group_client(int sd, unsigned int grpaddr, unsigned int iaddr);
+	int leave_group_client(int sd, unsigned int grpaddr, unsigned int iaddr);
 	int AddGame(Game game_in);
 	int FindGame(std::string playerName);
 	int JoinGame(Game game_to_join);

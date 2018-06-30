@@ -38,7 +38,7 @@ void loadICE(const char* file_name, std::vector<float> &finalVertices, std::vect
 		else {
 			if (strcmp(lineHeader, "v") == 0) {
 				//Store vertex information into the vertex vector
-				fscanf_s(file, "%f %f %f %f %f %f %f %f %f %f %f %f %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z,
+				fscanf_s(file, "%f %f %f, %f %f %f, %f %f %f, %f %f %f, %f %f\n", &tempVec.x, &tempVec.y, &tempVec.z,
 					&tempVecNormal.x, &tempVecNormal.y, &tempVecNormal.z,
 					&tempTangent.x, &tempTangent.y, &tempTangent.z,
 					&tempBitangent.x, &tempBitangent.y, &tempBitangent.z,
