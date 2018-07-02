@@ -259,9 +259,8 @@ void loadScene() {
 	roboMaterial->addTexture("Textures/robo_roughness.png", ROUGHNESS_MAP, texture_number++);
 	roboMaterial->addTexture("Textures/robo_ao.png", AO_MAP, texture_number++);
 	roboMaterial->addTexture("Textures/robo_normal.png", NORMAL_MAP, texture_number++);
-	roboMaterial->setMaterialType(PBR_BASIC);
-	ShaderProgram roboShader = ShaderProgram("PBR.vert", "PBR.frag");
-	roboMaterial->shader = roboShader;
+	roboMaterial->addTexture("Textures/robo_emissive.png", EMISSION_MAP, texture_number++);
+	roboMaterial->setMaterialType(PBR_EMISSIVE);
 
 	GLMaterial* tMaterial = new GLMaterial();
 	tMaterial->type = PBR_BASIC;
@@ -426,6 +425,14 @@ void loadScene() {
 	GameObject* spawnedLight_3 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(3, 3, 16), glm::vec3(1.0f, 0.0f, 1.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_3->glDrawable);
 
+	GameObject* player1_bottom = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(0, -0.95, 0), glm::vec3(1.0f, 1.0f, 0.0f), 1.0, true);
+	robo1->addChild(player1_bottom);
+	toGenerate.push_back(player1_bottom->glDrawable);
+
+	GameObject* player1_back = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(0, -0.25, -0.85), glm::vec3(1.0f, 0.0f, 0.0f), 1.0, true);
+	robo1->addChild(player1_back);
+	toGenerate.push_back(player1_back->glDrawable);
+
 	qsort(&toGenerate[0], toGenerate.size(), sizeof(GLDrawable*), compareByCoordSize);
 	for (GLDrawable* drawable : toGenerate) {
 		drawable->generateBuffers();
@@ -441,8 +448,10 @@ void loadScene() {
 
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);
-	lights.push_back(spawnedLight_2);
+	//lights.push_back(spawnedLight_2);
 	lights.push_back(spawnedLight_3);
+	lights.push_back(player1_bottom);
+	//lights.push_back(player1_back);
 
 	free(mCoordSpawner);
 	for (GameObject* obj : objects) {

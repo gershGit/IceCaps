@@ -41,6 +41,12 @@ int GLMaterial::addTexture(const char * file_name, tType texture_type, int textu
 		glGenTextures(1, &roughness);
 		glBindTexture(GL_TEXTURE_2D, roughness);
 	}
+	else if (texture_type == EMISSION_MAP) {
+		emissiveTexNumber = texture_number;
+		glActiveTexture(GL_TEXTURE0 + texture_number);
+		glGenTextures(1, &emissive);
+		glBindTexture(GL_TEXTURE_2D, emissive);
+	}
 	int width, height, nrComponents;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char *data = stbi_load(file_name, &width, &height, &nrComponents, 0);
@@ -84,6 +90,10 @@ int GLMaterial::buildShader()
 	}
 	else if (type == PBR_BASIC) {
 		shader = ShaderProgram("PBR.vert", "PBR.frag");
+		return 0;
+	}
+	else if (type == PBR_EMISSIVE) {
+		shader = ShaderProgram("PBR.vert", "PBR_emissive.frag");
 		return 0;
 	}
 	return 1;

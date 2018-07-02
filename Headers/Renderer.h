@@ -274,7 +274,59 @@ public:
 			glUniform3f(sunLoc, -2, -6, -1);
 
 			GLuint sunColor = glGetUniformLocation(shader.id(), "sunColor");
-			glUniform4f(sunColor, 0.8, 0.6, 0.8, 0.0001);
+			glUniform4f(sunColor, 0.8, 0.6, 0.8, 1.5);
+
+			GLuint baseReflectance = glGetUniformLocation(shader.id(), "baseReflectance");
+			glUniform1f(baseReflectance, 0.04);
+
+			//TODO ensure this is right and being used
+			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
+			glUniformMatrix4fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
+		}
+		else if (drawableProp->material->type == PBR_EMISSIVE) {
+			GLuint irrMapLoc = glGetUniformLocation(shader.id(), "irradianceMap");
+			glUniform1i(irrMapLoc, irradianceMap->mapTexNumber);
+
+			GLuint eMapLoc = glGetUniformLocation(shader.id(), "environmentMap");
+			glUniform1i(eMapLoc, environmentMap->mapTexNumber);
+
+			GLuint eyeLoc = glGetUniformLocation(shader.id(), "eyePos");
+			glUniform3f(eyeLoc, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+
+			GLuint emissiveImageLoc = glGetUniformLocation(shader.id(), "emissiveSampler");
+			glUniform1i(emissiveImageLoc, drawableProp->material->emissiveTexNumber);
+
+			GLuint metalImageLoc = glGetUniformLocation(shader.id(), "metallicSampler");
+			glUniform1i(metalImageLoc, drawableProp->material->metallicTexNumber);
+
+			GLuint roughnessImageLoc = glGetUniformLocation(shader.id(), "roughnessSampler");
+			glUniform1i(roughnessImageLoc, drawableProp->material->roughnessTexNumber);
+
+			GLuint aoImageLoc = glGetUniformLocation(shader.id(), "aoSampler");
+			glUniform1i(aoImageLoc, drawableProp->material->aoTexNumber);
+
+			GLuint normalImageLoc = glGetUniformLocation(shader.id(), "normalSampler");
+			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, -2, -6, -1);
+
+			GLuint sunColor = glGetUniformLocation(shader.id(), "sunColor");
+			glUniform4f(sunColor, 0.8, 0.6, 0.8, 1.5);
 
 			GLuint baseReflectance = glGetUniformLocation(shader.id(), "baseReflectance");
 			glUniform1f(baseReflectance, 0.04);

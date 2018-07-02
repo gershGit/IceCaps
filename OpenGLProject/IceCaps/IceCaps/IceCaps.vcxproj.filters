@@ -241,6 +241,9 @@
     <None Include="cubeMap.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="PBR_emissive.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="gf.bmp">

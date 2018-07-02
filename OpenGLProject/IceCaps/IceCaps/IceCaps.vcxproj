@@ -194,6 +194,7 @@
     <None Include="metallic.vert" />
     <None Include="PBR.frag" />
     <None Include="PBR.vert" />
+    <None Include="PBR_emissive.frag" />
     <None Include="PBR_simple.frag" />
     <None Include="PBR_simple.vert" />
     <None Include="phongFull.frag" />

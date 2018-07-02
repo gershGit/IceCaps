@@ -13,6 +13,7 @@ uniform sampler2D metallicSampler;
 uniform sampler2D roughnessSampler;
 uniform sampler2D normalSampler;
 uniform sampler2D aoSampler;
+uniform sampler2D emissiveSampler;
 uniform sampler2D irradianceMap;
 uniform sampler2D environmentMap;
 
@@ -102,7 +103,7 @@ vec3 BRDF(vec3 N, vec3 V, vec3 H, vec3 L, vec3 radiance, vec3 albedo, float meta
 	vec3 specular = numerator / max(denominator, 0.00001);
 
 	float diffuseAngle = max(dot(N,L), 0.0);
-	return ((diffuseFraction * albedo / M_PI) + mix(specular, reflectionCol, 0.01)) * radiance * diffuseAngle;
+	return ((diffuseFraction * albedo / M_PI) + mix(specular, reflectionCol, 0.04)) * radiance * diffuseAngle;
 }
 
 //Calculate radiance for a single light
@@ -129,7 +130,7 @@ vec3 getSunLighting(vec3 N, vec3 V, vec3 albedo, float metallic, float roughness
 vec3 getEnvironmentLighting(vec3 N, vec3 V, vec3 albedo, float metallic, float roughness, vec3 F0){
 	vec3 L = reflect(-V,N);
 	vec3 H = normalize(V + L);
-	vec3 radiance = getFromIMap(L) / 1634;		
+	vec3 radiance = getFromIMap(L) / 16384;		
 
 	return BRDF(N, V, H, L, radiance, albedo, metallic, F0, roughness);
 }
@@ -179,4 +180,8 @@ void main() {
 
 	//output
     fragColor = vec4(color, 1.0f);
+	vec3 emissive = texture(emissiveSampler, ourTexCoords).rgb;
+	if (emissive.r + emissive.g + emissive.b > 0.1){
+		fragColor = vec4(emissive, 1.0f);
+	}
 }
