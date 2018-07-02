@@ -9,7 +9,7 @@
 #include "Material.h"
 
 //Types of objects. This is important for raytracing in particular
-enum dType { MESH, SPHERE, UI };
+enum dType { MESH, SPHERE, UI_DRAWABLE };
 
 class GLDrawable : public Property
 {

@@ -449,9 +449,9 @@ void loadScene() {
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);
 	//lights.push_back(spawnedLight_2);
-	lights.push_back(spawnedLight_3);
+	//lights.push_back(spawnedLight_3);
 	lights.push_back(player1_bottom);
-	//lights.push_back(player1_back);
+	lights.push_back(player1_back);
 
 	free(mCoordSpawner);
 	for (GameObject* obj : objects) {
