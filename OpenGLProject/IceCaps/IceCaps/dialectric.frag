@@ -58,7 +58,7 @@ float geometrySmith(vec3 N, vec3 V, vec3 L){
 vec3 BRDF(vec3 N, vec3 V, vec3 H, vec3 L, vec3 radiance, vec3 albedo){
 	float D = distributionGGX(N, H);
 	float G = geometrySmith(N, V, L);
-	vec3 F = fresnelSchlick(max(dot(V,N), 0.0), vec3(baseReflectance));
+	vec3 F = fresnelSchlick(max(dot(H,N), 0.0), vec3(baseReflectance));
 
 	vec3 diffuseFraction = vec3(1.0) - F;
 

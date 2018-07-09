@@ -21,6 +21,7 @@
 #include <cstring>
 #include <mutex>
 #include <functional>
+#include "GameTimer.h"
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
@@ -38,6 +39,7 @@ std::mutex messageOut_mutex;
 NetClient myClient = NetClient(&messageInList, &messageOutList, &messageIn_mutex, &messageOut_mutex);
 int trackingInt = 0;
 ObjectFactory* mObjectFactory;
+GameTimer timer;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -98,35 +100,35 @@ void handleMessages(){
 }
 void runUpdates() {
 	if (input->isDown(UP_ARROW_KEY)) {
-		objects[2]->pos.y += 0.01f;
+		objects[2]->pos.y += 6.0f* timer.GetDeltaTime();
 		objects[2]->moved = true;
 	}
 	if (input->isDown(DOWN_ARROW_KEY)) {
-		objects[2]->pos.y -= 0.01f;
+		objects[2]->pos.y -= 6.0f* timer.GetDeltaTime();
 		objects[2]->moved = true;
 	}
 	if (input->isDown(LEFT_ARROW_KEY)) {
-		objects[2]->pos.x -= 0.01f;
+		objects[2]->pos.x -= 6.0f * timer.GetDeltaTime();
 		objects[2]->moved = true;
 	}
 	if (input->isDown(RIGHT_ARROW_KEY)) {
-		objects[2]->pos.x += 0.01f;
+		objects[2]->pos.x += 6.0f* timer.GetDeltaTime();
 		objects[2]->moved = true;
 	}
 	if (input->isDown(W_KEY)) {
-		mainCamera->pos += mainCamera->forward() * 0.01f;
+		mainCamera->pos += mainCamera->forward() * 6.0f * (float)timer.GetDeltaTime();
 		mainCamera->moved = true;
 	}
 	if (input->isDown(S_KEY)) {
-		mainCamera->pos -= mainCamera->forward() * 0.01f;
+		mainCamera->pos -= mainCamera->forward() * 6.0f * (float)timer.GetDeltaTime();
 		mainCamera->moved = true;
 	}
 	if (input->isDown(A_KEY)) {
-		mainCamera->pos += mainCamera->right() * 0.01f;
+		mainCamera->pos += mainCamera->right() * 6.0f * (float)timer.GetDeltaTime();
 		mainCamera->moved = true;
 	}
 	if (input->isDown(D_KEY)) {
-		mainCamera->pos -= mainCamera->right() * 0.01f;
+		mainCamera->pos -= mainCamera->right() * 6.0f * (float)timer.GetDeltaTime();
 		mainCamera->moved = true;
 	}
 	if (input->isDown(P_KEY)) {
@@ -211,9 +213,11 @@ void renderScene() {
 	renderer.renderIBL(envMap, mainCamera);
 };
 void loadScene() {
+	timer = GameTimer();
 	CoordsSpawner * mCoordSpawner = new CoordsSpawner();
 	std::vector<GLDrawable*> toGenerate = std::vector<GLDrawable*>();
 	int texture_number = 0;
+	mObjectFactory = new ObjectFactory();
 
 	GLCamera* mainCam = new GLCamera();
 	mainCam->fov = 45;
@@ -328,6 +332,12 @@ void loadScene() {
 	toGenerate.push_back(suzzane_drawable);
 
 	//-----------Objects------------
+	HeightMap * myMap = new HeightMap;
+	GameObject* myTerrain = mObjectFactory->createTerrainSaveMap(100, 40, 30, "Textures/heightmap_hq.png", myMap);
+	myTerrain->glDrawable->material = sphereMat;
+	myTerrain->moved = true;
+	toGenerate.push_back(myTerrain->glDrawable);
+
 	GameObject* childCube = new GameObject();
 	childCube->pos.x = 3.0f;
 	childCube->scale = glm::vec3(0.5, 0.5, 0.5);
@@ -386,8 +396,7 @@ void loadScene() {
 	GameObject* spawnedSphere = mObjectFactory->createObject(SPHERE_PRIMITVE);
 	spawnedSphere->glDrawable->material = gfPBR;
 	toGenerate.push_back(spawnedSphere->glDrawable);
-	spawnedSphere->pos.z = 12;
-	spawnedSphere->pos.y = 3;
+	mObjectFactory->addFoliage(spawnedSphere, 0, 12, myMap);
 	SphereCollider* lowSphere = new SphereCollider();
 	lowSphere->position = spawnedSphere->pos;
 	lowSphere->radius = 1;
@@ -425,7 +434,7 @@ void loadScene() {
 	GameObject* spawnedLight_3 = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(3, 3, 16), glm::vec3(1.0f, 0.0f, 1.0f), 1.0, true);
 	toGenerate.push_back(spawnedLight_3->glDrawable);
 
-	GameObject* player1_bottom = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(0, -0.95, 0), glm::vec3(1.0f, 1.0f, 0.0f), 1.0, true);
+	GameObject* player1_bottom = mObjectFactory->createLight(POINT_LIGHT, glm::vec3(0, -0.9, 0), glm::vec3(1.0f, 1.0f, 0.0f), 1.0, true);
 	robo1->addChild(player1_bottom);
 	toGenerate.push_back(player1_bottom->glDrawable);
 
@@ -439,6 +448,7 @@ void loadScene() {
 	}
 
 	//-------------Adding objects to list-----------------
+	objects.push_back(myTerrain);
 	objects.push_back(parentCube);
 	objects.push_back(ground);
 	objects.push_back(suzaneHead);
@@ -470,6 +480,7 @@ void startScene() {
 	for (GameObject* object : objects) {
 		callStart(object);
 	}
+	timer.Start();
 };
 
 int main()
@@ -510,6 +521,7 @@ int main()
 		//input->setFlags();
 		handleMessages();
 		instance.processInput(instance.window);
+		timer.Update();
 		runUpdates();
 		runSimulations();
 		calculatePhysics();

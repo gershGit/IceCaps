@@ -140,6 +140,7 @@
     <ClCompile Include="..\..\..\Source\Camera.cpp" />
     <ClCompile Include="..\..\..\Source\Drawable.cpp" />
     <ClCompile Include="..\..\..\Source\GameObject.cpp" />
+    <ClCompile Include="..\..\..\Source\GameTimer.cpp" />
     <ClCompile Include="..\..\..\Source\InputControl.cpp" />
     <ClCompile Include="..\..\..\Source\IrradianceMap.cpp" />
     <ClCompile Include="..\..\..\Source\Material.cpp" />
@@ -154,6 +155,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\Headers\BoxCollider.h" />
     <ClInclude Include="..\..\..\Headers\Collider.h" />
+    <ClInclude Include="..\..\..\Headers\GameTimer.h" />
     <ClInclude Include="..\..\..\Headers\iceLoader.h" />
     <ClInclude Include="..\..\..\Headers\IrradianceMap.h" />
     <ClInclude Include="..\..\..\Headers\Light.h" />

@@ -54,10 +54,10 @@ public:
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
 
 			//Point lights
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
 
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
@@ -90,10 +90,10 @@ public:
 			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
 
 			//Point lights
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
 
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
@@ -133,10 +133,10 @@ public:
 			glUniformMatrix4fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
 
 			//Point lights
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
 
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
@@ -284,10 +284,10 @@ public:
 			glUniformMatrix4fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
 
 			//Point lights
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
 
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
@@ -336,10 +336,10 @@ public:
 			glUniformMatrix4fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
 
 			//Point lights
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), lights[0]->pos.x, lights[0]->pos.y, lights[0]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), lights[1]->pos.x, lights[1]->pos.y, lights[1]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), lights[2]->pos.x, lights[2]->pos.y, lights[2]->pos.z);
-			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), lights[3]->pos.x, lights[3]->pos.y, lights[3]->pos.z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
 
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);

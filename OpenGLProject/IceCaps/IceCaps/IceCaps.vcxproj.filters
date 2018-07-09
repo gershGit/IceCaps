@@ -75,6 +75,9 @@
     <ClCompile Include="..\..\..\Source\NetServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Source\GameTimer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Headers.h">
@@ -148,6 +151,9 @@
     </ClInclude>
     <ClInclude Include="..\..\..\Headers\Property.h">
       <Filter>Header Files\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\Headers\GameTimer.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
