@@ -30,6 +30,21 @@ public:
 		glDeleteShader(fragmentShader);
 	}
 
+	//Creates a shader program from a vertex, fragment and geometry shader
+	ShaderProgram(const std::string& vertexPath, const std::string& geomPath,const std::string& fragmentPath) {
+		std::cout << "Loading shaders at " << vertexPath << " and " << geomPath <<  " and " << fragmentPath << std::endl;
+		GLuint vertexShader = createShader(vertexPath, GL_VERTEX_SHADER);
+		GLuint geometryShader = createShader(geomPath, GL_GEOMETRY_SHADER);
+		GLuint fragmentShader = createShader(fragmentPath, GL_FRAGMENT_SHADER);
+
+		shaderID = createShaderProgram(vertexShader, geometryShader, fragmentShader);
+
+		// cleanup the shaders
+		glDeleteShader(vertexShader);
+		glDeleteShader(geometryShader);
+		glDeleteShader(fragmentShader);
+	}
+
 	//Returns the shader's id
 	GLuint id() const {
 		return shaderID;
@@ -59,11 +74,32 @@ public:
 		return program;
 	}
 
+	//Creates the program from references to a vertex, geometry and frag shader
+	GLuint createShaderProgram(GLuint vertexShader, GLuint geometryShader, GLuint fragmentShader) {
+		GLuint program = glCreateProgram();
+		glAttachShader(program, vertexShader);
+		glAttachShader(program, geometryShader);
+		glAttachShader(program, fragmentShader);
+		glLinkProgram(program);
+
+		int success;
+		glGetProgramiv(program, GL_LINK_STATUS, &success);
+		if (!success) {
+			char infoLog[512];
+			glGetProgramInfoLog(program, 512, NULL, infoLog);
+			std::cerr << "ERROR::PROGRAM:COMPILATION_FAILED\n"
+				<< infoLog << std::endl;
+		}
+
+		return program;
+	}
+
 	//Returns the name of the shader type
 	std::string shaderTypeName(GLenum shaderType) {
 		switch (shaderType) {
 		case GL_VERTEX_SHADER: return "VERTEX";
 		case GL_FRAGMENT_SHADER: return "FRAGMENT";
+		case GL_GEOMETRY_SHADER: return "GEOMETRY";
 		default: return "UNKNOWN";
 		}
 	}

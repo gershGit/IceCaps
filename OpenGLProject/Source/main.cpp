@@ -22,12 +22,14 @@
 #include <mutex>
 #include <functional>
 #include "GameTimer.h"
+#include "ParticleSystem.h"
 
 InputControl* input;
 GLRenderer renderer = GLRenderer();
 GameObject* mainCamera = new GameObject();
 std::vector<GameObject*> objects;
 std::vector<GameObject*> online_playerObjects;
+std::vector<ParticleSystem*> pSystems;
 std::vector<GameObject*> lights;
 double lastTime = 0.0f;
 Imap *envMap;
@@ -59,6 +61,7 @@ int compareByCoordSize(const void * d1, const void * d2) {
 	if (draw1->coords.size() > draw2->coords.size()) return -1;
 	if (draw1->coords.size() == draw2->coords.size()) return 0;
 	if (draw1->coords.size() < draw2->coords.size()) return 1;
+	return 0;
 }
 
 DWORD WINAPI createClientReceiver(void *data) {
@@ -160,7 +163,11 @@ void runUpdates() {
 		}
 	}
 };
-void runSimulations() {};
+void runSimulations() {
+	for (ParticleSystem* system : pSystems) {
+		system->update();
+	}
+};
 void calculatePhysics() {
 	double newTime = glfwGetTime();
 	double timestep = newTime - lastTime;
@@ -196,17 +203,13 @@ void renderScene() {
 	renderer.viewMatrix = mainCamera->camera->getViewMatrix();
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
-			double nowTime = fmod(glfwGetTime(), 12);
-
-			if (strcmp(object->name, "SPHERE") == 0) {
-				//object->pos.y = sin(nowTime) + 3.0;
-				object->rot.z = nowTime / 6;
-				object->rot.x = nowTime / 2;
-				//object->moved = true;
-			}
 			renderer.renderObjects(object, mainCamera, lights, irrMap, envMap);
 		}
 	}
+	for (ParticleSystem* system : pSystems) {
+		renderer.renderParticleSystem(system, mainCamera, lights);
+	}
+
 	for (GameObject* object : lights) {
 		renderer.renderLights(object, mainCamera);
 	}
@@ -332,6 +335,17 @@ void loadScene() {
 	toGenerate.push_back(suzzane_drawable);
 
 	//-----------Objects------------
+	ParticleSystem * mySystem = new ParticleSystem(&timer);
+	mySystem->setAcceleration(glm::vec3(0, -9.8, 0));
+	mySystem->setStartVelocity(glm::vec3(0, 7, 0));
+	mySystem->setLifeTime(2.5f);
+	mySystem->setParticleStartSize(0.125f);
+	mySystem->setRandomness(2.0);
+	mySystem->setSpawnRate(500);
+	mySystem->setSpawnTime(5.0f);
+	mySystem->moved = true;
+	mySystem->shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
+
 	HeightMap * myMap = new HeightMap;
 	GameObject* myTerrain = mObjectFactory->createTerrainSaveMap(100, 40, 30, "Textures/heightmap_hq.png", myMap);
 	myTerrain->glDrawable->material = sphereMat;
@@ -448,13 +462,15 @@ void loadScene() {
 	}
 
 	//-------------Adding objects to list-----------------
-	objects.push_back(myTerrain);
-	objects.push_back(parentCube);
+	//objects.push_back(myTerrain);
+	//objects.push_back(parentCube);
 	objects.push_back(ground);
-	objects.push_back(suzaneHead);
-	objects.push_back(spawnedSphere);
-	objects.push_back(spawnedSphere2);
-	objects.push_back(robo1);
+	//objects.push_back(suzaneHead);
+	//objects.push_back(spawnedSphere);
+	//objects.push_back(spawnedSphere2);
+	//objects.push_back(robo1);
+
+	pSystems.push_back(mySystem);
 
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);

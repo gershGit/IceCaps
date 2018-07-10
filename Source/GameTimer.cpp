@@ -57,3 +57,13 @@ double GameTimer::GetUnscaledDeltaTime() {
 	}
 	return unscaledDeltaTime;
 }
+
+double GameTimer::GetOurCurrentTime()
+{
+	return glfwGetTime();
+}
+
+double GameTimer::GetTotalElapsed()
+{
+	return currentTime - baseTime;
+}

@@ -179,7 +179,7 @@ public:
 
 	//Checks for collisions within the list
 	//TODO only check for collisions with objects further in the list so collisions aren't recomputed
-	void checkCollisions(std::vector<GameObject*> objects) {
+	virtual void checkCollisions(std::vector<GameObject*> objects) {
 		for (GameObject* object : objects) {
 			if (object != this && object->usingCollider) {
 				collisionInfo cInfo = sCollider->checkCollision(object->sCollider);
@@ -195,7 +195,7 @@ public:
 		}
 	}
 
-	void handleCollisions() {
+	virtual void handleCollisions() {
 		for (collisionInfo info : collisions) {
 			//TODO add collision movement info using rigid bodies
 		}
@@ -224,4 +224,5 @@ public:
 	}
 
 	//TODO call update every frame and update a virtual function
+	virtual void update() {};
 };

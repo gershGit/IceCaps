@@ -21,8 +21,8 @@ public:
 	float aspect_ratio = 1.333333f;
 
 	//Near and far planes of the frustrum for culling
-	float n = 0.1;
-	float f = 50;
+	float n = 0.1f;
+	float f = 50.0f;
 
 	//Dimensions that the camera renders to
 	float x_dim = 1280;

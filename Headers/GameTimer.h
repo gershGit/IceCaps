@@ -1,3 +1,4 @@
+#pragma once
 #include "Headers.h"
 
 class GameTimer
@@ -20,4 +21,6 @@ public:
 	void SetScalar(double scalar);
 	double GetDeltaTime();
 	double GetUnscaledDeltaTime();
+	double GetOurCurrentTime();
+	double GetTotalElapsed();
 };

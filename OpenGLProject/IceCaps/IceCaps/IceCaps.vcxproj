@@ -147,6 +147,8 @@
     <ClCompile Include="..\..\..\Source\NetClient.cpp" />
     <ClCompile Include="..\..\..\Source\NetServer.cpp" />
     <ClCompile Include="..\..\..\Source\ObjectFactory.cpp" />
+    <ClCompile Include="..\..\..\Source\ParticleManager.cpp" />
+    <ClCompile Include="..\..\..\Source\ParticleSystem.cpp" />
     <ClCompile Include="..\..\..\Source\RigidBody.cpp" />
     <ClCompile Include="..\..\..\Source\SphereCollider.cpp" />
     <ClCompile Include="..\..\Source\main.cpp" />
@@ -169,6 +171,8 @@
     <ClInclude Include="..\..\..\Headers\GameObject.h" />
     <ClInclude Include="..\..\..\Headers\InputControl.h" />
     <ClInclude Include="..\..\..\Headers\Material.h" />
+    <ClInclude Include="..\..\..\Headers\ParticleManager.h" />
+    <ClInclude Include="..\..\..\Headers\ParticleSystem.h" />
     <ClInclude Include="..\..\..\Headers\Property.h" />
     <ClInclude Include="..\..\..\Headers\Renderer.h" />
     <ClInclude Include="..\..\..\Headers\RigidBody.h" />
@@ -194,6 +198,9 @@
     <None Include="displacePhong.vert" />
     <None Include="metallic.frag" />
     <None Include="metallic.vert" />
+    <None Include="particleSystem.frag" />
+    <None Include="particleSystem.geom" />
+    <None Include="particleSystem.vert" />
     <None Include="PBR.frag" />
     <None Include="PBR.vert" />
     <None Include="PBR_emissive.frag" />

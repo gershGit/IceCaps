@@ -64,6 +64,7 @@ GameObject* ObjectFactory::createObject(primitive primitive_type) {
 
 		return sphere;
 	}
+	return nullptr;
 }
 
 GameObject * ObjectFactory::createObject(primitive primitive_type, int id)
@@ -87,6 +88,7 @@ GameObject * ObjectFactory::createObject(primitive primitive_type, int id)
 
 		return sphere;
 	}
+	return nullptr;
 }
 
 void AddPoint(int length, float resolution, int xVal, int zVal, unsigned char * image, int width, float maxHeight, std::vector<float> &coordinates)
@@ -182,7 +184,6 @@ GameObject * ObjectFactory::createTerrain(float length, float maxHeight, float w
 	std::vector<unsigned int> indices = std::vector<unsigned int>();
 
 	//TODO optimize
-	float x, y, z;
 	int indexTracker = 0;
 	int xVal, zVal;
 	for (int i = 0; i < width-1; i++) {
@@ -293,7 +294,6 @@ GameObject * ObjectFactory::createTerrainSaveMap(float length, float maxHeight, 
 	std::vector<unsigned int> indices = std::vector<unsigned int>();
 
 	//TODO optimize
-	float x, y, z;
 	int indexTracker = 0;
 	int xVal, zVal;
 	for (int i = 0; i < width - 1; i++) {
@@ -418,4 +418,5 @@ GameObject* ObjectFactory::createLight(lightType type_of_light, glm::vec3 positi
 
 		return cube;
 	}
+	return nullptr;
 }

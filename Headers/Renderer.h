@@ -4,7 +4,9 @@
 
 #include "Headers.h"
 #include "GameObject.h"
+#include "ParticleSystem.h"
 #include "Drawable.h"
+#include "IrradianceMap.h"
 
 class GLRenderer {
 public:
@@ -367,6 +369,22 @@ public:
 		//Render all the children of this object at the same time to ensure all objects, not only top level ones are rendered
 		for (GameObject* child : object->children) {
 			renderObjects(child, camera, lights, irradianceMap, environmentMap);
+		}
+	}
+
+	void renderParticleSystem(ParticleSystem * pSystem, GameObject* camera, std::vector<GameObject*> lights) {
+		pSystem->shader.use();
+		//Store the matrices used in all shaders
+		GLuint loc = glGetUniformLocation(pSystem->shader.id(), "model");
+		glUniformMatrix4fv(loc, 1, GL_FALSE, &pSystem->getTransform()[0][0]);
+		GLuint viewLoc = glGetUniformLocation(pSystem->shader.id(), "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		GLuint projLoc = glGetUniformLocation(pSystem->shader.id(), "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
+
+		for (Particle particle : pSystem->particles) {
+			glBindVertexArray(particle.vao);
+			glDrawArrays(GL_POINT, 0, 1);
 		}
 	}
 
