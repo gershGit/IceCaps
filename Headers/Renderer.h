@@ -7,6 +7,7 @@
 #include "ParticleSystem.h"
 #include "Drawable.h"
 #include "IrradianceMap.h"
+#include <map>
 
 class GLRenderer {
 public:
@@ -15,9 +16,10 @@ public:
 	GLuint cubeVAO;
 	GLuint testVAO;
 	GLuint testVBO;
-	bool firstTest = true;
 	ShaderProgram cubeShader;
+	ShaderProgram testShader;
 	glm::mat4 viewMatrix;
+	GameObject* myCamera;
 
 	void renderObjects(GameObject* object, GameObject* camera, std::vector<GameObject*> lights, Imap* irradianceMap, Imap* environmentMap) {
 		//Debugging statement for which object is being rendered
@@ -263,6 +265,7 @@ public:
 			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
 			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
 
+
 			GLuint metalImageLoc = glGetUniformLocation(shader.id(), "metallicSampler");
 			glUniform1i(metalImageLoc, drawableProp->material->metallicTexNumber);
 
@@ -322,7 +325,7 @@ public:
 			glUniform1i(roughnessImageLoc, drawableProp->material->roughnessTexNumber);
 
 			GLuint aoImageLoc = glGetUniformLocation(shader.id(), "aoSampler");
-			glUniform1i(aoImageLoc, drawableProp->material->aoTexNumber);
+			glUniform1i(aoImageLoc, drawableProp->material->ao);
 
 			GLuint normalImageLoc = glGetUniformLocation(shader.id(), "normalSampler");
 			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
@@ -365,7 +368,7 @@ public:
 			glDrawElements(GL_TRIANGLES, drawableProp->indices.size(), GL_UNSIGNED_INT, 0);
 		}
 		else {
-			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
+			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size()/14);
 			glBindVertexArray(0);
 		}
 
@@ -377,15 +380,37 @@ public:
 
 	void renderParticleSystem(ParticleSystem * pSystem, GameObject* camera, std::vector<GameObject*> lights) {
 		pSystem->shader.use();
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDepthFunc(GL_LEQUAL);
 		//Store the matrices used in all shaders
-		GLuint loc = glGetUniformLocation(pSystem->shader.id(), "model");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, &pSystem->getTransform()[0][0]);
+		GLuint sizeLoc = glGetUniformLocation(pSystem->shader.id(), "radius");
+		GLuint camUpLoc = glGetUniformLocation(pSystem->shader.id(), "worldspace_up");
+		glUniform3f(camUpLoc, viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+		GLuint camRightLoc = glGetUniformLocation(pSystem->shader.id(), "worldspace_right");
+		glUniform3f(camRightLoc, viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+
+		GLuint texLoc = glGetUniformLocation(pSystem->shader.id(), "particle_texture"); 
+		glUniform1i(texLoc, pSystem->particle_texture_num);
+
 		GLuint viewLoc = glGetUniformLocation(pSystem->shader.id(), "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		GLuint projLoc = glGetUniformLocation(pSystem->shader.id(), "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(myCamera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
 
-		GLuint sizeLoc = glGetUniformLocation(pSystem->shader.id(), "size");
+		std::map<float, Particle*> sorted;
+		for (Particle * particle : pSystem->particles) {
+			if (particle->alive) {
+				float distance = glm::length(camera->pos - particle->position);
+				sorted[distance] = particle;
+			}
+		}
+		for (std::map<float, Particle*>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it) {
+			glUniform1f(sizeLoc, it->second->size);
+			glBindVertexArray(it->second->vao);
+			glDrawArrays(GL_POINTS, 0, 1);
+		}
+
 
 		for (Particle* particle : pSystem->particles) {
 			if (particle->alive) {
@@ -394,24 +419,7 @@ public:
 				glDrawArrays(GL_POINTS, 0, 1);
 			}
 		}
-	}
-
-	void renderParticleSystemWithObjects(ParticleSystem * pSystem, GameObject* model, GameObject* camera, std::vector<GameObject*> lights) {
-		pSystem->shader.use();
-		//Store the matrices used in all shaders
-		GLuint loc = glGetUniformLocation(pSystem->shader.id(), "model");
-		glUniformMatrix4fv(loc, 1, GL_FALSE, &pSystem->getTransform()[0][0]);
-		GLuint viewLoc = glGetUniformLocation(pSystem->shader.id(), "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
-		GLuint projLoc = glGetUniformLocation(pSystem->shader.id(), "projection");
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
-
-		for (Particle* particle : pSystem->particles) {
-			if (particle->alive) {
-				glBindVertexArray(particle->vao);
-				glDrawArrays(GL_TRIANGLES, 0, pSystem->coordinates.size());
-			}
-		}
+		glBindVertexArray(0);
 	}
 
 	void renderLights(GameObject* light_object, GameObject* camera) {
@@ -532,22 +540,38 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void renderTest(ShaderProgram &testShader) {
-		testShader.use();
-		float position[] = { -0.25f, -0.25f };
-		if (firstTest) {
+	void renderTest() {
+		if (testVBO == 0) {
+			float points[] = {
+				0.0f,  2.0f, 0.0f,
+			};
 			glGenVertexArrays(1, &testVAO);
 			glGenBuffers(1, &testVBO);
-
 			glBindVertexArray(testVAO);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)(0 * sizeof(float)));
 			glBindBuffer(GL_ARRAY_BUFFER, testVBO);
-			glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(float), &position[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 			glBindVertexArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			firstTest = false;
+
+			testShader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
 		}
+		testShader.use();
+		glDepthFunc(GL_LEQUAL);
+
+		GLuint sizeLoc = glGetUniformLocation(testShader.id(), "radius");
+		glUniform1f(sizeLoc, 0.125);
+		GLuint camUpLoc = glGetUniformLocation(testShader.id(), "worldspace_up");
+		glUniform3f(camUpLoc, viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+		GLuint camRightLoc = glGetUniformLocation(testShader.id(), "worldspace_right");
+		glUniform3f(camRightLoc, viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+
+		GLuint viewLoc = glGetUniformLocation(testShader.id(), "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
+		GLuint projLoc = glGetUniformLocation(testShader.id(), "projection");
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(myCamera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
+
 		glBindVertexArray(testVAO);
 		glDrawArrays(GL_POINTS, 0, 1);
 		glBindVertexArray(0);

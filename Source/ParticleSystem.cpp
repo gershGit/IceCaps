@@ -1,4 +1,5 @@
 #include "..\Headers\ParticleSystem.h"
+#include "stb_image.h"
 
 float rand_float() {
 	return rand() / (RAND_MAX + 1.);
@@ -16,6 +17,42 @@ ParticleSystem::~ParticleSystem()
 ParticleSystem::ParticleSystem(GameTimer * timer)
 {
 	myTimer = timer;
+}
+
+int ParticleSystem::setTexture(const char * texture_path, int textureNumber)
+{
+	//TODO deprecate the use of texture numbers in favor of texture GLuints
+	std::cout << "Loading texture at " << texture_path << std::endl;
+	particle_texture_num = textureNumber;
+	glActiveTexture(GL_TEXTURE0 + textureNumber);
+	glGenTextures(1, &particle_texture);
+	glBindTexture(GL_TEXTURE_2D, particle_texture);
+
+	int width, height, nrComponents;
+	stbi_set_flip_vertically_on_load(true);
+	unsigned char *data = stbi_load(texture_path, &width, &height, &nrComponents, 0);
+	if (data) {
+		GLenum format = 0;
+		switch (nrComponents) {
+		case 1: format = GL_RED; break;
+		case 3: format = GL_RGB; break;
+		case 4: format = GL_RGBA; break;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		stbi_image_free(data);
+	}
+	else {
+		std::cout << "Texture failed to load at path: " << texture_path << std::endl;
+		stbi_image_free(data);
+		return 1;
+	}
 }
 
 void ParticleSystem::setCoordinates(std::vector<float> in_coords)
@@ -92,13 +129,15 @@ void ParticleSystem::update()
 				new_particle->alive = true;
 				new_particle->size = particle_start_size;
 				new_particle->start_time = myTimer->GetOurCurrentTime();
+
+				//TODO check if passing as uniform is faster
 				glGenVertexArrays(1, &new_particle->vao);
 				glBindVertexArray(new_particle->vao);
 				glGenBuffers(1, &new_particle->vbo);
 				glBindBuffer(GL_ARRAY_BUFFER, new_particle->vbo);
+				glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &new_particle->position[0], GL_DYNAMIC_DRAW);
 				glEnableVertexAttribArray(0);
 				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));				
-				glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &new_particle->position[0], GL_DYNAMIC_DRAW);
 				glBindVertexArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				particles.push_back(new_particle);

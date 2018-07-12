@@ -201,20 +201,18 @@ void sendMessages() {
 void renderScene() {
 	glDepthFunc(GL_LEQUAL);
 	renderer.viewMatrix = mainCamera->camera->getViewMatrix();
-	renderer.renderTest(pSystems.front()->shader);
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
 			renderer.renderObjects(object, mainCamera, lights, irrMap, envMap);
 		}
 	}
-	for (ParticleSystem* system : pSystems) {
-		renderer.renderParticleSystem(system, mainCamera, lights);
-	}
-
 	for (GameObject* object : lights) {
 		renderer.renderLights(object, mainCamera);
 	}
 	renderer.renderIBL(envMap, mainCamera);
+	for (ParticleSystem* system : pSystems) {
+		renderer.renderParticleSystem(system, mainCamera, lights);
+	}
 };
 void loadScene() {
 	timer = GameTimer();
@@ -230,6 +228,7 @@ void loadScene() {
 	mainCam->gameObject = mainCamera;
 	mainCamera->camera = mainCam;
 	mainCamera->pos.y = 2.8f;
+	renderer.myCamera = mainCamera;
 
 	envMap = new Imap("Textures/Arches_E_PineTree_8k.jpg", texture_number++);
 	irrMap = new Imap("Textures/Arches_E_PineTree_Env.hdr", texture_number++);
@@ -337,20 +336,16 @@ void loadScene() {
 
 	//-----------Objects------------
 	ParticleSystem * mySystem = new ParticleSystem(&timer);
-	std::vector<float> myCoords = {
-		-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0, 0.0
-	};
-	mySystem->setCoordinates(myCoords);
-	mySystem->setAcceleration(glm::vec3(0, -1, 0));
-	mySystem->setStartVelocity(glm::vec3(0, 3, 0));
-	mySystem->setLifeTime(20.0f);
-	mySystem->setParticleStartSize(0.125f);
+	mySystem->setAcceleration(glm::vec3(0, -0.125, 0));
+	mySystem->setStartVelocity(glm::vec3(0, 0.5, 0));
+	mySystem->setLifeTime(25.0f);
+	mySystem->setParticleStartSize(6.0f);
 	mySystem->setRandomness(2.0);
-	mySystem->setSpawnRate(500);
-	mySystem->setSpawnTime(5.0f);
+	mySystem->setSpawnRate(20);
+	mySystem->setSpawnTime(2.0f);
 	mySystem->moved = true;
-	mySystem->shader = suzzane_drawable->material->shader;
-	//mySystem->shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
+	mySystem->setTexture("Textures/smoke.png", texture_number++);
+	mySystem->shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
 
 	HeightMap * myMap = new HeightMap;
 	GameObject* myTerrain = mObjectFactory->createTerrainSaveMap(100, 40, 30, "Textures/heightmap_hq.png", myMap);
@@ -513,7 +508,7 @@ int main()
 
 	GLInstance instance;
 	instance.initialize();
-	instance.createWindow("IceCaps - Week 7", 720, 1280);
+	instance.createWindow("IceCaps - Week 9", 720, 1280);
 	instance.initGlad();
 	input = new InputControl(instance.window);
 	glfwSetKeyCallback(instance.window, key_callback);

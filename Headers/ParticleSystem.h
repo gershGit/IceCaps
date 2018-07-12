@@ -18,6 +18,15 @@ struct Particle {
 
 enum ParticleSystemType {FIRE, SMOKE, BLOOD, WATER_SPRAY, SPARKS, EXPLOSION};
 
+//TODO add more shape characteristics to allow for stretched geometry like rain
+//TODO add functions for particles to change shape, size and color based on lifetime,speed etc.
+//TODO add a color to the particles to blend the texture with (or use in case of no texture)
+//TODO fill out default functions so default system types can quickly be added with setType function
+//TODO add blending characteristic for objects that need no blending but instead discard
+//TODO foliage particle system that snaps to terrain gameObject using a weight map (Possibly using foliage objects <subclass of gameobject with special wind effects>)
+//TODO add functions for different environment variables (i.e. wind)
+//TODO random rotation of particles as seen from camera
+//TODO ATTEMPT wind bending interation of foliage particles
 class ParticleSystem : public GameObject
 {
 private:
@@ -48,6 +57,8 @@ public:
 	~ParticleSystem();
 
 	ParticleSystem(GameTimer * timer);
+	int setTexture(const char * texture_path, int textureNumber);
+
 	void setCoordinates(std::vector<float> in_coords);
 	void setDefaults();
 	void setType(ParticleSystemType type);

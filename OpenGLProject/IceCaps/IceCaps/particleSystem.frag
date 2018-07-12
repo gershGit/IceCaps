@@ -1,8 +1,10 @@
 #version 330 core
-in vec2 ourTexCoords;
-
 out vec4 FragColor;
 
-void main(){
-	FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-}
+in vec2 ourTexCoords;
+uniform sampler2D particle_texture;
+
+void main()
+{
+    FragColor = texture(particle_texture, ourTexCoords);   
+} 
