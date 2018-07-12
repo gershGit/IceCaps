@@ -18,6 +18,11 @@ ParticleSystem::ParticleSystem(GameTimer * timer)
 	myTimer = timer;
 }
 
+void ParticleSystem::setCoordinates(std::vector<float> in_coords)
+{
+	coordinates = in_coords;
+}
+
 void ParticleSystem::setStartVelocity(glm::vec3 start_vel_in)
 {
 	start_velocity = start_vel_in;
@@ -80,19 +85,20 @@ void ParticleSystem::update()
 				makeup_time = 0;
 			}
 			for (int i = 0; i < number_to_spawn; i++) {
-				Particle new_particle;
-				new_particle.position = pos;
+				Particle * new_particle = new Particle;
+				new_particle->position = pos;
 				glm::vec3 randVec = glm::vec3(rand_float(), rand_float(), rand_float()) * randomness;
-				new_particle.velocity = start_velocity + randVec;
-				new_particle.alive = true;
-				new_particle.size = particle_start_size;
-				glGenVertexArrays(1, &new_particle.vao);
-				glBindVertexArray(new_particle.vao);
+				new_particle->velocity = start_velocity + randVec;
+				new_particle->alive = true;
+				new_particle->size = particle_start_size;
+				new_particle->start_time = myTimer->GetOurCurrentTime();
+				glGenVertexArrays(1, &new_particle->vao);
+				glBindVertexArray(new_particle->vao);
+				glGenBuffers(1, &new_particle->vbo);
+				glBindBuffer(GL_ARRAY_BUFFER, new_particle->vbo);
 				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));
-				glGenBuffers(1, &new_particle.vbo);
-				glBindBuffer(GL_ARRAY_BUFFER, new_particle.vbo);
-				glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &new_particle.position.x, GL_DYNAMIC_DRAW);
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)(0 * sizeof(float)));				
+				glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &new_particle->position[0], GL_DYNAMIC_DRAW);
 				glBindVertexArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				particles.push_back(new_particle);
@@ -102,19 +108,19 @@ void ParticleSystem::update()
 	}
 	
 	float timestep = (float)myTimer->GetDeltaTime();
-	for (Particle particle : particles) {
-		if (particle.alive) {
-			if (elapsedTime - particle.start_time > lifetime) {
-				particle.alive = false;
+	float currentTime = (float)myTimer->GetOurCurrentTime();
+	for (Particle * particle : particles) {
+		if (particle->alive) {
+			if (currentTime - particle->start_time > lifetime) {
+				particle->alive = false;
 			}
 			else {
 				for (glm::vec3 accel : accelerations) {
-					glm::vec3 change = timestep * (particle.velocity + timestep * accel * 0.5f);
-					particle.position += timestep * (particle.velocity + timestep * accel * 0.5f);
-					particle.velocity += timestep * accel;
-					glBindVertexArray(particle.vao);
-					glBindBuffer(GL_ARRAY_BUFFER, particle.vbo);
-					glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &particle.position.x, GL_DYNAMIC_DRAW);
+					particle->position += timestep * (particle->velocity + timestep * accel * 0.5f);
+					particle->velocity += timestep * accel;
+					glBindVertexArray(particle->vao);
+					glBindBuffer(GL_ARRAY_BUFFER, particle->vbo);
+					glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &particle->position[0], GL_DYNAMIC_DRAW);
 					glBindVertexArray(0);
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}

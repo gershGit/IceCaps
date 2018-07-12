@@ -5,6 +5,8 @@ uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
 
+//uniform float size;
+
 float near = 0.1;
 float far = 100;
 
@@ -14,5 +16,6 @@ float LinearizeDepth(float depth){
 
 void main(){
 	vec4 tempPos = projection * view * model * vec4(aPos, 1.0);
-	gl_Position = vec4(tempPos.x, tempPos.y, LinearizeDepth(tempPos.z), tempPos.w);
+	//gl_Position = vec4(tempPos.x, tempPos.y, LinearizeDepth(tempPos.z), tempPos.w);
+	gl_Position = vec4(aPos.xy, 0.1, 1.0);
 }

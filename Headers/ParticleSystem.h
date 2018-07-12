@@ -28,7 +28,7 @@ public:
 	GLuint particle_texture;
 	int particle_texture_num;
 	int blendMode;
-	std::vector<Particle> particles;
+	std::vector<Particle*> particles;
 	int number_alive;
 	std::vector<glm::vec3> accelerations;
 	float lifetime;
@@ -41,12 +41,14 @@ public:
 	bool still_spawning = true;
 	double makeup_time = 0;
 	ShaderProgram shader;
+	std::vector<float> coordinates;
 
 public:
 	ParticleSystem();
 	~ParticleSystem();
 
 	ParticleSystem(GameTimer * timer);
+	void setCoordinates(std::vector<float> in_coords);
 	void setDefaults();
 	void setType(ParticleSystemType type);
 	void setStartVelocity(glm::vec3 start_vel_in);

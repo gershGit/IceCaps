@@ -201,6 +201,7 @@ void sendMessages() {
 void renderScene() {
 	glDepthFunc(GL_LEQUAL);
 	renderer.viewMatrix = mainCamera->camera->getViewMatrix();
+	renderer.renderTest(pSystems.front()->shader);
 	for (GameObject* object : objects) {
 		if (object->drawFlag) {
 			renderer.renderObjects(object, mainCamera, lights, irrMap, envMap);
@@ -336,15 +337,20 @@ void loadScene() {
 
 	//-----------Objects------------
 	ParticleSystem * mySystem = new ParticleSystem(&timer);
-	mySystem->setAcceleration(glm::vec3(0, -9.8, 0));
-	mySystem->setStartVelocity(glm::vec3(0, 7, 0));
-	mySystem->setLifeTime(2.5f);
+	std::vector<float> myCoords = {
+		-1.0, -1.0, 0.0, 1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, -1.0, 0.0, 1.0, 1.0, 0.0, -1.0, 1.0, 0.0
+	};
+	mySystem->setCoordinates(myCoords);
+	mySystem->setAcceleration(glm::vec3(0, -1, 0));
+	mySystem->setStartVelocity(glm::vec3(0, 3, 0));
+	mySystem->setLifeTime(20.0f);
 	mySystem->setParticleStartSize(0.125f);
 	mySystem->setRandomness(2.0);
 	mySystem->setSpawnRate(500);
 	mySystem->setSpawnTime(5.0f);
 	mySystem->moved = true;
-	mySystem->shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
+	mySystem->shader = suzzane_drawable->material->shader;
+	//mySystem->shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
 
 	HeightMap * myMap = new HeightMap;
 	GameObject* myTerrain = mObjectFactory->createTerrainSaveMap(100, 40, 30, "Textures/heightmap_hq.png", myMap);
@@ -462,13 +468,13 @@ void loadScene() {
 	}
 
 	//-------------Adding objects to list-----------------
-	//objects.push_back(myTerrain);
-	//objects.push_back(parentCube);
+	objects.push_back(myTerrain);
+	objects.push_back(parentCube);
 	objects.push_back(ground);
-	//objects.push_back(suzaneHead);
-	//objects.push_back(spawnedSphere);
-	//objects.push_back(spawnedSphere2);
-	//objects.push_back(robo1);
+	objects.push_back(suzaneHead);
+	objects.push_back(spawnedSphere);
+	objects.push_back(spawnedSphere2);
+	objects.push_back(robo1);
 
 	pSystems.push_back(mySystem);
 
