@@ -213,10 +213,11 @@ public:
 	};
 
 	//Function that controls what every game object must do on frame one
-	//TODO make this call a virtual function
 	void onStart() {
-		
+		start();
 	};
+
+	virtual void start() {};
 
 	//Function called on every collision
 	//TODO make this call a virtual function

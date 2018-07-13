@@ -201,6 +201,8 @@
     <None Include="particleSystem.frag" />
     <None Include="particleSystem.geom" />
     <None Include="particleSystem.vert" />
+    <None Include="particleSystemQuads.geom" />
+    <None Include="particleSystemVariableColor.frag" />
     <None Include="PBR.frag" />
     <None Include="PBR.vert" />
     <None Include="PBR_emissive.frag" />

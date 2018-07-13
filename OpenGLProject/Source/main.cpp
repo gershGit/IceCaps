@@ -347,6 +347,11 @@ void loadScene() {
 	mySystem->setTexture("Textures/smoke.png", texture_number++);
 	mySystem->shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
 
+	ParticleSystem * fireSystem = new ParticleSystem(&timer);
+	fireSystem->pos = glm::vec3(2, 0.1, -25);
+	fireSystem->moved = true;
+	fireSystem->setType(FIRE, texture_number++);
+
 	HeightMap * myMap = new HeightMap;
 	GameObject* myTerrain = mObjectFactory->createTerrainSaveMap(100, 40, 30, "Textures/heightmap_hq.png", myMap);
 	myTerrain->glDrawable->material = sphereMat;
@@ -471,7 +476,8 @@ void loadScene() {
 	objects.push_back(spawnedSphere2);
 	objects.push_back(robo1);
 
-	pSystems.push_back(mySystem);
+	//pSystems.push_back(mySystem);
+	pSystems.push_back(fireSystem);
 
 	lights.push_back(spawnedLight_0);
 	lights.push_back(spawnedLight_1);
@@ -496,6 +502,9 @@ void callStart(GameObject* parent) {
 void startScene() {
 	for (GameObject* object : objects) {
 		callStart(object);
+	}
+	for (ParticleSystem* system : pSystems) {
+		system->onStart();
 	}
 	timer.Start();
 };

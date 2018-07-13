@@ -10,10 +10,14 @@ struct Particle {
 	GLuint vbo;
 	glm::vec3 velocity;
 	glm::vec3 position;
+	glm::vec3 color;
+	float opacity;
 	glm::vec3 old_position;
 	float start_time;
 	float size;
 	bool alive;
+	int particle_texture_num;
+	glm::vec2 quadInfo;
 };
 
 enum ParticleSystemType {FIRE, SMOKE, BLOOD, WATER_SPRAY, SPARKS, EXPLOSION};
@@ -27,21 +31,26 @@ enum ParticleSystemType {FIRE, SMOKE, BLOOD, WATER_SPRAY, SPARKS, EXPLOSION};
 //TODO add functions for different environment variables (i.e. wind)
 //TODO random rotation of particles as seen from camera
 //TODO ATTEMPT wind bending interation of foliage particles
+//TODO add random size to particles
 class ParticleSystem : public GameObject
 {
 private:
+	int quadNum = 0;
+	int max_alive = 99999;
 	float startTime;
 	float elapsedTime;
 public:
+	bool usingQuads = false;
+	bool variableColor = false;
+
 	GameTimer *myTimer;
-	GLuint particle_texture;
-	int particle_texture_num;
+	std::vector<GLuint> particle_textures;
+	std::vector<int> particle_texture_nums;
 	int blendMode;
 	std::vector<Particle*> particles;
 	int number_alive;
 	std::vector<glm::vec3> accelerations;
 	float lifetime;
-	float particle_start_size;
 	int spawn_rate;
 	glm::vec3 start_velocity;
 	int shape;
@@ -52,6 +61,19 @@ public:
 	ShaderProgram shader;
 	std::vector<float> coordinates;
 
+	glm::vec3 start_color;
+	glm::vec3 end_color;
+	int color_interpolation_func;
+	float particle_start_opacity;
+	float particle_end_opacity;
+	int transparency_interpolation_func;
+	float mixRate = 0.0f;
+
+	float particle_start_size;
+	float particle_end_size;
+	int size_interpolation_func;
+	
+
 public:
 	ParticleSystem();
 	~ParticleSystem();
@@ -61,7 +83,8 @@ public:
 
 	void setCoordinates(std::vector<float> in_coords);
 	void setDefaults();
-	void setType(ParticleSystemType type);
+	void setType(ParticleSystemType type, int freeTexNumber);
+	void setUseQuads(bool to_use);
 	void setStartVelocity(glm::vec3 start_vel_in);
 	void setParticleStartSize(float new_size);
 	void setShape(int newShape);
@@ -71,6 +94,7 @@ public:
 	void setSpawnRate(int new_rate);
 	void setAcceleration(glm::vec3 accel_vector);
 	void setLifeTime(float lifetime);
+	void start();
 	void update();
 	//TODO collisions and responses using AABB for lighting things on fire and individual particles for movement
 };

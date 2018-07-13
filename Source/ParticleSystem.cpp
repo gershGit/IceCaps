@@ -2,7 +2,7 @@
 #include "stb_image.h"
 
 float rand_float() {
-	return rand() / (RAND_MAX + 1.);
+	return (((float) rand() / (RAND_MAX + 1))-0.5f)*2;
 }
 
 ParticleSystem::ParticleSystem()
@@ -23,10 +23,12 @@ int ParticleSystem::setTexture(const char * texture_path, int textureNumber)
 {
 	//TODO deprecate the use of texture numbers in favor of texture GLuints
 	std::cout << "Loading texture at " << texture_path << std::endl;
-	particle_texture_num = textureNumber;
+	stbi_set_flip_vertically_on_load(true);
+	particle_texture_nums.push_back(textureNumber);
 	glActiveTexture(GL_TEXTURE0 + textureNumber);
-	glGenTextures(1, &particle_texture);
-	glBindTexture(GL_TEXTURE_2D, particle_texture);
+	particle_textures.push_back(GLuint());
+	glGenTextures(1, &particle_textures.back());
+	glBindTexture(GL_TEXTURE_2D, particle_textures.back());
 
 	int width, height, nrComponents;
 	stbi_set_flip_vertically_on_load(true);
@@ -58,6 +60,48 @@ int ParticleSystem::setTexture(const char * texture_path, int textureNumber)
 void ParticleSystem::setCoordinates(std::vector<float> in_coords)
 {
 	coordinates = in_coords;
+}
+
+void ParticleSystem::setType(ParticleSystemType type, int freeTexNumber)
+{
+	if (type == FIRE) {
+		usingQuads = true;
+		variableColor = true;
+
+		particle_textures.clear();
+		particle_texture_nums.clear();
+		setTexture("Textures/firetexture.png", freeTexNumber);
+		mixRate = 1.0f;
+
+		randomness = 0.65;
+		start_velocity = glm::vec3(0, 1.75, 0);
+
+		spawn_rate = 3;
+		spawnTime = 9999999;
+		lifetime = 2.5;
+
+		start_color = glm::vec3(0.4,0.32,0.1);
+		end_color = glm::vec3(0.125f, 0, 0);
+		color_interpolation_func = 1;
+
+		particle_start_opacity = 1.0;
+		particle_end_opacity = 0.0;
+		transparency_interpolation_func = 1;
+
+		particle_start_size = 1.5;
+		particle_end_size = 1.75;
+		size_interpolation_func = 1;
+
+		accelerations.clear();
+		accelerations.push_back(glm::vec3(0, 0.2, 0));
+
+		max_alive = 18;
+	}
+}
+
+void ParticleSystem::setUseQuads(bool to_use)
+{
+	usingQuads = to_use;
 }
 
 void ParticleSystem::setStartVelocity(glm::vec3 start_vel_in)
@@ -105,11 +149,29 @@ void ParticleSystem::setLifeTime(float lifetime_in)
 	lifetime = lifetime_in;
 }
 
+
+void ParticleSystem::start()
+{
+	if (usingQuads && variableColor) {
+		shader = ShaderProgram("particleSystem.vert", "particleSystemQuads.geom", "particleSystemVariableColor.frag");
+	}
+	else if (usingQuads) {
+		shader = ShaderProgram("particleSystem.vert", "particleSystemQuads.geom", "particleSystem.frag");
+	}
+	else {
+		shader = ShaderProgram("particleSystem.vert", "particleSystem.geom", "particleSystem.frag");
+	}
+}
+
+template <class interpolater>
+interpolater linearInterpolate(interpolater start, interpolater end, float t) {
+	return start + (t*(end - start));
+}
+
 void ParticleSystem::update()
 {
 	elapsedTime += (float)myTimer->GetDeltaTime();
-	//TODO spawn new particles properly
-	if (still_spawning) {
+	if (still_spawning && number_alive < max_alive) {
 		if (elapsedTime > spawnTime) {
 			still_spawning = false;
 		}
@@ -120,15 +182,60 @@ void ParticleSystem::update()
 			}
 			else {
 				makeup_time = 0;
+			}		
+			for (int i = 0; i < particles.size(); i++) {
+				if (!particles.at(i)->alive) {
+					//Regenerate particle;
+					number_alive++;
+					particles.at(i)->alive = true;
+					particles.at(i)->position = pos;
+					glm::vec3 randVec = glm::vec3(rand_float(), rand_float(), rand_float()) * randomness;
+					particles.at(i)->velocity = start_velocity + randVec;
+					particles.at(i)->size = particle_start_size;
+					particles.at(i)->color = start_color;
+					particles.at(i)->opacity = particle_start_opacity;
+					particles.at(i)->start_time = myTimer->GetOurCurrentTime();
+
+					glBindVertexArray(particles.at(i)->vao);
+					glBindBuffer(GL_ARRAY_BUFFER, particles.at(i)->vbo);
+					glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(float), &particles.at(i)->position[0], GL_DYNAMIC_DRAW);
+					glBindVertexArray(0);
+					glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+					number_to_spawn--;
+					if (number_to_spawn == 0 || number_alive >= max_alive) {
+						break;
+					}
+				}
 			}
 			for (int i = 0; i < number_to_spawn; i++) {
+				number_alive++;
 				Particle * new_particle = new Particle;
 				new_particle->position = pos;
 				glm::vec3 randVec = glm::vec3(rand_float(), rand_float(), rand_float()) * randomness;
 				new_particle->velocity = start_velocity + randVec;
 				new_particle->alive = true;
 				new_particle->size = particle_start_size;
+				new_particle->color = start_color;
+				new_particle->opacity = particle_start_opacity;
 				new_particle->start_time = myTimer->GetOurCurrentTime();
+				new_particle->particle_texture_num = particle_texture_nums.at(rand()% particle_texture_nums.size());
+				if (usingQuads) {
+					switch (quadNum) {
+					case 0: new_particle->quadInfo = glm::vec2(0, 0);
+						break;
+					case 1: new_particle->quadInfo = glm::vec2(0.5f, 0);
+						break;
+					case 2: new_particle->quadInfo = glm::vec2(0, 0.5f);
+						break;
+					case 3: new_particle->quadInfo = glm::vec2(0.5f, 0.5f);
+						break;
+					default:
+						new_particle->quadInfo = glm::vec2(0, 0);
+					}
+					quadNum++;
+					quadNum = quadNum % 4;
+				}
 
 				//TODO check if passing as uniform is faster
 				glGenVertexArrays(1, &new_particle->vao);
@@ -141,7 +248,10 @@ void ParticleSystem::update()
 				glBindVertexArray(0);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				particles.push_back(new_particle);
-				
+			
+				if (number_alive >= max_alive) {
+					break;
+				}
 			}
 		}
 	}
@@ -152,6 +262,7 @@ void ParticleSystem::update()
 		if (particle->alive) {
 			if (currentTime - particle->start_time > lifetime) {
 				particle->alive = false;
+				number_alive--;
 			}
 			else {
 				for (glm::vec3 accel : accelerations) {
@@ -163,8 +274,21 @@ void ParticleSystem::update()
 					glBindVertexArray(0);
 					glBindBuffer(GL_ARRAY_BUFFER, 0);
 				}
+				switch (size_interpolation_func) {
+				case 0: break;
+				case 1: particle->size = linearInterpolate<float>(particle_start_size, particle_end_size, (currentTime - particle->start_time) / lifetime); //linear interpolate by time
+					break;
+				default: break;
+				}
+				switch (color_interpolation_func) {
+				case 0: break;
+				case 1: particle->color = linearInterpolate<glm::vec3>(start_color, end_color, (currentTime - particle->start_time) / lifetime);  //linear interpolate by time
+				}
+				switch (transparency_interpolation_func) {
+				case 0: break;
+				case 1: particle->opacity = linearInterpolate<float>(particle_start_opacity, particle_end_opacity, (currentTime - particle->start_time) / lifetime);  //linear interpolate by time
+				}
 			}
 		}
-	}
-	
+	}	
 }

@@ -381,22 +381,29 @@ public:
 	void renderParticleSystem(ParticleSystem * pSystem, GameObject* camera, std::vector<GameObject*> lights) {
 		pSystem->shader.use();
 		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); old version
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE); //New version
+		glDepthMask(false);
 		glDepthFunc(GL_LEQUAL);
 		//Store the matrices used in all shaders
 		GLuint sizeLoc = glGetUniformLocation(pSystem->shader.id(), "radius");
+		GLuint quadLoc = glGetUniformLocation(pSystem->shader.id(), "quad");
+		GLuint colorLoc = glGetUniformLocation(pSystem->shader.id(), "color");
+
 		GLuint camUpLoc = glGetUniformLocation(pSystem->shader.id(), "worldspace_up");
 		glUniform3f(camUpLoc, viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
 		GLuint camRightLoc = glGetUniformLocation(pSystem->shader.id(), "worldspace_right");
 		glUniform3f(camRightLoc, viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
 
 		GLuint texLoc = glGetUniformLocation(pSystem->shader.id(), "particle_texture"); 
-		glUniform1i(texLoc, pSystem->particle_texture_num);
 
 		GLuint viewLoc = glGetUniformLocation(pSystem->shader.id(), "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		GLuint projLoc = glGetUniformLocation(pSystem->shader.id(), "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(myCamera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
+
+		GLuint mixLoc = glGetUniformLocation(pSystem->shader.id(), "mixRate");
+		glUniform1f(mixLoc, pSystem->mixRate);
 
 		std::map<float, Particle*> sorted;
 		for (Particle * particle : pSystem->particles) {
@@ -406,8 +413,12 @@ public:
 			}
 		}
 		for (std::map<float, Particle*>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it) {
-			glUniform1f(sizeLoc, it->second->size);
-			glBindVertexArray(it->second->vao);
+			Particle* particle = it->second;
+			glUniform2f(quadLoc, particle->quadInfo.x, it->second->quadInfo.y);
+			glUniform4f(colorLoc, particle->color.x, particle->color.y, particle->color.z, particle->opacity);
+			glUniform1f(sizeLoc, particle->size);
+			glUniform1i(texLoc, particle->particle_texture_num);
+			glBindVertexArray(particle->vao);
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 
@@ -419,7 +430,9 @@ public:
 				glDrawArrays(GL_POINTS, 0, 1);
 			}
 		}
+		glDisable(GL_BLEND);
 		glBindVertexArray(0);
+		glDepthMask(true);
 	}
 
 	void renderLights(GameObject* light_object, GameObject* camera) {

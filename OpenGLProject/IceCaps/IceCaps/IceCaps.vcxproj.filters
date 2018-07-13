@@ -271,6 +271,12 @@
     <None Include="particleSystem.frag">
       <Filter>Source Files\shaders</Filter>
     </None>
+    <None Include="particleSystemQuads.geom">
+      <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="particleSystemVariableColor.frag">
+      <Filter>Source Files\shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="gf.bmp">
