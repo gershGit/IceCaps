@@ -24,9 +24,9 @@ public:
 	dType dtype;
 
 	//References for an objects vertex buffer object, index/element buffer object, and the vertex attribute object to use them
-	GLuint vbo;
-	GLuint vao;
-	GLuint ebo;
+	std::vector<GLuint> vbo_vector;
+	std::vector<GLuint> vao_vector;
+	std::vector<GLuint> ebo_vector;
 
 	//Bool used to determine whether or not OpenGL should draw by vertices or indices
 	bool usingEBO = false;
@@ -40,8 +40,6 @@ public:
 	//The coordinates to be used for the vertex buffer object
 	//TODO ensure this is freed once the vbo is initialized
 	std::vector<std::vector<float>> coords;
-	//Sizes are kept for rendering information
-	std::vector<int> coords_sizes;
 
 	//The coordinates to be used for the vertex buffer object
 	//TODO ensure this is freed once the vbo is initialized

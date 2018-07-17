@@ -364,12 +364,23 @@ public:
 		glBindVertexArray(drawableProp->vao);
 
 		//Render by indices or vertices based on if an ebo has been created
-		if (drawableProp->usingEBO) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo);
+		if (drawableProp->LODs > 1) {
+			float myLength = glm::length(camera->pos - object->pos);
+			for (int i = 0; i < drawableProp->LODs; i++) {
+				if (myLength < drawableProp->LOD_distances[i]) {
+					std::cout << "rendering LOD " << i << std::endl;
+					glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo_vector[i]);
+					glDrawElements(GL_TRIANGLES, drawableProp->indices[i].size(), GL_UNSIGNED_INT, 0);
+					break;
+				}
+			}
+		}
+		else if (drawableProp->usingEBO) {
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo_vector[0]);
 			glDrawElements(GL_TRIANGLES, drawableProp->indices[0].size(), GL_UNSIGNED_INT, 0);
 		}
 		else {
-			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords[0].size()/14);
+			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size()/14);
 			glBindVertexArray(0);
 		}
 
@@ -464,11 +475,11 @@ public:
 
 		//Render by indices or vertices based on if an ebo has been created
 		if (drawableProp->usingEBO) {
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo_vector[0]);
 			glDrawElements(GL_TRIANGLES, drawableProp->indices[0].size(), GL_UNSIGNED_INT, 0);
 		}
 		else {
-			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords[0].size());
+			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
 			glBindVertexArray(0);
 		}
 	}
