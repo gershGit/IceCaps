@@ -16,13 +16,30 @@ void GLDrawable::generateBuffers() {
 	// VBO creation
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, coords.size() * sizeof(float), coords.data(), GL_STATIC_DRAW);
+	int totalSize = 0;
+	for (int i = 0; i < LODs; i++) {
+		totalSize += coords[i].size();
+	}
+	glBufferData(GL_ARRAY_BUFFER, totalSize*sizeof(float), nullptr, GL_STATIC_DRAW);
+	if (LODs <= 1) {	
+		glBufferData(GL_ARRAY_BUFFER, coords[0].size() * sizeof(float), coords[0].data(), GL_STATIC_DRAW);
+	}
+	else {
+		int offset = 0;
+		for (int i = 0; i < LODs; i++) {
+			glBufferSubData(GL_ARRAY_BUFFER, offset * sizeof(float), coords[i].size() * sizeof(float), coords[i].data());
+			offset += coords[i].size();
+		}
+	}
 
 	//EBO creation
-	if (usingEBO) {
+	if (usingEBO && LODs<=1) {
 		glGenBuffers(1, &ebo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices[0].size() * sizeof(unsigned int), indices[0].data(), GL_STATIC_DRAW);
+	}
+	else if (usingEBO) {
+
 	}
 
 	// VAO implementation
