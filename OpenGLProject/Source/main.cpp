@@ -290,7 +290,8 @@ void loadScene() {
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
 	planeMesh->usingEBO = true;
-	planeMesh->coords = mCoordSpawner->planeCoordsOnly;
+	planeMesh->coords.push_back(std::vector<float>());
+	planeMesh->coords[0] = mCoordSpawner->planeCoordsOnly;
 	planeMesh->indices.push_back(mCoordSpawner->planeIndeces);
 	planeMesh->material = gfPBR;
 	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
@@ -303,7 +304,8 @@ void loadScene() {
 	std::vector<float> coords_robo = std::vector<float>();
 	std::vector<unsigned int> indices_robo = std::vector<unsigned int>();
 	roboMesh->indices.push_back(std::vector<unsigned int>());
-	loadICE("robo.ice", roboMesh->coords, roboMesh->indices[0]);
+	roboMesh->coords.push_back(std::vector<float>());
+	loadICE("robo.ice", roboMesh->coords[0], roboMesh->indices[0]);
 	roboMesh->LODs = 0;
 	roboMesh->usingEBO = true;
 	roboMesh->material = roboMaterial;
@@ -316,7 +318,8 @@ void loadScene() {
 	squareMesh->dtype = MESH;
 	squareMesh->usingEBO = true;
 	squareMesh->indices.push_back(std::vector<unsigned int>());
-	squareMesh->coords = mCoordSpawner->squareCoordsOnly;
+	squareMesh->coords.push_back(std::vector<float>());
+	squareMesh->coords[0] = mCoordSpawner->squareCoordsOnly;
 	squareMesh->indices[0] = mCoordSpawner->squareIndices;
 	squareMesh->LODs = 0;
 	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
@@ -328,9 +331,9 @@ void loadScene() {
 	suzzane_drawable->ptype = DRAWABLE;
 	suzzane_drawable->renderFlag = true;
 	suzzane_drawable->dtype = MESH;
-	std::vector<float> coords = std::vector<float>();
+	suzzane_drawable->coords.push_back(std::vector<float>());
 	suzzane_drawable->indices.push_back(std::vector<unsigned int>());
-	loadICE("some.ice", suzzane_drawable->coords, suzzane_drawable->indices[0]);
+	loadICE("some.ice", suzzane_drawable->coords[0], suzzane_drawable->indices[0]);
 	suzzane_drawable->LODs = 0;
 	suzzane_drawable->usingEBO = true;
 	suzzane_drawable->material = sphereMat;
@@ -340,7 +343,7 @@ void loadScene() {
 	//-----------Objects------------
 	GameObject * lodTest = loadICEasGameObject("lod_test.ice");
 	lodTest->pos = glm::vec3(2, 4, 10);
-	lodTest->glDrawable->LOD_distances.push_back(5.0f);
+	lodTest->glDrawable->LOD_distances.push_back(1.2f);
 	lodTest->glDrawable->LOD_distances.push_back(12.0f);
 	lodTest->glDrawable->LOD_distances.push_back(INFINITY);
 	toGenerate.push_back(lodTest->glDrawable);
@@ -520,21 +523,141 @@ void startScene() {
 	timer.Start();
 };
 
+void testLoop() {
+	GLInstance instance;
+	instance.initialize();
+	instance.createWindow("IceCaps - Week 10", 720, 1280);
+	instance.initGlad();
+
+	ShaderProgram program = ShaderProgram("passthrough.vert", "passthrough.frag");
+
+	float vertices[] = {
+		0.5f,  0.5f, 0.0f,  // top right
+		0.5f, -0.5f, 0.0f,  // bottom right
+		-0.5f, -0.5f, 0.0f,  // bottom left
+		-0.5f,  0.5f, 0.0f   // top left 
+	};
+	unsigned int indices1[] = {  // note that we start from 0!
+		0, 1, 3,  // first Triangle
+	};
+	unsigned int indices2[] = {  // note that we start from 0!
+		1, 2, 3   // second Triangle
+	};
+
+	unsigned int VBO, VBO1, VAO, VAO1, EBO, EBO1;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
+	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices1), indices1, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+	glBindVertexArray(0);
+
+	glGenVertexArrays(1, &VAO1);
+	glGenBuffers(1, &VBO1);
+	glGenBuffers(1, &EBO1);
+	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+	glBindVertexArray(VAO1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO1);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO1);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices2), indices2, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// remember: do NOT unbind the EBO while a VAO is active as the bound element buffer object IS stored in the VAO; keep the EBO bound.
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// You can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO, but this rarely happens. Modifying other
+	// VAOs requires a call to glBindVertexArray anyways so we generally don't unbind VAOs (nor VBOs) when it's not directly necessary.
+	glBindVertexArray(0);
+	// uncomment this call to draw in wireframe polygons.
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	// render loop
+	// -----------
+	while (!glfwWindowShouldClose(instance.window))
+	{
+
+		// render
+		// ------
+		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		// draw our first triangle
+		glUseProgram(program.id());
+		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+								//glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(VAO1); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
+								//glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+		// glBindVertexArray(0); // no need to unbind it every time 
+
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		// -------------------------------------------------------------------------------
+		glfwSwapBuffers(instance.window);
+		glfwPollEvents();
+	}
+
+	// optional: de-allocate all resources once they've outlived their purpose:
+	// ------------------------------------------------------------------------
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glDeleteVertexArrays(1, &VAO1);
+	glDeleteBuffers(1, &VBO1);
+	glDeleteBuffers(1, &EBO1);
+
+	// glfw: terminate, clearing all previously allocated GLFW resources.
+	// ------------------------------------------------------------------
+	glfwTerminate();
+	return;
+}
+
 int main()
 {
+	testLoop();
+	return 1;
+
 	createClientOnThread();
 
 	std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
 
 	GLInstance instance;
 	instance.initialize();
-	instance.createWindow("IceCaps - Week 9", 720, 1280);
+	instance.createWindow("IceCaps - Week 10", 720, 1280);
 	instance.initGlad();
 	input = new InputControl(instance.window);
 	glfwSetKeyCallback(instance.window, key_callback);
-	glfwSetCursorPosCallback(instance.window, cursor_position_callback);
-	glfwSetInputMode(instance.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetCursorPosCallback(instance.window, cursor_position_callback);
+	//glfwSetInputMode(instance.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(instance.window, framebuffer_size_callback);
+
+	
 
 	loadScene();
 
