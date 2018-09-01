@@ -361,7 +361,7 @@ public:
 		}
 
 		// Bind the VAO of the object ot access the correct info
-		glBindVertexArray(drawableProp->vao_vector[0]);
+		glBindVertexArray(drawableProp->vao);
 
 		//Render by indices or vertices based on if an ebo has been created
 		if (drawableProp->LODs > 1) {
@@ -471,7 +471,7 @@ public:
 		glUniform3f(color, light_object->light->color.r, light_object->light->color.g, light_object->light->color.b);
 
 		// Bind the VAO of the object ot access the correct info
-		glEnableVertexAttribArray(drawableProp->vao_vector[0]);
+		glBindVertexArray(drawableProp->vao);
 
 		//Render by indices or vertices based on if an ebo has been created
 		if (drawableProp->usingEBO) {
@@ -482,7 +482,6 @@ public:
 			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
 			glBindVertexArray(0);
 		}
-		glDisableVertexAttribArray(drawableProp->vao_vector[0]);
 	}
 
 	void renderIBL(Imap* map, GameObject* camera) {

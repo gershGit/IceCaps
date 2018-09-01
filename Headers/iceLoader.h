@@ -132,7 +132,6 @@ GameObject* loadICEasGameObject(const char* file_name) {
 			else if (strcmp(lineHeader, "LOD")==0) {
 				LOD++;
 				drawable->indices.push_back(std::vector<unsigned int>());
-				drawable->coords.push_back(std::vector<float>());
 			}
 			else if (strcmp(lineHeader, "v") == 0) {
 				//Store vertex information into the vertex vector
@@ -151,19 +150,19 @@ GameObject* loadICEasGameObject(const char* file_name) {
 				drawable->coords[LOD].push_back(tempVec.z);
 
 				drawable->coords[LOD].push_back(tempVecNormal.x);
-				drawable->coords[LOD].push_back(tempVecNormal.y);
-				drawable->coords[LOD].push_back(tempVecNormal.z);
+				drawable->coords.push_back(tempVecNormal.y);
+				drawable->coords.push_back(tempVecNormal.z);
 
-				drawable->coords[LOD].push_back(tempTangent.x);
-				drawable->coords[LOD].push_back(tempTangent.y);
-				drawable->coords[LOD].push_back(tempTangent.z);
+				drawable->coords.push_back(tempTangent.x);
+				drawable->coords.push_back(tempTangent.y);
+				drawable->coords.push_back(tempTangent.z);
 
-				drawable->coords[LOD].push_back(tempBitangent.x);
-				drawable->coords[LOD].push_back(tempBitangent.y);
-				drawable->coords[LOD].push_back(tempBitangent.z);
+				drawable->coords.push_back(tempBitangent.x);
+				drawable->coords.push_back(tempBitangent.y);
+				drawable->coords.push_back(tempBitangent.z);
 
-				drawable->coords[LOD].push_back(tempVecUV.x);
-				drawable->coords[LOD].push_back(tempVecUV.y);
+				drawable->coords.push_back(tempVecUV.x);
+				drawable->coords.push_back(tempVecUV.y);
 			}
 			else if (strcmp(lineHeader, "i") == 0) {
 				//Store vertex normal information into the vertex vector
