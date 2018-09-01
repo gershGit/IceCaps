@@ -290,7 +290,7 @@ void loadScene() {
 	planeMesh->renderFlag = true;
 	planeMesh->dtype = MESH;
 	planeMesh->usingEBO = true;
-	planeMesh->coords = mCoordSpawner->planeCoordsOnly;
+	planeMesh->coords.push_back(mCoordSpawner->planeCoordsOnly);
 	planeMesh->indices.push_back(mCoordSpawner->planeIndeces);
 	planeMesh->material = gfPBR;
 	planeMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
@@ -302,8 +302,9 @@ void loadScene() {
 	roboMesh->dtype = MESH;
 	std::vector<float> coords_robo = std::vector<float>();
 	std::vector<unsigned int> indices_robo = std::vector<unsigned int>();
+	roboMesh->coords.push_back(std::vector<float>());
 	roboMesh->indices.push_back(std::vector<unsigned int>());
-	loadICE("robo.ice", roboMesh->coords, roboMesh->indices[0]);
+	loadICE("robo.ice", roboMesh->coords[0], roboMesh->indices[0]);
 	roboMesh->LODs = 0;
 	roboMesh->usingEBO = true;
 	roboMesh->material = roboMaterial;
@@ -315,8 +316,9 @@ void loadScene() {
 	squareMesh->renderFlag = true;
 	squareMesh->dtype = MESH;
 	squareMesh->usingEBO = true;
+	squareMesh->coords.push_back(std::vector<float>());
 	squareMesh->indices.push_back(std::vector<unsigned int>());
-	squareMesh->coords = mCoordSpawner->squareCoordsOnly;
+	squareMesh->coords[0] = mCoordSpawner->squareCoordsOnly;
 	squareMesh->indices[0] = mCoordSpawner->squareIndices;
 	squareMesh->LODs = 0;
 	squareMesh->bufferAttributes = glm::vec4(0, 3, 2, 2);
@@ -329,8 +331,10 @@ void loadScene() {
 	suzzane_drawable->renderFlag = true;
 	suzzane_drawable->dtype = MESH;
 	std::vector<float> coords = std::vector<float>();
+	std::vector<unsigned int> indices = std::vector<unsigned int>();
+	suzzane_drawable->coords.push_back(std::vector<float>());
 	suzzane_drawable->indices.push_back(std::vector<unsigned int>());
-	loadICE("some.ice", suzzane_drawable->coords, suzzane_drawable->indices[0]);
+	loadICE("some.ice", suzzane_drawable->coords[0], suzzane_drawable->indices[0]);
 	suzzane_drawable->LODs = 0;
 	suzzane_drawable->usingEBO = true;
 	suzzane_drawable->material = sphereMat;
@@ -338,13 +342,6 @@ void loadScene() {
 	toGenerate.push_back(suzzane_drawable);
 
 	//-----------Objects------------
-	GameObject * lodTest = loadICEasGameObject("lod_test.ice");
-	lodTest->pos = glm::vec3(2, 4, 10);
-	lodTest->glDrawable->LOD_distances.push_back(5.0f);
-	lodTest->glDrawable->LOD_distances.push_back(12.0f);
-	lodTest->glDrawable->LOD_distances.push_back(INFINITY);
-	toGenerate.push_back(lodTest->glDrawable);
-
 	ParticleSystem * mySystem = new ParticleSystem(&timer);
 	mySystem->setAcceleration(glm::vec3(0, -0.125, 0));
 	mySystem->setStartVelocity(glm::vec3(0, 0.5, 0));
@@ -478,14 +475,13 @@ void loadScene() {
 	}
 
 	//-------------Adding objects to list-----------------
-	//objects.push_back(myTerrain);
-	//objects.push_back(parentCube);
+	objects.push_back(myTerrain);
+	objects.push_back(parentCube);
 	objects.push_back(ground);
-	//objects.push_back(suzaneHead);
-	//objects.push_back(spawnedSphere);
-	//objects.push_back(spawnedSphere2);
+	objects.push_back(suzaneHead);
+	objects.push_back(spawnedSphere);
+	objects.push_back(spawnedSphere2);
 	objects.push_back(robo1);
-	objects.push_back(lodTest);
 
 	//pSystems.push_back(mySystem);
 	pSystems.push_back(fireSystem);
