@@ -25,10 +25,8 @@ GameObject* ObjectFactory::createObject(primitive primitive_type) {
 		squareMesh->renderFlag = true;
 		squareMesh->dtype = MESH;
 		squareMesh->usingEBO = true;
-		squareMesh->coords.push_back(std::vector<float>());
-		squareMesh->indices.push_back(std::vector<unsigned int>());
-		squareMesh->coords[0] = mCoordsSpawner->squareCoordsOnly;
-		squareMesh->indices[0] = mCoordsSpawner->squareIndices;
+		squareMesh->coords = mCoordsSpawner->squareCoordsOnly;
+		squareMesh->indices = mCoordsSpawner->squareIndices;
 		squareMesh->material = purple_material;
 
 		GameObject* cube = new GameObject();
@@ -54,10 +52,8 @@ GameObject* ObjectFactory::createObject(primitive primitive_type) {
 		sphereMesh->renderFlag = true;
 		sphereMesh->dtype = MESH;
 		sphereMesh->usingEBO = true;
-		sphereMesh->coords.push_back(std::vector<float>());
-		sphereMesh->indices.push_back(std::vector<unsigned int>());
-		sphereMesh->coords[0] = mCoordsSpawner->sphereCoords(18);
-		sphereMesh->indices[0] = mCoordsSpawner->sphereIndeces(18);
+		sphereMesh->coords = mCoordsSpawner->sphereCoords(18);
+		sphereMesh->indices = mCoordsSpawner->sphereIndeces(18);
 		sphereMesh->material = purple_material;
 
 		GameObject* sphere = new GameObject();
@@ -79,10 +75,8 @@ GameObject * ObjectFactory::createObject(primitive primitive_type, int id)
 		sphereMesh->renderFlag = true;
 		sphereMesh->dtype = MESH;
 		sphereMesh->usingEBO = true;
-		sphereMesh->coords.push_back(std::vector<float>());
-		sphereMesh->indices.push_back(std::vector<unsigned int>());
-		sphereMesh->coords[0] = mCoordsSpawner->sphereCoords(18);
-		sphereMesh->indices[0] = mCoordsSpawner->sphereIndeces(18);
+		sphereMesh->coords = mCoordsSpawner->sphereCoords(18);
+		sphereMesh->indices = mCoordsSpawner->sphereIndeces(18);
 		sphereMesh->material = purple_material;
 
 		GameObject* sphere = new GameObject();
@@ -263,10 +257,9 @@ GameObject * ObjectFactory::createTerrain(float length, float maxHeight, float w
 		}
 	}
 
-	terrainMesh->coords.push_back(std::vector<float>());
-	terrainMesh->indices.push_back(std::vector<unsigned int>());
-	terrainMesh->coords[0] = coordinates;
-	terrainMesh->indices[0] = indices;
+
+	terrainMesh->coords = coordinates;
+	terrainMesh->indices = indices;
 	terrainMesh->material = dialectric_standard_material;
 
 	stbi_image_free(image);
@@ -374,10 +367,9 @@ GameObject * ObjectFactory::createTerrainSaveMap(float length, float maxHeight, 
 		}
 	}
 
-	terrainMesh->coords.push_back(std::vector<float>());
-	terrainMesh->indices.push_back(std::vector<unsigned int>());
-	terrainMesh->coords[0] = coordinates;
-	terrainMesh->indices[0] = indices;
+
+	terrainMesh->coords = coordinates;
+	terrainMesh->indices = indices;
 	terrainMesh->material = dialectric_standard_material;
 
 	map->height = height;
@@ -409,10 +401,8 @@ GameObject* ObjectFactory::createLight(lightType type_of_light, glm::vec3 positi
 			squareMesh->renderFlag = true;
 			squareMesh->dtype = MESH;
 			squareMesh->usingEBO = true;
-			squareMesh->coords.push_back(std::vector<float>());
-			squareMesh->indices.push_back(std::vector<unsigned int>());
-			squareMesh->coords[0] = mCoordsSpawner->squareCoordsOnly;
-			squareMesh->indices[0] = mCoordsSpawner->squareIndices;
+			squareMesh->coords = mCoordsSpawner->squareCoordsOnly;
+			squareMesh->indices = mCoordsSpawner->squareIndices;
 			squareMesh->material = light_material;
 
 			cube->properties.push_back(squareMesh);

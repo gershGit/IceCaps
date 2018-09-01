@@ -35,19 +35,13 @@ public:
 	//TODO deprecate this in favor of the type of material being used
 	glm::vec4 bufferAttributes;
 
-	int LODs = 0;
-	std::vector<float> LOD_distances;
 	//The coordinates to be used for the vertex buffer object
 	//TODO ensure this is freed once the vbo is initialized
-	std::vector<std::vector<float>> coords;
-	//Sizes are kept for rendering information
-	std::vector<int> coords_sizes;
+	std::vector<float> coords;
 
 	//The coordinates to be used for the vertex buffer object
 	//TODO ensure this is freed once the vbo is initialized
-	std::vector<std::vector<unsigned int>> indices;
-	//Sizes are kept for rendering information
-	std::vector<int> indices_sizes;
+	std::vector<unsigned int> indices;
 
 	//The material this drawable will use to render. Includes the shader
 	GLMaterial* material;

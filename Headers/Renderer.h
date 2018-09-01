@@ -21,7 +21,6 @@ public:
 	glm::mat4 viewMatrix;
 	GameObject* myCamera;
 
-	//TODO fix for LODs
 	void renderObjects(GameObject* object, GameObject* camera, std::vector<GameObject*> lights, Imap* irradianceMap, Imap* environmentMap) {
 		//Debugging statement for which object is being rendered
 		//std::cout << "Now rendering " << object->name << std::endl;
@@ -366,10 +365,10 @@ public:
 		//Render by indices or vertices based on if an ebo has been created
 		if (drawableProp->usingEBO) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo);
-			glDrawElements(GL_TRIANGLES, drawableProp->indices[0].size(), GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, drawableProp->indices.size(), GL_UNSIGNED_INT, 0);
 		}
 		else {
-			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords[0].size()/14);
+			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size()/14);
 			glBindVertexArray(0);
 		}
 
@@ -465,10 +464,10 @@ public:
 		//Render by indices or vertices based on if an ebo has been created
 		if (drawableProp->usingEBO) {
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, drawableProp->ebo);
-			glDrawElements(GL_TRIANGLES, drawableProp->indices[0].size(), GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, drawableProp->indices.size(), GL_UNSIGNED_INT, 0);
 		}
 		else {
-			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords[0].size());
+			glDrawArrays(GL_TRIANGLES, 0, drawableProp->coords.size());
 			glBindVertexArray(0);
 		}
 	}
