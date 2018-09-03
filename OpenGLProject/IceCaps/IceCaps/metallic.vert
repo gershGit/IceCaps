@@ -11,6 +11,7 @@ uniform mat4 view;
 out vec3 ourColor;
 out vec3 ourNormal;
 out vec3 ourFragPos;
+out float depth;
 
 float near = 0.1;
 float far = 100;
@@ -26,4 +27,5 @@ void main() {
     ourColor = aColor;
 	ourNormal = mat3(transpose(inverse(model))) * aNormal;
 	ourFragPos = vec3(model * vec4(aPos, 1.0));
+	depth = LinearizeDepth(tempPos.z);
 }

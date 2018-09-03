@@ -15,11 +15,15 @@ void RigidBody::updateAll(glm::vec3 & returnPos, float timestep, glm::vec3 added
 		glm::vec3 change = timestep * (lastVelocity + timestep * gravity_acceleration * 0.5f);
 		//std::cout << "\t-->Change of " << change.x << ", " << change.y << ", " << change.z << std::endl;
 
+		//TODO fix this to match terrain or ground floor
 		lastPosition += timestep * (lastVelocity + timestep * gravity_acceleration * 0.5f);
 		lastVelocity += timestep * gravity_acceleration;
-		if (lastPosition.y <= 0) {
-			returnPos = glm::vec3(lastPosition.x, 0, lastPosition.z);
-			is_grounded = true;
+		if (lastPosition.y <= 0.4f) {
+			lastVelocity.y = -lastVelocity.y/1.65;
+			if (lastVelocity.y < 0.001f) {
+				returnPos = glm::vec3(lastPosition.x, 0.4f, lastPosition.z);
+				is_grounded = true;
+			}
 		}
 		else {
 			returnPos = lastPosition;

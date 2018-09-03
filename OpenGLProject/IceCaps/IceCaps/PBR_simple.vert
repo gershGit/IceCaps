@@ -14,6 +14,7 @@ out vec2 ourTexCoords;
 out vec3 ourFragPos;
 out mat3 TBN;
 out vec3 linearPos;
+out float depth;
 
 float near = 0.1;
 float far = 100;
@@ -35,4 +36,5 @@ void main() {
 	ourFragPos = vec3(model * vec4(aPos, 1.0));
 	ourTexCoords = aTexCoords;
 	linearPos = vec3(tempPos.x, tempPos.y, LinearizeDepth(tempPos.z));
+	depth = LinearizeDepth(tempPos.z);
 }

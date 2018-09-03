@@ -9,7 +9,7 @@
 
 class RigidBody : Property
 {
-private:
+public:
 	//Information stored for every object
 	const glm::vec3 gravity_acceleration = glm::vec3(0, -9.8f, 0);
 	glm::vec3 lastAcceleration;

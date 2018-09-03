@@ -20,7 +20,7 @@ struct Particle {
 	glm::vec2 quadInfo;
 };
 
-enum ParticleSystemType {FIRE, SMOKE, BLOOD, WATER_SPRAY, SPARKS, EXPLOSION};
+enum ParticleSystemType {FIRE, SMOKE, BLOOD, WATER_SPRAY, SPARKS, EXPLOSION, RANDOM};
 
 //TODO add more shape characteristics to allow for stretched geometry like rain
 //TODO add functions for particles to change shape, size and color based on lifetime,speed etc.

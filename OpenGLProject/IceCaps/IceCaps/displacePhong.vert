@@ -30,7 +30,7 @@ float LinearizeDepth(float depth){
 void main() {
 	float height = texture(displacementSampler, texCoords).x;
 	vec3 tempNormal = mat3(transpose(inverse(model))) * aNormal;
-    vec4 tempPos = projection * view * model * (vec4(aPos, 1.0) + tempNormal * height * displacementStrength));;
+    vec4 tempPos = projection * view * model * (vec4(aPos, 1.0) + tempNormal * height * displacementStrength));
 
 	gl_Position = vec4(tempPos.x, tempPos.y, LinearizeDepth(tempPos.z), tempPos.w);
 

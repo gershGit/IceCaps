@@ -70,13 +70,13 @@ void ParticleSystem::setType(ParticleSystemType type, int freeTexNumber)
 
 		particle_textures.clear();
 		particle_texture_nums.clear();
-		setTexture("Textures/firetexture.png", freeTexNumber);
+		setTexture("Textures/fireTexture.png", freeTexNumber);
 		mixRate = 1.0f;
 
 		randomness = 0.65;
 		start_velocity = glm::vec3(0, 1.75, 0);
 
-		spawn_rate = 3;
+		spawn_rate = 6;
 		spawnTime = 9999999;
 		lifetime = 2.5;
 
@@ -93,9 +93,42 @@ void ParticleSystem::setType(ParticleSystemType type, int freeTexNumber)
 		size_interpolation_func = 1;
 
 		accelerations.clear();
-		accelerations.push_back(glm::vec3(0, 0.2, 0));
+		accelerations.push_back(glm::vec3(0, 0.2f, 0));
 
-		max_alive = 18;
+		max_alive = 36;
+	}
+	else if (type == RANDOM) {
+		usingQuads = true;
+		variableColor = true;
+
+		particle_textures.clear();
+		particle_texture_nums.clear();
+		setTexture("Textures/fireTexture.png", freeTexNumber);
+		mixRate = 1.0f;
+
+		randomness = rand_float() + 1.0f;
+		start_velocity = glm::vec3(0, (rand_float()+1.0) * 10, 0);
+
+		spawn_rate = (rand_float()+1.0f) * 9;
+		spawnTime = 9999999;
+		lifetime = (rand_float() + 1.0f) * 4;
+
+		start_color = glm::vec3((rand_float() + 1.0f) / 2, (rand_float() + 1.0f) / 2, (rand_float() + 1.0f) / 2);
+		end_color = glm::vec3((rand_float() + 1.0f) / 2, (rand_float() + 1.0f) / 2, (rand_float() + 1.0f) / 2);
+		color_interpolation_func = 1;
+
+		particle_start_opacity = (rand_float() + 1.0f) / 2;
+		particle_end_opacity = (rand_float() + 1.0f) / 2;
+		transparency_interpolation_func = 1;
+
+		particle_start_size = (rand_float() + 1.0f) * 2;
+		particle_end_size = (rand_float() + 1.0f) * 2;
+		size_interpolation_func = 1;
+
+		accelerations.clear();
+		accelerations.push_back(glm::vec3(0, rand_float() * 5 - 4, 0));
+
+		max_alive = (rand_float() + 1.0f) * 36 + 36;
 	}
 }
 

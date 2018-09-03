@@ -5,6 +5,7 @@ in vec3 ourFragPos;
 in vec2 ourTexCoords;
 in mat3 TBN;
 in vec3 linearPos;
+in float depth;
 
 out vec4 fragColor;
 
@@ -14,6 +15,7 @@ uniform sampler2D roughnessSampler;
 uniform sampler2D normalSampler;
 uniform sampler2D aoSampler;
 
+uniform float fogAmount;
 uniform vec3 eyePos;
 uniform vec3 sunAngle;
 uniform vec4 sunColor;							//r,g,b,strength
@@ -129,6 +131,7 @@ void main() {
 	color = color / (color+vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
 
+	color = mix(color, vec3(0.5,0.5,0.5), min(depth*fogAmount,1.0f));
 	//output
     fragColor = vec4(color, 1.0f);
 }

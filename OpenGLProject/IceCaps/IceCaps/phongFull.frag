@@ -1,51 +1,49 @@
 #version 330 core
+#define NR_POINT_LIGHTS 4
 
 out vec4 fragColor;
 
-in vec2 ourTexCoord;
+in vec3 ourColor;
 in vec3 ourNormal;
 in vec3 ourFragPos;
+in float depth;
 
-in vec3 ourTangent;
-in vec3 ourBitangent;
-
-uniform sampler2D diffuseSampler;
-uniform sampler2D specularSampler;
-uniform sampler2D normalSampler;
+uniform float fogAmount;
 uniform vec3 eyePos;
-uniform vec3 sunPos;
+uniform vec3 sunAngle;
+uniform vec3 pointLightPos[NR_POINT_LIGHTS];
+uniform vec3 pointLightColors[NR_POINT_LIGHTS];
 
-float ambientStrength = 0.2;
+float ambientStrength = 0.05;
 float shininess = 128.0;
 vec3 lightColor = vec3(0.4, 0.4, 0.4);
+float specularStrength = 0.5;
 
 void main() {
-	//mat3 TBN = mat3(ourTangent, ourBitangent, ourNormal);
+	vec3 lightDir = normalize(-sunAngle);
+	//Blinn phong
+	vec3 ambient = ambientStrength * ourColor;
 
-	vec4 ourColorFour = texture(diffuseSampler, ourTexCoord);
-	vec3 ourColor = vec3(ourColorFour.x, ourColorFour.y, ourColorFour.z);
-
-	vec3 specularStrength = vec3(texture(specularSampler, ourTexCoord).x, texture(specularSampler, ourTexCoord).y, texture(specularSampler, ourTexCoord).z);
-
-	vec3 ambient = ambientStrength * lightColor;
-
-	//vec4 ourSampledNormal = texture(normalSampler, ourTexCoord);
-    //vec3 normal = normalize(ourNormal + vec3(ourSampledNormal.x, ourSampledNormal.y, ourSampledNormal.z));
-	vec3 normal = normalize (texture(normalSampler, ourTexCoord).xyz*2.0 - 1.0);
-	//vec3 normal = normalize(ourNormal);
-    vec3 lightDir = normalize(sunPos - ourFragPos);
-	//lightDir *= TBN;
-	//lightDir = normalize(lightDir);
-
-    float diff = max(dot(normal, lightDir), 0.0);
+    float diff = max(dot(ourNormal, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
-	//Blinn phong
-	vec3 viewDir = normalize(-ourFragPos);
-	vec3 halfDir = normalize(lightDir + viewDir);
-	float specAngle = max(dot(halfDir, normal), 0.0);
-	vec3 specular = pow(specAngle, shininess/4.0) * specularStrength * lightColor;
+	vec3 viewDir = normalize(eyePos-ourFragPos);
+	vec3 halfDir = normalize(lightDir + viewDir);  
+    float specAngle = pow(max(dot(ourNormal, halfDir), 0.0), 1.0);
+	//vec3 specular = lightColor * specAngle;
+	vec3 specular = vec3(0);
 
-    vec3 result = (ambient+diffuse+specular)*ourColor;
+	for (int i =0; i<NR_POINT_LIGHTS; i++){
+		float lightDist = length(pointLightPos[i] - ourFragPos);
+		vec3 thisLightDir = normalize(pointLightPos[i] - ourFragPos);
+		diffuse += diff * pointLightColors[i] * (1/(lightDist * lightDist));
+
+		vec3 thisHalfDir = normalize(thisLightDir + viewDir);  
+		float thisSpecAngle = pow(max(dot(ourNormal, thisHalfDir), 0.0), 1.0);
+		specular += pointLightColors[i] * thisSpecAngle * (1/(lightDist));
+	}
+
+	vec3 result = (ambient+diffuse+specular)*ourColor;
+	result = mix(result, vec3(0.5,0.5,0.5), min(depth * fogAmount,1.0f));
     fragColor = vec4(result, 1.0f);
 }

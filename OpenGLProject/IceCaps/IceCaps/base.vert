@@ -7,6 +7,7 @@ uniform mat4 view;
 uniform vec3 aColor;
 
 out vec3 ourColor;
+out float depth;
 
 float near = 0.1;
 float far = 100;
@@ -19,5 +20,6 @@ void main() {
 	vec4 tempPos = projection * view * model * vec4(aPos, 1.0);
 
 	gl_Position = vec4(tempPos.x, tempPos.y, LinearizeDepth(tempPos.z), tempPos.w);
+	depth = LinearizeDepth(tempPos.z);
     ourColor = aColor;
 }

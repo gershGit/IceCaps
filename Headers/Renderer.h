@@ -16,6 +16,7 @@ public:
 	GLuint cubeVAO;
 	GLuint testVAO;
 	GLuint testVBO;
+	float fogAmount;
 	ShaderProgram cubeShader;
 	ShaderProgram testShader;
 	glm::mat4 viewMatrix;
@@ -39,6 +40,8 @@ public:
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &viewMatrix[0][0]);
 		GLuint projLoc = glGetUniformLocation(shader.id(), "projection");
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
+		GLuint fogLoc = glGetUniformLocation(shader.id(), "fogAmount");
+		glUniform1f(fogLoc, fogAmount);
 
 		//Upload uniforms based on the type of material
 		if (drawableProp->material->type == SIMPLE) {
@@ -49,16 +52,74 @@ public:
 			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
 			glm::vec3 eyeVec = -camera->forward();
 			//glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
-			glUniform3f(eye, eyeVec.x, eyeVec.y, eyeVec.z);
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
 			GLuint col = glGetUniformLocation(shader.id(), "aColor");
 			glUniform3f(col, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
 
 			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
-			glUniform3f(sunLoc, -2, -6, -1);
+			glUniform3f(sunLoc, 2, -3, 1);
+		}
+		else if (drawableProp->material->type == PHONG) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
-			GLuint itModel = glGetUniformLocation(shader.id(), "itModel");
-			glUniformMatrix3fv(itModel, 1, GL_FALSE, &glm::inverse(glm::transpose(object->getTransform()))[0][0]);
+			GLuint col = glGetUniformLocation(shader.id(), "aColor");
+			glUniform3f(col, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, 2, -3, 1);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
+		}
+		else if (drawableProp->material->type == SSS) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eyePos");
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			GLuint col = glGetUniformLocation(shader.id(), "aColor");
+			glUniform3f(col, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, 2, -3, 1);
+
+			GLuint sunColLoc = glGetUniformLocation(shader.id(), "sunColor");
+			glUniform3f(sunColLoc, 0.4, 0.4, 0.4);
+
+			//Point lights
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[1]"), (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).x, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).y, (glm::vec4(lights[1]->pos, 1) * glm::transpose(lights[1]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[2]"), (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).x, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).y, (glm::vec4(lights[2]->pos, 1) * glm::transpose(lights[2]->getTransform())).z);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[3]"), (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).x, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).y, (glm::vec4(lights[3]->pos, 1) * glm::transpose(lights[3]->getTransform())).z);
+
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[0]"), lights[0]->light->color.r, lights[0]->light->color.g, lights[0]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[1]"), lights[1]->light->color.r, lights[1]->light->color.g, lights[1]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[2]"), lights[2]->light->color.r, lights[2]->light->color.g, lights[2]->light->color.b);
+			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
+		}
+		else if (drawableProp->material->type == PHONG_TEXTURED) {
+			GLuint eye = glGetUniformLocation(shader.id(), "eyeDir");
+			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
+
+			GLuint col = glGetUniformLocation(shader.id(), "aColor");
+			glUniform3f(col, drawableProp->material->color.x, drawableProp->material->color.y, drawableProp->material->color.z);
+
+			GLuint sunLoc = glGetUniformLocation(shader.id(), "sunAngle");
+			glUniform3f(sunLoc, 2, -3, 1);
+
+			GLuint diffuseImageLoc = glGetUniformLocation(shader.id(), "diffuseSampler");
+			glUniform1i(diffuseImageLoc, drawableProp->material->diffuseTexNumber);
+
+			GLuint specImageLoc = glGetUniformLocation(shader.id(), "specularSampler");
+			glUniform1i(specImageLoc, drawableProp->material->specularTexNumber);
 
 			//Point lights
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightPos[0]"), (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).x, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).y, (glm::vec4(lights[0]->pos, 1) * glm::transpose(lights[0]->getTransform())).z);
@@ -219,7 +280,6 @@ public:
 		}
 		else if (drawableProp->material->type == STANDARD) {
 			GLuint eye = glGetUniformLocation(shader.id(), "eye");
-			glm::vec3 eyeVec = -camera->forward();
 			glUniform3f(eye, camera->pos.x, camera->pos.y, camera->pos.z);
 
 			//Lights
@@ -253,11 +313,15 @@ public:
 			glUniform1i(normalImageLoc, drawableProp->material->normalTexNumber);
 		}
 		else if (drawableProp->material->type == PBR_BASIC) {
-			GLuint irrMapLoc = glGetUniformLocation(shader.id(), "irradianceMap");
-			glUniform1i(irrMapLoc, irradianceMap->mapTexNumber);
+			if (irradianceMap != nullptr) {
+				GLuint irrMapLoc = glGetUniformLocation(shader.id(), "irradianceMap");
+				glUniform1i(irrMapLoc, irradianceMap->mapTexNumber);
+			}
 
-			GLuint eMapLoc = glGetUniformLocation(shader.id(), "environmentMap");
-			glUniform1i(eMapLoc, environmentMap->mapTexNumber);
+			if (environmentMap != nullptr) {
+				GLuint eMapLoc = glGetUniformLocation(shader.id(), "environmentMap");
+				glUniform1i(eMapLoc, environmentMap->mapTexNumber);
+			}
 
 			GLuint eyeLoc = glGetUniformLocation(shader.id(), "eyePos");
 			glUniform3f(eyeLoc, camera->pos.x, camera->pos.y, camera->pos.z);
@@ -303,11 +367,15 @@ public:
 			glUniform3f(glGetUniformLocation(shader.id(), "pointLightColors[3]"), lights[3]->light->color.r, lights[3]->light->color.g, lights[3]->light->color.b);
 		}
 		else if (drawableProp->material->type == PBR_EMISSIVE) {
-			GLuint irrMapLoc = glGetUniformLocation(shader.id(), "irradianceMap");
-			glUniform1i(irrMapLoc, irradianceMap->mapTexNumber);
+			if (irradianceMap != nullptr) {
+				GLuint irrMapLoc = glGetUniformLocation(shader.id(), "irradianceMap");
+				glUniform1i(irrMapLoc, irradianceMap->mapTexNumber);
+			}
 
-			GLuint eMapLoc = glGetUniformLocation(shader.id(), "environmentMap");
-			glUniform1i(eMapLoc, environmentMap->mapTexNumber);
+			if (environmentMap != nullptr) {
+				GLuint eMapLoc = glGetUniformLocation(shader.id(), "environmentMap");
+				glUniform1i(eMapLoc, environmentMap->mapTexNumber);
+			}
 
 			GLuint eyeLoc = glGetUniformLocation(shader.id(), "eyePos");
 			glUniform3f(eyeLoc, camera->pos.x, camera->pos.y, camera->pos.z);
@@ -414,7 +482,7 @@ public:
 		}
 		for (std::map<float, Particle*>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it) {
 			Particle* particle = it->second;
-			glUniform2f(quadLoc, particle->quadInfo.x, it->second->quadInfo.y);
+			glUniform2f(quadLoc, particle->quadInfo.x, particle->quadInfo.y);
 			glUniform4f(colorLoc, particle->color.x, particle->color.y, particle->color.z, particle->opacity);
 			glUniform1f(sizeLoc, particle->size);
 			glUniform1i(texLoc, particle->particle_texture_num);
@@ -422,14 +490,6 @@ public:
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 
-
-		for (Particle* particle : pSystem->particles) {
-			if (particle->alive) {
-				glUniform1f(sizeLoc, particle->size);
-				glBindVertexArray(particle->vao);
-				glDrawArrays(GL_POINTS, 0, 1);
-			}
-		}
 		glDisable(GL_BLEND);
 		glBindVertexArray(0);
 		glDepthMask(true);
@@ -547,6 +607,8 @@ public:
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, &glm::perspective(glm::radians(camera->camera->fov), (float)1280 / (float)720, 0.1f, 100.0f)[0][0]);
 		GLuint equirectangularMap = glGetUniformLocation(cubeShader.id(), "equirectangularMap");
 		glUniform1i(equirectangularMap, map->mapTexNumber);
+		GLuint fogLoc = glGetUniformLocation(cubeShader.id(), "fogAmount");
+		glUniform1f(fogLoc, fogAmount);
 
 		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);

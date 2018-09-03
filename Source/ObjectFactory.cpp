@@ -386,7 +386,7 @@ void ObjectFactory::addFoliage(GameObject * foliage_ptr, float x_pos, float z_po
 {
 	int xVal = heightmap->width/2 + x_pos;
 	int zVal = heightmap->width/2 + z_pos;
-	foliage_ptr->pos = glm::vec3(x_pos, ((float)heightmap->image[xVal*heightmap->width + zVal] / 255) * (heightmap->maxHeight) - heightmap->waterlevel - 0.5f, z_pos);
+	foliage_ptr->pos = glm::vec3(x_pos, ((float)heightmap->image[xVal*heightmap->width + zVal] / 255) * (heightmap->maxHeight) - heightmap->waterlevel - 2.0f, z_pos);
 }
 
 GameObject* ObjectFactory::createLight(lightType type_of_light, glm::vec3 position, glm::vec3 color, float strength, bool visible = true) {

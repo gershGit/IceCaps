@@ -184,6 +184,7 @@ public:
 			if (object != this && object->usingCollider) {
 				collisionInfo cInfo = sCollider->checkCollision(object->sCollider);
 				if (cInfo.collision) {
+					rigidBody->lastVelocity = glm::vec3(-rigidBody->lastVelocity.x/1.5f, cInfo.collisionObject->rigidBody->lastVelocity.y / 1.5f, -rigidBody->lastVelocity.x / 1.5f);
 					collisions.push_back(cInfo);
 				}
 			}
@@ -197,6 +198,10 @@ public:
 
 	virtual void handleCollisions() {
 		for (collisionInfo info : collisions) {
+			//TODO delete this and make virtual function for this sort of control
+			std::cout << "REMOVING RIGIDBODY ----------------------------------------" << std::endl;
+			rigidBody = nullptr;
+			usingRigid = false;
 			//TODO add collision movement info using rigid bodies
 		}
 		collisions.clear();

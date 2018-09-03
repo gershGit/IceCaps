@@ -41,6 +41,7 @@ private:
 	key q_key;
 	key e_key;
 	key p_key;
+	key o_key;
 	key space_key;
 public:
 	//Reference to a window to capture the input from

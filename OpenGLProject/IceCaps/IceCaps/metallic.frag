@@ -4,9 +4,11 @@
 in vec3 ourColor;
 in vec3 ourNormal;
 in vec3 ourFragPos;
+in float depth;
 
 out vec4 fragColor;
 
+uniform float fogAmount;
 uniform vec3 eyePos;
 uniform float roughness;
 uniform float baseReflectance;
@@ -108,6 +110,7 @@ void main() {
 	color = color / (color+vec3(1.0));
 	color = pow(color, vec3(1.0/2.2));
 
+	color = mix(color,vec3(0.5,0.5,0.5), min(depth*fogAmount, 1.0f);
 	//output
     fragColor = vec4(color, 1.0f);
 }

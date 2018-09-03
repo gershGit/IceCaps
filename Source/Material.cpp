@@ -76,7 +76,23 @@ int GLMaterial::addTexture(const char * file_name, tType texture_type, int textu
 //TODO add all the correct material shaders
 int GLMaterial::buildShader()
 {
-	if (type == DIALECTRIC) {
+	if (type == SIMPLE) {
+		shader = ShaderProgram("base.vert", "base.frag");
+		return 0;
+	}
+	else if (type == PHONG_SIMPLE) {
+		shader = ShaderProgram("phongSun.vert", "phongSun.frag");
+		return 0;
+	}
+	else if (type == PHONG) {
+		shader = ShaderProgram("phongFull.vert", "phongFull.frag");
+		return 0;
+	}
+	else if (type == PHONG_TEXTURED) {
+		shader = ShaderProgram("texturedSimple.vert", "texturedSimple.frag");
+		return 0;
+	}
+	else if (type == DIALECTRIC) {
 		shader = ShaderProgram("dialectric.vert", "dialectric.frag");
 		return 0;
 	}
@@ -94,6 +110,10 @@ int GLMaterial::buildShader()
 	}
 	else if (type == PBR_EMISSIVE) {
 		shader = ShaderProgram("PBR.vert", "PBR_emissive.frag");
+		return 0;
+	}
+	else if (type == SSS) {
+		shader = ShaderProgram("skin.vert", "skin.frag");
 		return 0;
 	}
 	return 1;
