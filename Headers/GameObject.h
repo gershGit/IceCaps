@@ -22,6 +22,7 @@
 #include "SphereCollider.h"
 #include "Light.h"
 #include <vector>
+#include "Animation.h"
 
 class GameObject
 {
@@ -46,6 +47,11 @@ public:
 private:
 	//Private matrix used to return the position quickly when an object hasn't moved
 	glm::mat4 lastTransform;
+	//Animation information
+	bool playingAnimation;
+	int currentlyPlayingAnimation;
+	//Timer for reference
+	GameTimer* timer;
 
 public:
 	//Vector storing all collisions that need to be resolved for this object
@@ -95,6 +101,8 @@ public:
 	Collider* collider;
 	//Reference to a sphere collider
 	SphereCollider* sCollider;
+	//List of animations
+	std::vector<Animation*> animations;
 	//Reference to a camera
 	GLCamera* camera;
 	//Reference to a light
@@ -156,9 +164,15 @@ public:
 				child->moved = true;
 			}
 			//return the transformation matrix
+			if (playingAnimation) {
+				return myTransform * animations[currentlyPlayingAnimation]->getMatrix(timer.GetOurCurrentTime());
+			}
 			return myTransform;
 		}
 		else {
+			if (playingAnimation) {
+				return lastTransform * animations[currentlyPlayingAnimation]->getMatrix(timer.GetOurCurrentTime());
+			}
 			return lastTransform;
 		}
 	};
@@ -231,4 +245,9 @@ public:
 
 	//TODO call update every frame and update a virtual function
 	virtual void update() {};
+
+	//Adds a timer reference
+	void addTimer(GameTimer * in_timer) {
+		timer = in_timer;
+	}
 };
