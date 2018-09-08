@@ -651,4 +651,6 @@ public:
 		glDrawArrays(GL_POINTS, 0, 1);
 		glBindVertexArray(0);
 	}
+
+	void cullObjects(std::vector<GameObject*>* objectsToCull, std::vector<GameObject*>* renderList);
 };

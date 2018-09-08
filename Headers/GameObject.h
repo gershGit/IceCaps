@@ -24,6 +24,11 @@
 #include <vector>
 #include "Animation.h"
 
+//AABB structure used for collisions and culling
+struct AABB {
+	float xMax, xMin, yMax, yMin, zMax, zMin;
+};
+
 class GameObject
 {
 public:

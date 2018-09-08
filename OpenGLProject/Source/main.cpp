@@ -257,7 +257,11 @@ void renderScene() {
 	glDepthFunc(GL_LEQUAL);
 	renderer.viewMatrix = mainCamera->camera->getViewMatrix();
 	renderer.fogAmount = 1.0f;
-	for (GameObject* object : objects) {
+
+	std::vector<GameObject*> renderList;
+	renderer.cullObjects(&objects, &renderList);
+
+	for (GameObject* object : renderList) {
 		if (object->drawFlag) {
 			if (object->name != "Ground") {
 				//object->rot.y += 1.0f * timer.GetDeltaTime();
