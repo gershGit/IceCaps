@@ -14,7 +14,6 @@
 #include "iceLoader.h"
 #include "RigidBody.h"
 #include "ObjectFactory.h"
-#include <cstdlib>
 #include "NetServer.h"
 #include "NetClient.h"
 #include <string>
@@ -305,8 +304,8 @@ void loadScene() {
 	//mainCamera->rot.y = -3.14159f;
 	renderer.myCamera = mainCamera;
 
-	envMap = new Imap("Textures/Arches_E_PineTree_8k.jpg", texture_number++);
-	irrMap = new Imap("Textures/Arches_E_PineTree_Env.hdr", texture_number++);
+	envMap = new Imap("../../../../Demo/Textures/Arches_E_PineTree_8k.jpg", texture_number++);
+	irrMap = new Imap("../../../../Demo/Textures/Arches_E_PineTree_Env.hdr", texture_number++);
 
 	//------------Materials--------------
 	GLMaterial* ground_material = new GLMaterial();
@@ -328,8 +327,8 @@ void loadScene() {
 	mat2->setMaterialType(PHONG);
 
 	GLMaterial* mat4 = new GLMaterial();
-	mat4->addTexture("Textures/DiffSpec/diffuse.png", DIFFUSE, texture_number++);
-	mat4->addTexture("Textures/DiffSpec/specular.png", SPECULAR_MASK, texture_number++);
+	mat4->addTexture("../../../../Demo/Textures/DiffSpec/diffuse.png", DIFFUSE, texture_number++);
+	mat4->addTexture("../../../../Demo/Textures/DiffSpec/specular.png", SPECULAR_MASK, texture_number++);
 	mat4->setMaterialType(PHONG_TEXTURED);
 
 	/*
@@ -369,43 +368,43 @@ void loadScene() {
 	roboMaterial->setMaterialType(PBR_BASIC);*/
 
 	GLMaterial * iceMaterial = new GLMaterial();
-	iceMaterial->addTexture("Textures/IceEarth/diffuse.png", DIFFUSE, texture_number++);
-	iceMaterial->addTexture("Textures/IceEarth/metallic.png", METALLIC_MASK, texture_number++);
-	iceMaterial->addTexture("Textures/IceEarth/roughness.png", ROUGHNESS_MAP, texture_number++);
-	iceMaterial->addTexture("Textures/IceEarth/ao.png", AO_MAP, texture_number++);
-	iceMaterial->addTexture("Textures/IceEarth/normal.png", NORMAL_MAP, texture_number++);
+	iceMaterial->addTexture("../../../../Demo/Textures/IceEarth/diffuse.png", DIFFUSE, texture_number++);
+	iceMaterial->addTexture("../../../../Demo/Textures/IceEarth/metallic.png", METALLIC_MASK, texture_number++);
+	iceMaterial->addTexture("../../../../Demo/Textures/IceEarth/roughness.png", ROUGHNESS_MAP, texture_number++);
+	iceMaterial->addTexture("../../../../Demo/Textures/IceEarth/ao.png", AO_MAP, texture_number++);
+	iceMaterial->addTexture("../../../../Demo/Textures/IceEarth/normal.png", NORMAL_MAP, texture_number++);
 	iceMaterial->setMaterialType(PBR_SIMPLE);
 	
 	GLMaterial * pbrExample = new GLMaterial();
-	pbrExample->addTexture("Textures/PBR/diffuse.png", DIFFUSE, texture_number++);
-	pbrExample->addTexture("Textures/PBR/metallic.png", METALLIC_MASK, texture_number++);
-	pbrExample->addTexture("Textures/PBR/roughness.png", ROUGHNESS_MAP, texture_number++);
-	pbrExample->addTexture("Textures/PBR/ao.png", AO_MAP, texture_number++);
-	pbrExample->addTexture("Textures/PBR/normal.png", NORMAL_MAP, texture_number++);
+	pbrExample->addTexture("../../../../Demo/Textures/PBR/diffuse.png", DIFFUSE, texture_number++);
+	pbrExample->addTexture("../../../../Demo/Textures/PBR/metallic.png", METALLIC_MASK, texture_number++);
+	pbrExample->addTexture("../../../../Demo/Textures/PBR/roughness.png", ROUGHNESS_MAP, texture_number++);
+	pbrExample->addTexture("../../../../Demo/Textures/PBR/ao.png", AO_MAP, texture_number++);
+	pbrExample->addTexture("../../../../Demo/Textures/PBR/normal.png", NORMAL_MAP, texture_number++);
 	pbrExample->setMaterialType(PBR_SIMPLE);
 	
 	GLMaterial * pbrExampleBasic = new GLMaterial();
-	pbrExampleBasic->addTexture("Textures/PBR/diffuse.png", DIFFUSE, texture_number++);
-	pbrExampleBasic->addTexture("Textures/PBR/metallic.png", METALLIC_MASK, texture_number++);
-	pbrExampleBasic->addTexture("Textures/PBR/roughness.png", ROUGHNESS_MAP, texture_number++);
-	pbrExampleBasic->addTexture("Textures/PBR/ao.png", AO_MAP, texture_number++);
-	pbrExampleBasic->addTexture("Textures/PBR/normal.png", NORMAL_MAP, texture_number++);
+	pbrExampleBasic->addTexture("../../../../Demo/Textures/PBR/diffuse.png", DIFFUSE, texture_number++);
+	pbrExampleBasic->addTexture("../../../../Demo/Textures/PBR/metallic.png", METALLIC_MASK, texture_number++);
+	pbrExampleBasic->addTexture("../../../../Demo/Textures/PBR/roughness.png", ROUGHNESS_MAP, texture_number++);
+	pbrExampleBasic->addTexture("../../../../Demo/Textures/PBR/ao.png", AO_MAP, texture_number++);
+	pbrExampleBasic->addTexture("../../../../Demo/Textures/PBR/normal.png", NORMAL_MAP, texture_number++);
 	pbrExampleBasic->setMaterialType(PBR_BASIC);
 
 	GLMaterial * pbrExampleDialectric = new GLMaterial();
-	pbrExampleDialectric->addTexture("Textures/Dialectric/diffuse.png", DIFFUSE, texture_number++);
-	pbrExampleDialectric->addTexture("Textures/Dialectric/metallic.png", METALLIC_MASK, texture_number++);
-	pbrExampleDialectric->addTexture("Textures/Dialectric/roughness.png", ROUGHNESS_MAP, texture_number++);
-	pbrExampleDialectric->addTexture("Textures/Dialectric/ao.png", AO_MAP, texture_number++);
-	pbrExampleDialectric->addTexture("Textures/Dialectric/normal.png", NORMAL_MAP, texture_number++);
+	pbrExampleDialectric->addTexture("../../../../Demo/Textures/Dialectric/diffuse.png", DIFFUSE, texture_number++);
+	pbrExampleDialectric->addTexture("../../../../Demo/Textures/Dialectric/metallic.png", METALLIC_MASK, texture_number++);
+	pbrExampleDialectric->addTexture("../../../../Demo/Textures/Dialectric/roughness.png", ROUGHNESS_MAP, texture_number++);
+	pbrExampleDialectric->addTexture("../../../../Demo/Textures/Dialectric/ao.png", AO_MAP, texture_number++);
+	pbrExampleDialectric->addTexture("../../../../Demo/Textures/Dialectric/normal.png", NORMAL_MAP, texture_number++);
 	pbrExampleDialectric->setMaterialType(PBR_BASIC);
 
 	GLMaterial * pbrExampleMettallic = new GLMaterial();
-	pbrExampleMettallic->addTexture("Textures/Metallic/diffuse.png", DIFFUSE, texture_number++);
-	pbrExampleMettallic->addTexture("Textures/Metallic/metallic.png", METALLIC_MASK, texture_number++);
-	pbrExampleMettallic->addTexture("Textures/Metallic/roughness.png", ROUGHNESS_MAP, texture_number++);
-	pbrExampleMettallic->addTexture("Textures/Metallic/ao.png", AO_MAP, texture_number++);
-	pbrExampleMettallic->addTexture("Textures/Metallic/normal.png", NORMAL_MAP, texture_number++);
+	pbrExampleMettallic->addTexture("../../../../Demo/Textures/Metallic/diffuse.png", DIFFUSE, texture_number++);
+	pbrExampleMettallic->addTexture("../../../../Demo/Textures/Metallic/metallic.png", METALLIC_MASK, texture_number++);
+	pbrExampleMettallic->addTexture("../../../../Demo/Textures/Metallic/roughness.png", ROUGHNESS_MAP, texture_number++);
+	pbrExampleMettallic->addTexture("../../../../Demo/Textures/Metallic/ao.png", AO_MAP, texture_number++);
+	pbrExampleMettallic->addTexture("../../../../Demo/Textures/Metallic/normal.png", NORMAL_MAP, texture_number++);
 	pbrExampleMettallic->setMaterialType(PBR_BASIC);
 
 	GLMaterial * skin = new GLMaterial();
@@ -413,35 +412,35 @@ void loadScene() {
 	skin->setMaterialType(SSS);
 
 	GLMaterial * helmMaterial = new GLMaterial();
-	helmMaterial->addTexture("Textures/Helm/diffuse.png", DIFFUSE, texture_number++);
-	helmMaterial->addTexture("Textures/Helm/metallic.png", METALLIC_MASK, texture_number++);
-	helmMaterial->addTexture("Textures/Helm/roughness.png", ROUGHNESS_MAP, texture_number++);
-	helmMaterial->addTexture("Textures/Helm/ao.png", AO_MAP, texture_number++);
-	helmMaterial->addTexture("Textures/Helm/normal.png", NORMAL_MAP, texture_number++);
+	helmMaterial->addTexture("../../../../Demo/Textures/Helm/diffuse.png", DIFFUSE, texture_number++);
+	helmMaterial->addTexture("../../../../Demo/Textures/Helm/metallic.png", METALLIC_MASK, texture_number++);
+	helmMaterial->addTexture("../../../../Demo/Textures/Helm/roughness.png", ROUGHNESS_MAP, texture_number++);
+	helmMaterial->addTexture("../../../../Demo/Textures/Helm/ao.png", AO_MAP, texture_number++);
+	helmMaterial->addTexture("../../../../Demo/Textures/Helm/normal.png", NORMAL_MAP, texture_number++);
 	helmMaterial->setMaterialType(PBR_BASIC);
 
 	GLMaterial * shieldMaterial = new GLMaterial();
-	shieldMaterial->addTexture("Textures/Shield/diffuse.png", DIFFUSE, texture_number++);
-	shieldMaterial->addTexture("Textures/Shield/metallic.png", METALLIC_MASK, texture_number++);
-	shieldMaterial->addTexture("Textures/Shield/roughness.png", ROUGHNESS_MAP, texture_number++);
-	shieldMaterial->addTexture("Textures/Shield/ao.png", AO_MAP, texture_number++);
-	shieldMaterial->addTexture("Textures/Shield/normal.png", NORMAL_MAP, texture_number++);
+	shieldMaterial->addTexture("../../../../Demo/Textures/Shield/diffuse.png", DIFFUSE, texture_number++);
+	shieldMaterial->addTexture("../../../../Demo/Textures/Shield/metallic.png", METALLIC_MASK, texture_number++);
+	shieldMaterial->addTexture("../../../../Demo/Textures/Shield/roughness.png", ROUGHNESS_MAP, texture_number++);
+	shieldMaterial->addTexture("../../../../Demo/Textures/Shield/ao.png", AO_MAP, texture_number++);
+	shieldMaterial->addTexture("../../../../Demo/Textures/Shield/normal.png", NORMAL_MAP, texture_number++);
 	shieldMaterial->setMaterialType(PBR_BASIC);
 
 	GLMaterial * axeMaterial = new GLMaterial();
-	axeMaterial->addTexture("Textures/Axe/diffuse.png", DIFFUSE, texture_number++);
-	axeMaterial->addTexture("Textures/Axe/metallic.png", METALLIC_MASK, texture_number++);
-	axeMaterial->addTexture("Textures/Axe/roughness.png", ROUGHNESS_MAP, texture_number++);
-	axeMaterial->addTexture("Textures/Axe/ao.png", AO_MAP, texture_number++);
-	axeMaterial->addTexture("Textures/Axe/normal.png", NORMAL_MAP, texture_number++);
+	axeMaterial->addTexture("../../../../Demo/Textures/Axe/diffuse.png", DIFFUSE, texture_number++);
+	axeMaterial->addTexture("../../../../Demo/Textures/Axe/metallic.png", METALLIC_MASK, texture_number++);
+	axeMaterial->addTexture("../../../../Demo/Textures/Axe/roughness.png", ROUGHNESS_MAP, texture_number++);
+	axeMaterial->addTexture("../../../../Demo/Textures/Axe/ao.png", AO_MAP, texture_number++);
+	axeMaterial->addTexture("../../../../Demo/Textures/Axe/normal.png", NORMAL_MAP, texture_number++);
 	axeMaterial->setMaterialType(PBR_BASIC);
 
 	GLMaterial * bodyMaterial = new GLMaterial();
-	bodyMaterial->addTexture("Textures/Body/diffuse.png", DIFFUSE, texture_number++);
-	bodyMaterial->addTexture("Textures/Body/metallic.png", METALLIC_MASK, texture_number++);
-	bodyMaterial->addTexture("Textures/Body/roughness.png", ROUGHNESS_MAP, texture_number++);
-	bodyMaterial->addTexture("Textures/Body/ao.png", AO_MAP, texture_number++);
-	bodyMaterial->addTexture("Textures/Body/normal.png", NORMAL_MAP, texture_number++);
+	bodyMaterial->addTexture("../../../../Demo/Textures/Body/diffuse.png", DIFFUSE, texture_number++);
+	bodyMaterial->addTexture("../../../../Demo/Textures/Body/metallic.png", METALLIC_MASK, texture_number++);
+	bodyMaterial->addTexture("../../../../Demo/Textures/Body/roughness.png", ROUGHNESS_MAP, texture_number++);
+	bodyMaterial->addTexture("../../../../Demo/Textures/Body/ao.png", AO_MAP, texture_number++);
+	bodyMaterial->addTexture("../../../../Demo/Textures/Body/normal.png", NORMAL_MAP, texture_number++);
 	bodyMaterial->setMaterialType(PBR_BASIC);
 
 	/*
@@ -490,7 +489,7 @@ void loadScene() {
 	bodyMesh->ptype = DRAWABLE;
 	bodyMesh->renderFlag = true;
 	bodyMesh->dtype = MESH;
-	loadICE("body.ice", bodyMesh->coords, bodyMesh->indices);
+	loadICE("../../../../Demo/Models/body.ice", bodyMesh->coords, bodyMesh->indices);
 	bodyMesh->usingEBO = true;
 	bodyMesh->material = bodyMaterial;
 	toGenerate.push_back(bodyMesh);
@@ -499,7 +498,7 @@ void loadScene() {
 	axeMesh->ptype = DRAWABLE;
 	axeMesh->renderFlag = true;
 	axeMesh->dtype = MESH;
-	loadICE("axe.ice", axeMesh->coords, axeMesh->indices);
+	loadICE("../../../../Demo/Models/axe.ice", axeMesh->coords, axeMesh->indices);
 	axeMesh->usingEBO = true;
 	axeMesh->material = axeMaterial;
 	toGenerate.push_back(axeMesh);
@@ -508,7 +507,7 @@ void loadScene() {
 	helmMesh->ptype = DRAWABLE;
 	helmMesh->renderFlag = true;
 	helmMesh->dtype = MESH;
-	loadICE("helm.ice", helmMesh->coords, helmMesh->indices);
+	loadICE("../../../../Demo/Models/helm.ice", helmMesh->coords, helmMesh->indices);
 	helmMesh->usingEBO = true;
 	helmMesh->material = helmMaterial;
 	toGenerate.push_back(helmMesh);
@@ -517,7 +516,7 @@ void loadScene() {
 	shieldMesh->ptype = DRAWABLE;
 	shieldMesh->renderFlag = true;
 	shieldMesh->dtype = MESH;
-	loadICE("shield.ice", shieldMesh->coords, shieldMesh->indices);
+	loadICE("../../../../Demo/Models/shield.ice", shieldMesh->coords, shieldMesh->indices);
 	shieldMesh->usingEBO = true;
 	shieldMesh->material = shieldMaterial;
 	toGenerate.push_back(shieldMesh);
@@ -526,7 +525,7 @@ void loadScene() {
 	dis0->ptype = DRAWABLE;
 	dis0->renderFlag = true;
 	dis0->dtype = MESH;
-	loadICE("Icec.ice", dis0->coords, dis0->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis0->coords, dis0->indices);
 	dis0->usingEBO = true;
 	dis0->material = mat0;
 	toGenerate.push_back(dis0);
@@ -535,7 +534,7 @@ void loadScene() {
 	dis1->ptype = DRAWABLE;
 	dis1->renderFlag = true;
 	dis1->dtype = MESH;
-	loadICE("Icec.ice", dis1->coords, dis1->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis1->coords, dis1->indices);
 	dis1->usingEBO = true;
 	dis1->material = mat1;
 	toGenerate.push_back(dis1);
@@ -544,7 +543,7 @@ void loadScene() {
 	dis2->ptype = DRAWABLE;
 	dis2->renderFlag = true;
 	dis2->dtype = MESH;
-	loadICE("Icec.ice", dis2->coords, dis2->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis2->coords, dis2->indices);
 	dis2->usingEBO = true;
 	dis2->material = mat2;
 	toGenerate.push_back(dis2);
@@ -553,7 +552,7 @@ void loadScene() {
 	dis4->ptype = DRAWABLE;
 	dis4->renderFlag = true;
 	dis4->dtype = MESH;
-	loadICE("Icec.ice", dis4->coords, dis4->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis4->coords, dis4->indices);
 	dis4->usingEBO = true;
 	dis4->material = pbrExampleMettallic;
 	toGenerate.push_back(dis4);
@@ -562,7 +561,7 @@ void loadScene() {
 	dis5->ptype = DRAWABLE;
 	dis5->renderFlag = true;
 	dis5->dtype = MESH;
-	loadICE("Icec.ice", dis5->coords, dis5->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis5->coords, dis5->indices);
 	dis5->usingEBO = true;
 	dis5->material = pbrExampleDialectric;
 	toGenerate.push_back(dis5);
@@ -571,7 +570,7 @@ void loadScene() {
 	dis6->ptype = DRAWABLE;
 	dis6->renderFlag = true;
 	dis6->dtype = MESH;
-	loadICE("Icec.ice", dis6->coords, dis6->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis6->coords, dis6->indices);
 	dis6->usingEBO = true;
 	dis6->material = mat4;
 	toGenerate.push_back(dis6);
@@ -580,7 +579,7 @@ void loadScene() {
 	dis7->ptype = DRAWABLE;
 	dis7->renderFlag = true;
 	dis7->dtype = MESH;
-	loadICE("Icec.ice", dis7->coords, dis7->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis7->coords, dis7->indices);
 	dis7->usingEBO = true;
 	dis7->material = skin;
 	toGenerate.push_back(dis7);
@@ -589,7 +588,7 @@ void loadScene() {
 	dis8->ptype = DRAWABLE;
 	dis8->renderFlag = true;
 	dis8->dtype = MESH;
-	loadICE("Icec.ice", dis8->coords, dis8->indices);
+	loadICE("../../../../Demo/Models/Icec.ice", dis8->coords, dis8->indices);
 	dis8->usingEBO = true;
 	dis8->material = iceMaterial;
 	toGenerate.push_back(dis8);
@@ -950,6 +949,7 @@ void callStart(GameObject* parent) {
 	}
 }
 void startScene() {
+	std::cout << "Engine Starting" << std::endl;
 	for (GameObject* object : objects) {
 		callStart(object);
 	}
