@@ -48,6 +48,13 @@ GameTimer timer;
 
 float lastSpawnTime;
 
+struct initAPIinfo {
+	bool vulkan;
+	bool openGL;
+	bool dx_11;
+	bool dx_12;
+	GLInstance glInstance;
+};
 float rand_float_11() {
 	return (((float)rand() / (RAND_MAX + 1)) - 0.5f) * 2;
 }
@@ -958,13 +965,9 @@ void startScene() {
 	}
 	timer.Start();
 };
-
-int main()
-{
-	createClientOnThread();
-
-	std::cout << GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS << std::endl;
-
+initAPIinfo initializeAPI(){
+	//load file with selection
+	std::cout << "Running with OpenGL" << std::endl;
 	GLInstance instance;
 	instance.initialize();
 	instance.createWindow("IceCaps - Week 9", 720, 1280);
@@ -975,6 +978,27 @@ int main()
 	glfwSetInputMode(instance.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetFramebufferSizeCallback(instance.window, framebuffer_size_callback);
 
+	initAPIinfo info;
+	info.openGL = true;
+	info.glInstance = instance;
+	return info;
+}
+void cleanup(initAPIinfo apiInfo){
+	if (apiInfo.vulkan) {
+		//All vulkan cleanup
+	} else {
+		//All OpenGL cleanup
+	}
+}
+
+int main()
+{
+	createClientOnThread();
+
+	initAPIinfo apiInfo = initializeAPI();
+	bool vulkanActive = apiInfo.vulkan;
+
+	if (apiInfo.openGL) {
 	loadScene();
 
 	//glEnable(GL_CULL_FACE);
@@ -987,7 +1011,7 @@ int main()
 	lastTime = glfwGetTime();
 	startScene();
 	// render loop
-	while (!glfwWindowShouldClose(instance.window))
+	while (!glfwWindowShouldClose(apiInfo.glInstance.window))
 	{
 		// render
 		glClearColor(0.1, 0.1, 0.1, 1.0f);
@@ -996,7 +1020,7 @@ int main()
 
 		//input->setFlags();
 		handleMessages();
-		instance.processInput(instance.window);
+		apiInfo.glInstance.processInput(apiInfo.glInstance.window);
 		timer.Update();
 		runUpdates();
 		runSimulations();
@@ -1006,12 +1030,13 @@ int main()
 		renderScene();
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
-		glfwSwapBuffers(instance.window);
+		glfwSwapBuffers(apiInfo.glInstance.window);
 		glfwPollEvents();
 	}
-
+	}
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	glfwTerminate();
+	cleanup(apiInfo);
 	return 0;
 }
 
