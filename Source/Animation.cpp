@@ -1,5 +1,5 @@
 #include "..\Headers\Animation.h"
-
+#include "glm/gtx/quaternion.hpp"
 
 Animation::Animation(GameTimer* timer)
 {

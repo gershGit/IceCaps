@@ -1,6 +1,9 @@
 #include <Headers.h>
-#include "GameObject.h"
+#include <vector>
 #include "GameTimer.h"
+
+//Forward decleration
+class GameObject;
 
 struct KeyFrame {
 	std::string name;

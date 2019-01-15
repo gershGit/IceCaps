@@ -170,13 +170,13 @@ public:
 			}
 			//return the transformation matrix
 			if (playingAnimation) {
-				return myTransform * animations[currentlyPlayingAnimation]->getMatrix(timer.GetOurCurrentTime());
+				return myTransform * animations[currentlyPlayingAnimation]->getMatrix(timer->GetOurCurrentTime());
 			}
 			return myTransform;
 		}
 		else {
 			if (playingAnimation) {
-				return lastTransform * animations[currentlyPlayingAnimation]->getMatrix(timer.GetOurCurrentTime());
+				return lastTransform * animations[currentlyPlayingAnimation]->getMatrix(timer->GetOurCurrentTime());
 			}
 			return lastTransform;
 		}
