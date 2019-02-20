@@ -1,0 +1,19 @@
+ECS Overview
+Each entity will have components with various types
+Each component will have an associated index in an array of booleans telling if it is present
+System will check if component is present and if it is get the data associated
+
+How to not waste memory if entity does not have components?
+Have systems keep direct lists of components? Components are ID based
+Components as structures?
+Components as classes inheriting from component?
+
+component managers keep track of which components and entities are linked, neither must reference each other
+or just keep lists in systems of components that apply and which are linked
+
+struct health {
+    unsigned int id = [health_component_id];
+    unsigned int entity_id = [entity_it_is_associated_with];
+    entity* entity ? instead of using an id?
+    int value = 100;
+}
