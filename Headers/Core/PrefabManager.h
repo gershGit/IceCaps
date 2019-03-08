@@ -3,7 +3,7 @@
 */
 
 #pragma once
-#include "MappedComponentManager.h"
+#include "Core/MappedComponentManager.h"
 class PrefabManager :
 	public MappedComponentManager
 {

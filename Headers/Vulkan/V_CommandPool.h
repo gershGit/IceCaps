@@ -3,10 +3,10 @@
 */
 
 #pragma once
-#include "V_Device.h"
-#include "V_Swapchain.h"
-#include "V_GraphicsPipeline.h"
-#include "V_DescriptorPool.h"
+#include "Vulkan/V_Device.h"
+#include "Vulkan/V_Swapchain.h"
+#include "Vulkan/V_GraphicsPipeline.h"
+#include "Vulkan/V_DescriptorPool.h"
 
 //Possible types the pool could be used for
 enum pool_type {GRAPHICS, COMPUTE, TRANSFER, IMAGE_OPERATIONS};

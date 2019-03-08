@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "Main_Headers.h"
-#include "OpenGLInstance.h"
-#include "V_Instance.h"
-#include "V_Device.h"
-#include "StringTranslation.h"
-#include "V_Renderer.h"
+#include "Core/Main_Headers.h"
+#include "OpenGL/OpenGLInstance.h"
+#include "Vulkan/V_Instance.h"
+#include "Vulkan/V_Device.h"
+#include "Core/StringTranslation.h"
+#include "Vulkan/V_RenderSystem.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -34,7 +34,7 @@ void loadConfiguration(configurationStructure &config) {
 	std::vector<config_key> keys = std::vector<config_key>();
 	std::vector<std::string> values = std::vector<std::string>();
 
-	std::ifstream infile("Configuration/icecaps.config");
+	std::ifstream infile("../../Configuration/icecaps.config");
 	std::string line, value;
 	config_key key;
 	while (std::getline(infile, line))

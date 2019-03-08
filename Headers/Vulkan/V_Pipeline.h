@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#include "Vulkan_Headers.h"
-#include "V_Device.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Vulkan/V_Device.h"
 #include <vector>
 
 //Enumerations for selecting the descriptor layout set

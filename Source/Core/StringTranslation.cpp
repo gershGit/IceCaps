@@ -1,8 +1,7 @@
 #pragma once
-#include "StringTranslation.h"
-#pragma once
-#include "EntityComponents.h"
-#include "V_Components.h"
+#include "Core/StringTranslation.h"
+#include "Core/EntityComponents.h"
+#include "Vulkan/V_Components.h"
 
 //Parses the key from a line
 config_key getConfigKey(std::string line) {

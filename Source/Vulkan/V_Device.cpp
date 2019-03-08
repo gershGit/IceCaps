@@ -1,4 +1,4 @@
-#include "V_Device.h"
+#include "Vulkan/V_Device.h"
 #include <optional>
 #include <set>
 
@@ -9,7 +9,7 @@ V_Device::V_Device()
 //Creates the logical device
 void V_Device::createLogicalDevice() {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice, surface);
-
+	
 	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 	std::set<uint32_t> uniqueQueueFamilies;
 	if (indices.computeFamily.has_value()) {

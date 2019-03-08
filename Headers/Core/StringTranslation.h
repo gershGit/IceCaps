@@ -5,7 +5,7 @@
 
 #pragma once
 #include "EntityComponents.h"
-#include "V_Components.h"
+#include "Vulkan/V_Components.h"
 
 //Parses the key from a line
 config_key getConfigKey(std::string line);

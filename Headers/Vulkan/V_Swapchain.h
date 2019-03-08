@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#include "V_Device.h"
-#include "Global_Callbacks.h"
+#include "Vulkan/V_Device.h"
+#include "Core/Global_Callbacks.h"
 
 class V_CommandPool;
 

@@ -1,5 +1,5 @@
-#include "MaterialManager.h"
-#include "V_Device.h"
+#include "Core/MaterialManager.h"
+#include "Vulkan/V_Device.h"
 
 //Loops through materials and returns the total number of images in all
 int V_MaterialManager::getImageCount()

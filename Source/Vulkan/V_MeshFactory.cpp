@@ -1,6 +1,6 @@
-#include "V_MeshFactory.h"
-#include "Vulkan_Headers.h"
-#include "V_BufferHelper.h"
+#include "Vulkan/V_MeshFactory.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Vulkan/V_BufferHelper.h"
 
 //Builds and attaches a vertex or index buffer to a vulkan mesh
 void V_MeshFactory::buildVertexBuffer(v_mesh & mesh, std::vector<vertex> &vertices, V_CommandPool * transferPool, V_Device * device)

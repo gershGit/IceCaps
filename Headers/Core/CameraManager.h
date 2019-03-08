@@ -3,8 +3,7 @@
 */
 
 #pragma once
-#include "MappedComponentManager.h"
-#include "V_Components.h"
+#include "Core/MappedComponentManager.h"
 
 class CameraManager :
 	public MappedComponentManager

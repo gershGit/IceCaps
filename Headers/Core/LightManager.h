@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#include "MappedComponentManager.h"
-#include "LightManager.h"
+#include "Core/MappedComponentManager.h"
+#include "Core/LightManager.h"
 
 class LightManager :
 	public MappedComponentManager

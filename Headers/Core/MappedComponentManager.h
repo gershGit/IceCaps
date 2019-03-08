@@ -4,7 +4,7 @@
 */
 
 #pragma once
-#include "ComponentManager.h"
+#include "Core/ComponentManager.h"
 class MappedComponentManager :
 	public ComponentManager
 {

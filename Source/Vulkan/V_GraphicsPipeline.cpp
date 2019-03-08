@@ -1,5 +1,5 @@
-#include "V_GraphicsPipeline.h"
-#include "V_BufferHelper.h"
+#include "Vulkan/V_GraphicsPipeline.h"
+#include "Vulkan/V_BufferHelper.h"
 #include <array>
 
 //Sets the device and swapchain
@@ -286,8 +286,8 @@ void V_GraphicsPipeline::initialize(material_type mType)
 	type = mType;
 	std::string vertexShader, fragmentShader;
 	if (mType == PBR) {
-		vertexShader = "Shaders/vbuffer.vert.spv";
-		fragmentShader = "Shaders/shader.frag.spv";
+		vertexShader = "../../Source/Shaders/vbuffer.vert.spv";
+		fragmentShader = "../../Source/Shaders/shader.frag.spv";
 		descriptorSetLayouts.resize(2);
 		createDescriptorSetLayout(mType);
 		createBindingDescription(PBR);

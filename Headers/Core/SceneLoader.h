@@ -3,10 +3,10 @@
 */
 
 #pragma once
-#include "Vulkan_Headers.h"
-#include "ComponentManager.h"
-#include "ManagersFactories.h"
-#include "SystemsHeader.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Core/ComponentManager.h"
+#include "Core/ManagersFactories.h"
+#include "Core/SystemsHeader.h"
 
 class SceneLoader
 {

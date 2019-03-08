@@ -1,4 +1,4 @@
-#include "MappedComponentManager.h"
+#include "Core/MappedComponentManager.h"
 
 
 MappedComponentManager::MappedComponentManager()

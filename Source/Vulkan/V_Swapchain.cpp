@@ -1,8 +1,8 @@
-#include "V_Swapchain.h"
+#include "Vulkan/V_Swapchain.h"
 #include <algorithm>
-#include "V_BufferHelper.h"
-#include "Global_Callbacks.h"
-#include "StringTranslation.h"
+#include "Vulkan/V_BufferHelper.h"
+#include "Core/Global_Callbacks.h"
+#include "Core/StringTranslation.h"
 #include <array>
 
 V_Swapchain::V_Swapchain(VkSurfaceKHR surface_in, V_Device* device_in)

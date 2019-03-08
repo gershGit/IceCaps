@@ -3,9 +3,9 @@
 */
 
 #pragma once
-#include "V_Components.h"
-#include "V_Instance.h"
-#include "V_CommandPool.h"
+#include "Vulkan/V_Components.h"
+#include "Vulkan/V_Instance.h"
+#include "Vulkan/V_CommandPool.h"
 
 
 class V_MeshFactory

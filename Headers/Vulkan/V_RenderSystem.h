@@ -1,11 +1,11 @@
 #pragma once
-#include "EntitySystem.h"
-#include "V_Components.h"
-#include "ManagersFactories.h"
-#include "V_GraphicsPipeline.h"
+#include "Core/EntitySystem.h"
+#include "Vulkan/V_Components.h"
+#include "Core/ManagersFactories.h"
+#include "Vulkan/V_GraphicsPipeline.h"
 
 
-class V_Renderer : public EntitySystem
+class V_RenderSystem : public EntitySystem
 {
 private:
 	//References to necessary objects
@@ -45,7 +45,7 @@ public:
 	std::vector<VkDescriptorSet> descriptorSets;
 
 	//Creation and intialization functions
-	V_Renderer();
+	V_RenderSystem();
 	void initialize();
 	void createSubmitInfos();
 	void createLightArray();
@@ -67,6 +67,6 @@ public:
 	void presentRender();
 
 	void setSwapchain(V_Swapchain* swapchain_in) { swapchain = swapchain_in; };
-	~V_Renderer();
+	~V_RenderSystem();
 };
 

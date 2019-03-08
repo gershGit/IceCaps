@@ -4,10 +4,10 @@
 */
 
 #pragma once
-#include "Main_Headers.h"
+#include "Core/Main_Headers.h"
 #include <vector>
-#include "EntityComponents.h"
-#include "ComponentManager.h"
+#include "Core/EntityComponents.h"
+#include "Core/ComponentManager.h"
 #include <iostream>
 
 class EntitySystem

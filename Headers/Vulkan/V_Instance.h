@@ -4,12 +4,12 @@
 */
 
 #pragma once
-#include "Vulkan_Headers.h"
-#include "V_Device.h"
-#include "V_Swapchain.h"
-#include "V_GraphicsPipeline.h"
-#include "V_CommandPool.h"
-#include "V_DescriptorPool.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Vulkan/V_Device.h"
+#include "Vulkan/V_Swapchain.h"
+#include "Vulkan/V_GraphicsPipeline.h"
+#include "Vulkan/V_CommandPool.h"
+#include "Vulkan/V_DescriptorPool.h"
 #include <optional>
 
 class V_Instance {

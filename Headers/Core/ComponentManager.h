@@ -1,7 +1,7 @@
 /*
 * Parent class for all component managers
 */
-#include "EntityComponents.h"
+#include "Core/EntityComponents.h"
 
 #pragma once
 class ComponentManager

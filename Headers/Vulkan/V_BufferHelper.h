@@ -4,9 +4,9 @@
 
 #pragma once
 
-#include "Vulkan_Headers.h"
-#include "Global_Callbacks.h"
-#include "V_Device.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Core/Global_Callbacks.h"
+#include "Vulkan/V_Device.h"
 
 class V_CommandPool;
 

@@ -3,9 +3,9 @@
 */
 
 #pragma once
-#include "MappedComponentManager.h"
-#include "V_Components.h"
-#include "V_Device.h"
+#include "Core/MappedComponentManager.h"
+#include "Vulkan/V_Components.h"
+#include "Vulkan/V_Device.h"
 
 class V_MeshManager :
 	public MappedComponentManager

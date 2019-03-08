@@ -5,16 +5,16 @@
 
 #pragma once
 
-#include "ComponentManager.h"
-#include "MeshManager.h"
-#include "MaterialManager.h"
-#include "TransformManager.h"
-#include "PrefabManager.h"
-#include "LightManager.h"
-#include "CameraManager.h"
+#include "Core/ComponentManager.h"
+#include "Core/MeshManager.h"
+#include "Core/MaterialManager.h"
+#include "Core/TransformManager.h"
+#include "Core/PrefabManager.h"
+#include "Core/LightManager.h"
+#include "Core/CameraManager.h"
 
-#include "V_MeshFactory.h"
-#include "V_MaterialFactory.h"
+#include "Vulkan/V_MeshFactory.h"
+#include "Vulkan/V_MaterialFactory.h"
 
 //Manager Retrieval Functions ---------
 

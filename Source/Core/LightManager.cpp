@@ -1,4 +1,4 @@
-#include "LightManager.h"
+#include "Core/LightManager.h"
 
 
 LightManager::~LightManager()

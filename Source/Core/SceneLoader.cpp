@@ -1,10 +1,10 @@
-#include "SceneLoader.h"
-#include "TransformManager.h"
-#include "V_Instance.h"
-#include "V_Components.h"
-#include "ManagersFactories.h"
-#include "SystemsHeader.h"
-#include "StringTranslation.h"
+#include "Core/SceneLoader.h"
+#include "Core/TransformManager.h"
+#include "Vulkan/V_Instance.h"
+#include "Vulkan/V_Components.h"
+#include "Core/ManagersFactories.h"
+#include "Core/SystemsHeader.h"
+#include "Core/StringTranslation.h"
 #include <fstream>
 
 
@@ -165,7 +165,7 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 			if (getSystemType(value) == RENDERER) {
 				if (config.api == Vulkan) {
 					std::cout << "\tAdding render system" << std::endl;
-					V_Renderer* renderSystem = new V_Renderer();		
+					V_RenderSystem* renderSystem = new V_RenderSystem();		
 					renderSystem->setSwapchain(config.apiInfo.v_Instance->getSwapchain());
 					systems.push_back(renderSystem);
 				}

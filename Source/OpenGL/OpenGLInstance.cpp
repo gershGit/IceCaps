@@ -1,4 +1,4 @@
-#include "OpenGlInstance.h"
+#include "OpenGL/OpenGlInstance.h"
 
 GLInstance::GLInstance() {
 }

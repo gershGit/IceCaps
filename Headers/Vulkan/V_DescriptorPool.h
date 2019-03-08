@@ -3,11 +3,11 @@
 */
 
 #pragma once
-#include "Vulkan_Headers.h"
-#include "V_Device.h"
-#include "V_Swapchain.h"
-#include "V_Components.h"
-#include "V_GraphicsPipeline.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Vulkan/V_Device.h"
+#include "Vulkan/V_Swapchain.h"
+#include "Vulkan/V_Components.h"
+#include "Vulkan/V_GraphicsPipeline.h"
 
 class V_DescriptorPool
 {

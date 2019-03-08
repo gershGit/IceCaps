@@ -1,7 +1,7 @@
-#include "Lifecycle_Functions.h"
-#include "ManagersFactories.h"
-#include "SceneLoader.h"
-#include "Global_Callbacks.h"
+#include "Core/Lifecycle_Functions.h"
+#include "Core/ManagersFactories.h"
+#include "Core/SceneLoader.h"
+#include "Core/Global_Callbacks.h"
 #include <thread>
 
 using namespace std;

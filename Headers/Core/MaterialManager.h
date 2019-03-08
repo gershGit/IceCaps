@@ -3,9 +3,9 @@
 */
 
 #pragma once
-#include "MappedComponentManager.h"
-#include "Vulkan_Headers.h"
-#include "V_Components.h"
+#include "Core/MappedComponentManager.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Vulkan/V_Components.h"
 
 class V_Device;
 

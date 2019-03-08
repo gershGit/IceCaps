@@ -1,4 +1,4 @@
-#include "GameTimer.h"
+#include "Core/GameTimer.h"
 using namespace std::chrono;
 
 bool GameTimer::isPaused;

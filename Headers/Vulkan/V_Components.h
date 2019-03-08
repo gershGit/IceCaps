@@ -3,8 +3,8 @@
 */
 
 #pragma once
-#include "Vulkan_Headers.h"
-#include "EntityComponents.h"
+#include "Vulkan/Vulkan_Headers.h"
+#include "Core/EntityComponents.h"
 
 //Mesh component with all the necessary buffers to render
 struct v_mesh {

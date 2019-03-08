@@ -1,14 +1,14 @@
-#include "V_Renderer.h"
-#include "V_Instance.h"
-#include "ManagersFactories.h"
+#include "Vulkan/V_RenderSystem.h"
+#include "Vulkan/V_Instance.h"
+#include "Core/ManagersFactories.h"
 #include <limits>
 #include <thread>
 
 //Constructor sets information
-V_Renderer::V_Renderer()
+V_RenderSystem::V_RenderSystem()
 {
 	operatesOn = { TRANSFORM, V_MESH, V_MATERIAL, CAMERA, LIGHT_COMPONENT, PREFAB_COMPONENT };
-	entityListRequiredComponents = { {V_MESH, V_MATERIAL}, {PREFAB_COMPONENT} };
+	entityListRequiredComponents = { {V_MESH, V_MATERIAL} };
 
 	beginInfo = {};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -20,15 +20,16 @@ V_Renderer::V_Renderer()
 }
 
 //Initializes the renderer by creating necessary objects
-void V_Renderer::initialize()
+void V_RenderSystem::initialize()
 {
+	lightsData.resize(config->cpu_info->coreCount);
 	createSubmitInfos();
 	createLightArray();
 }
 
 //Creates submit structures for use in submitting command buffers
 //Creates present structures for use in presenting rendered images
-void V_Renderer::createSubmitInfos()
+void V_RenderSystem::createSubmitInfos()
 {
 	submitInfos.resize(config->swapchainBuffering);
 	presentInfos.resize(config->swapchainBuffering);
@@ -63,7 +64,7 @@ void V_Renderer::createSubmitInfos()
 }
 
 //Creates an array large enough to hold all lights needed in a render
-void V_Renderer::createLightArray()
+void V_RenderSystem::createLightArray()
 {
 	int most_max_lights = 0;
 	graphicsPipelines = config->apiInfo.v_Instance->getGraphicsPipelines();
@@ -72,13 +73,13 @@ void V_Renderer::createLightArray()
 			most_max_lights = pipeline->max_lights;
 		}
 	}
-	for (int i = 0; i < config->cpu_info->coreCount; i++) {
+	for (unsigned int i = 0; i < config->cpu_info->coreCount; i++) {
 		lightsData[i] = (LightObject*)malloc(sizeof(LightObject) * most_max_lights);
 	}
 }
 
 //When configuration has been changed, reset the swapchain if necessary
-void V_Renderer::onConfigurationChange()
+void V_RenderSystem::onConfigurationChange()
 {
 	if (swapchainKHR != config->apiInfo.v_Instance->getSwapchain()->getSwapchain()) {
 		swapchainKHR = config->apiInfo.v_Instance->getSwapchain()->getSwapchain();
@@ -86,7 +87,7 @@ void V_Renderer::onConfigurationChange()
 }
 
 //Adds an entity into the trees
-void V_Renderer::addEntity(int entityID)
+void V_RenderSystem::addEntity(int entityID)
 {
 	material_type entityPipelineType = getVulkanMaterialManager(*managers)->getEntity(entityID)->matType;
 	for (int i = 0; i < pipelineTypes->size(); i++) {
@@ -102,7 +103,7 @@ void V_Renderer::addEntity(int entityID)
 }
 
 //System on update call
-void V_Renderer::onUpdate()
+void V_RenderSystem::onUpdate()
 {
 	V_Instance* instance = config->apiInfo.v_Instance;
 	//Wait for the inflight fence associated with the current frame to ensure we don't overfill the gpu with cpu commands
@@ -117,7 +118,7 @@ void V_Renderer::onUpdate()
 }
 
 //Gets the image it will present
-void V_Renderer::acquireImage()
+void V_RenderSystem::acquireImage()
 {
 	V_Instance* instance = config->apiInfo.v_Instance;
 	//Acquires the next image using a semaphore and stores the index into imageIndex
@@ -137,12 +138,12 @@ void V_Renderer::acquireImage()
 }
 
 //Culls meshes from the trees for rendering
-void V_Renderer::cullMeshes()
+void V_RenderSystem::cullMeshes()
 {
 }
 
 //Updates the camera buffers for the current frame
-void V_Renderer::updateCameraBuffers()
+void V_RenderSystem::updateCameraBuffers()
 {
 	ViewPersp viewPersp = ViewPersp();
 	if (activeCamera == nullptr) {
@@ -167,7 +168,7 @@ void V_Renderer::updateCameraBuffers()
 }
 
 //Returns the index of which light is to be replaced in the light array
-int V_Renderer::replacedLightIndex(int lightCount, transform objectTrans, float currentLightDistance, int coreID) {
+int V_RenderSystem::replacedLightIndex(int lightCount, transform objectTrans, float currentLightDistance, int coreID) {
 	float maxLightInArray = 0.0f;
 	int maxLightIndex = -1;
 	for (int i = 0; i < lightCount; i++) {
@@ -181,7 +182,7 @@ int V_Renderer::replacedLightIndex(int lightCount, transform objectTrans, float 
 }
 
 //Updates the light buffer with the closes lightCount lights
-void V_Renderer::updateLightBuffers(int lightCount, transform objectTrans, int coreID)
+void V_RenderSystem::updateLightBuffers(int lightCount, transform objectTrans, int coreID)
 {
 	float maxDistance = std::numeric_limits<float>::infinity();
 	int lightsFound = 0;
@@ -221,14 +222,14 @@ void V_Renderer::updateLightBuffers(int lightCount, transform objectTrans, int c
 }
 
 //Builds and submits render command buffers
-void V_Renderer::buildCommandBuffers()
+void V_RenderSystem::buildCommandBuffers()
 {
 	int pipelineIndex = 0;
 	for (pipelineIndex = 0; pipelineIndex < renderTrees->size(); pipelineIndex++) {
 		int entitiesPerCore = (int)renderTrees[pipelineIndex].size() / config->cpu_info->coreCount;
 		int sentEntities = 0;
 		for (unsigned int coreID = 0; coreID < config->cpu_info->coreCount; coreID++) {
-			config->cpu_info->threads[coreID] = std::thread(&V_Renderer::renderEntities, this, sentEntities, entitiesPerCore, pipelineIndex, config->apiInfo.v_Instance->getGraphicsPipeline(pipelineTypes->at(pipelineIndex)), coreID);
+			config->cpu_info->threads[coreID] = std::thread(&V_RenderSystem::renderEntities, this, sentEntities, entitiesPerCore, pipelineIndex, config->apiInfo.v_Instance->getGraphicsPipeline(pipelineTypes->at(pipelineIndex)), coreID);
 			sentEntities += entitiesPerCore;
 		}
 		//Handles odd numbers of entities
@@ -242,7 +243,7 @@ void V_Renderer::buildCommandBuffers()
 }
 
 //Renders a subset of entities on a single core
-void V_Renderer::renderEntities(int entitiesStart, int entityCount, int renderTreeIndex, V_GraphicsPipeline* pipeline, int coreID)
+void V_RenderSystem::renderEntities(int entitiesStart, int entityCount, int renderTreeIndex, V_GraphicsPipeline* pipeline, int coreID)
 {
 	if (entityCount > 0) {
 		std::vector<int> * renderTree = &renderTrees->at(renderTreeIndex);
@@ -292,7 +293,7 @@ void V_Renderer::renderEntities(int entitiesStart, int entityCount, int renderTr
 }
 
 //Submits a command buffer to a graphics queue
-void V_Renderer::submitCommandBuffer(VkCommandBuffer &buffer, int coreID)
+void V_RenderSystem::submitCommandBuffer(VkCommandBuffer &buffer, int coreID)
 {
 	submitInfos[config->apiInfo.v_Instance->currentFrame].pCommandBuffers = &buffer;
 
@@ -310,7 +311,7 @@ void V_Renderer::submitCommandBuffer(VkCommandBuffer &buffer, int coreID)
 }
 
 //Presents the final rendered image
-void V_Renderer::presentRender()
+void V_RenderSystem::presentRender()
 {
 	if (recreatedSwapchain) {
 		VkSwapchainKHR swapchains[] = { config->apiInfo.v_Instance->getSwapchain()->getSwapchain() };
@@ -329,6 +330,6 @@ void V_Renderer::presentRender()
 	}
 }
 
-V_Renderer::~V_Renderer()
+V_RenderSystem::~V_RenderSystem()
 {
 }

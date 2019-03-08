@@ -1,6 +1,6 @@
-#include "V_Instance.h"
+#include "Vulkan/V_Instance.h"
 #include <set>
-#include "StringTranslation.h"
+#include "Core/StringTranslation.h"
 #include <array>
 
 

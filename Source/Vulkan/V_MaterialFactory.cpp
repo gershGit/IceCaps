@@ -1,9 +1,9 @@
-#include "V_MaterialFactory.h"
+#include "Vulkan/V_MaterialFactory.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include "V_BufferHelper.h"
-#include "V_Instance.h"
-#include "StringTranslation.h"
+#include "ThirdParty/stb_image.h"
+#include "Vulkan/V_BufferHelper.h"
+#include "Vulkan/V_Instance.h"
+#include "Core/StringTranslation.h"
 #include <fstream>
 
 //Sets v_material type to correct value based on string

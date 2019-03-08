@@ -1,6 +1,6 @@
-#include "V_BufferHelper.h"
-#include "V_CommandPool.h"
-#include "StringTranslation.h"
+#include "Vulkan/V_BufferHelper.h"
+#include "Vulkan/V_CommandPool.h"
+#include "Core/StringTranslation.h"
 
 void V_BufferHelper::createBuffer(V_Device *device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer & buffer, VkDeviceMemory & bufferMemory)
 {
