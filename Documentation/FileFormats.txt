@@ -1,0 +1,14 @@
+.ice file (Ice file)
+Static Model file
+
+.sno file (Snow file)
+Material file
+
+.gf file (Game file)
+Game file, scene order
+
+.icap file (IceCap file)
+Scene file
+
+.glac (Glacier file)
+Skinned mesh file
