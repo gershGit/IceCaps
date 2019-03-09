@@ -8,7 +8,7 @@ enum colliderType {SPHERE, AABB, BOX, CAPSULE, MESH};
 enum light_type {POINT_LIGHT, DIRECTION_LIGHT, SPOT_LIGHT};
 enum component_type {TRANSFORM, PARENT,
 						PREFAB_COMPONENT,
-						PHYSICS, COLLIDER, 
+						PHYSICS, COLLIDER, RIGID_BODY,
 						CAMERA, V_CAMERA, DX12_CAMERA, 
 						SCRIPT,
 						MESH_COMPONENT, MATERIAL_COMPONENT,
@@ -17,7 +17,7 @@ enum component_type {TRANSFORM, PARENT,
 						V_DESCRIPTOR, DX12_DESCRIPTOR,
 						LIGHT_COMPONENT,
 						NO_TYPE};
-enum system_type {RENDERER};
+enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM};
 
 //Entity
 struct entity {
@@ -44,9 +44,17 @@ struct parentEntity {
 	entity* parent;
 };
 
-struct physics {
-	unsigned int mass;
-	glm::mat4 COM;
+struct rigid_body {
+	float mass;
+	glm::vec3 COM;
+	bool is_grounded = false;
+	glm::vec3 lastPosition;
+	glm::vec3 lastVelocity;
+	float elasticity = 0.5f;
+};
+
+struct accelerations {
+	std::vector<glm::vec3> accelerationVectors;
 };
 
 struct collider {

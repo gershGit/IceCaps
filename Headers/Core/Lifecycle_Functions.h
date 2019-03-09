@@ -9,7 +9,8 @@
 #include "Vulkan/V_Instance.h"
 #include "Vulkan/V_Device.h"
 #include "Core/StringTranslation.h"
-#include "Vulkan/V_RenderSystem.h"
+#include "Core/SystemsHeader.h"
+#include "GameTimer.h"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -174,8 +175,10 @@ GLFWwindow* opengl_initializeWindow() {
 
 //The main engine loop for an application using vulkan
 void vulkan_mainloop(configurationStructure &config, std::vector<EntitySystem*> &systems) {
-	while (!glfwWindowShouldClose(config.window)) {
+	GameTimer::Start();
+	while (!glfwWindowShouldClose(config.window)) {	
 		glfwPollEvents();
+		GameTimer::Update();
 		if (config.changed) {
 			for (EntitySystem * system : systems) {
 				system->onConfigurationChange();

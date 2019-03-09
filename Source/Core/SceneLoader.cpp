@@ -73,6 +73,10 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 				std::cout << "\tAdding Light Manager" << std::endl;
 				managers.push_back(new LightManager());
 			}
+			else if (getComponentType(value) == RIGID_BODY) {
+				std::cout << "\tAdding Rigid Body Manager" << std::endl;
+				managers.push_back(new RigidBodyManager());
+			}
 		}
 	}
 }
@@ -98,6 +102,9 @@ void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*
 		else if (managerType == V_MATERIAL) {
 			system->managers->push_back(getVulkanMaterialManager(managers));
 		}
+		else if (managerType == RIGID_BODY) {
+			system->managers->push_back(getRigidBodyManager(managers));
+		}
 	}
 }
 
@@ -120,7 +127,6 @@ void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*
 					}
 				}
 				else if (requiredComponent == V_MESH) {
-		
 					if (!getVulkanMeshManager(managers)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
@@ -144,6 +150,12 @@ void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*
 						break;
 					}
 				}
+				else if (requiredComponent == RIGID_BODY) {
+					if (!getRigidBodyManager(managers)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
 			}
 			if (validEntity) {
 				system->addEntity(entityID);
@@ -162,13 +174,19 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 			break;
 		}
 		else if (getSceneKey(line) == ADD_SYSTEM) {
-			if (getSystemType(value) == RENDERER) {
+			if (getSystemType(value) == RENDER_SYSTEM) {
 				if (config.api == Vulkan) {
 					std::cout << "\tAdding render system" << std::endl;
 					V_RenderSystem* renderSystem = new V_RenderSystem();		
 					renderSystem->setSwapchain(config.apiInfo.v_Instance->getSwapchain());
 					systems.push_back(renderSystem);
 				}
+			}
+			else if (getSystemType(value) == RIGID_BODY_SYSTEM) {
+				std::cout << "\tAdding rigid body system" << std::endl;
+				RigidBodySystem* rigidBodySystem = new RigidBodySystem();
+				rigidBodySystem->setConfig(config);
+				systems.push_back(rigidBodySystem);
 			}
 		}
 	}
@@ -326,6 +344,30 @@ light buildLight(std::ifstream &fileStream, configurationStructure &config) {
 	return retLight;
 }
 
+//Creates a rigid body component from a file stream
+rigid_body buildRigidBody(std::ifstream &fileStream, configurationStructure &config) {
+	rigid_body retBody = rigid_body();
+	std::string line, value, subComponent;
+	retBody.lastVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
+	while (std::getline(fileStream, line)) {
+		value = getValue(line);
+		subComponent = getSubComponent(line);
+		if (strcmp(subComponent.c_str(), "MASS") == 0) {
+			retBody.mass = strtof(value.c_str(), nullptr);
+		}
+		else if (strcmp(subComponent.c_str(), "ELASTICITY") == 0) {
+			retBody.elasticity = strtof(value.c_str(), nullptr);
+		}
+		else if (strcmp(subComponent.c_str(), "START_VELOCITY") == 0) {
+			retBody.lastVelocity = getVectorFromString<glm::vec3>(value);
+		}
+		else if (strcmp(subComponent.c_str(), "END") == 0) {
+			break;
+		}
+	}
+	return retBody;
+}
+
 //Loads in an entity under the vulkan api
 void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentManagers, std::ifstream &fileStream, configurationStructure &config) {
 	std::cout << "Adding entity: " << entityID << std::endl;
@@ -370,6 +412,13 @@ void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentMan
 				light tempLight = buildLight(fileStream, config);
 				getLightManager(componentManagers)->addComponent(entityID);
 				getLightManager(componentManagers)->setComponent(entityID, tempLight);
+			}
+			else if (getComponentType(value) == RIGID_BODY) {
+				std::cout << "\tAdding Rigid Body Component" << std::endl;
+				rigid_body tempRigid = buildRigidBody(fileStream, config);
+				tempRigid.lastPosition = getTransformManager(componentManagers)->transformArray[entityID].pos;
+				getRigidBodyManager(componentManagers)->addComponent(entityID);
+				getRigidBodyManager(componentManagers)->setComponent(entityID, tempRigid);
 			}
 		}
 	}

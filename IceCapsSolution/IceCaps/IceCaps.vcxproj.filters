@@ -123,6 +123,12 @@
     <ClCompile Include="..\..\Source\Core\TransformManager.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Core\RigidBodySystem.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Core\RigidBodyManager.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Core\Lifecycle_Functions.h">
@@ -220,6 +226,12 @@
     </ClInclude>
     <ClInclude Include="..\..\Headers\Vulkan\V_RenderSystem.h">
       <Filter>Header Files\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\RigidBodySystem.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\RigidBodyManager.h">
+      <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

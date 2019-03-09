@@ -895,13 +895,19 @@ component_type getComponentType(std::string value) {
 	else if (strcmp(value.c_str(), "PREFAB") == 0) {
 		return PREFAB_COMPONENT;
 	}
+	else if (strcmp(value.c_str(), "RIGID_BODY") == 0) {
+		return RIGID_BODY;
+	}
 	return NO_TYPE;
 }
 
 //Gets a system type from a line value
 system_type getSystemType(std::string value) {
-	if (strcmp(value.c_str(), "RENDERER") == 0) {
-		return RENDERER;
+	if (strcmp(value.c_str(), "RENDER_SYSTEM") == 0) {
+		return RENDER_SYSTEM;
+	}
+	else if (strcmp(value.c_str(), "RIGID_BODY_SYSTEM") == 0) {
+		return RIGID_BODY_SYSTEM;
 	}
 	return system_type();
 }

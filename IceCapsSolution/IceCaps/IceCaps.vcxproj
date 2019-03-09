@@ -133,6 +133,8 @@
     <ClCompile Include="..\..\Source\Core\MaterialManager.cpp" />
     <ClCompile Include="..\..\Source\Core\MeshManager.cpp" />
     <ClCompile Include="..\..\Source\Core\PrefabManager.cpp" />
+    <ClCompile Include="..\..\Source\Core\RigidBodyManager.cpp" />
+    <ClCompile Include="..\..\Source\Core\RigidBodySystem.cpp" />
     <ClCompile Include="..\..\Source\Core\SceneLoader.cpp" />
     <ClCompile Include="..\..\Source\Core\StringTranslation.cpp" />
     <ClCompile Include="..\..\Source\Core\TransformManager.cpp" />
@@ -165,6 +167,8 @@
     <ClInclude Include="..\..\Headers\Core\MaterialManager.h" />
     <ClInclude Include="..\..\Headers\Core\MeshManager.h" />
     <ClInclude Include="..\..\Headers\Core\PrefabManager.h" />
+    <ClInclude Include="..\..\Headers\Core\RigidBodyManager.h" />
+    <ClInclude Include="..\..\Headers\Core\RigidBodySystem.h" />
     <ClInclude Include="..\..\Headers\Core\SceneLoader.h" />
     <ClInclude Include="..\..\Headers\Core\StringTranslation.h" />
     <ClInclude Include="..\..\Headers\Core\SystemsHeader.h" />

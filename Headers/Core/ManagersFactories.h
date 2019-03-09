@@ -12,6 +12,7 @@
 #include "Core/PrefabManager.h"
 #include "Core/LightManager.h"
 #include "Core/CameraManager.h"
+#include "Core/RigidBodyManager.h"
 
 #include "Vulkan/V_MeshFactory.h"
 #include "Vulkan/V_MaterialFactory.h"
@@ -24,3 +25,4 @@ V_MaterialManager* getVulkanMaterialManager(std::vector<ComponentManager*>& mana
 PrefabManager* getPrefabManager(std::vector<ComponentManager*> &managers);
 CameraManager* getCameraManager(std::vector<ComponentManager*> &managers);
 LightManager* getLightManager(std::vector<ComponentManager*> &managers);
+RigidBodyManager* getRigidBodyManager(std::vector<ComponentManager*> &managers);

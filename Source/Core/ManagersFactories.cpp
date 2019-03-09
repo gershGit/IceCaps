@@ -50,3 +50,13 @@ LightManager* getLightManager(std::vector<ComponentManager*> &managers) {
 	}
 	return nullptr;
 }
+
+RigidBodyManager * getRigidBodyManager(std::vector<ComponentManager*>& managers)
+{
+	for (ComponentManager* manager : managers) {
+		if (manager->type == RIGID_BODY) {
+			return dynamic_cast<RigidBodyManager*>(manager);
+		}
+	}
+	return nullptr;
+}

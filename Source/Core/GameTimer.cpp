@@ -35,7 +35,7 @@ void GameTimer::Continue()
 
 void GameTimer::Update() {
 	currentTime = high_resolution_clock::now();
-	unscaledDeltaTime = duration_cast<duration<double>>(currentTime - lastTime).count() / 1000.0;
+	unscaledDeltaTime = duration_cast<duration<double>>(currentTime - lastTime).count();
 	deltaTime = unscaledDeltaTime * timeScalar;
 	lastTime = currentTime;
 }
