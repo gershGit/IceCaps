@@ -60,3 +60,23 @@ RigidBodyManager * getRigidBodyManager(std::vector<ComponentManager*>& managers)
 	}
 	return nullptr;
 }
+
+ColliderManager * getColliderManager(std::vector<ComponentManager*>& managers)
+{
+	for (ComponentManager* manager : managers) {
+		if (manager->type == COLLIDER) {
+			return dynamic_cast<ColliderManager*>(manager);
+		}
+	}
+	return nullptr;
+}
+
+CollisionManager * getCollisionManager(std::vector<ComponentManager*>& managers)
+{
+	for (ComponentManager* manager : managers) {
+		if (manager->type == COLLISION) {
+			return dynamic_cast<CollisionManager*>(manager);
+		}
+	}
+	return nullptr;
+}

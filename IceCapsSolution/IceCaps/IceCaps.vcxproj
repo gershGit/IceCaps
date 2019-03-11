@@ -122,6 +122,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Source\Core\CameraManager.cpp" />
+    <ClCompile Include="..\..\Source\Core\ColliderManager.cpp" />
+    <ClCompile Include="..\..\Source\Core\CollisionSystem.cpp" />
     <ClCompile Include="..\..\Source\Core\ComponentManager.cpp" />
     <ClCompile Include="..\..\Source\Core\EntitySystem.cpp" />
     <ClCompile Include="..\..\Source\Core\GameTimer.cpp" />
@@ -154,6 +156,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Core\CameraManager.h" />
+    <ClInclude Include="..\..\Headers\Core\ColliderManager.h" />
+    <ClInclude Include="..\..\Headers\Core\CollisionManager.h" />
+    <ClInclude Include="..\..\Headers\Core\CollisionSystem.h" />
     <ClInclude Include="..\..\Headers\Core\ComponentManager.h" />
     <ClInclude Include="..\..\Headers\Core\EntityComponents.h" />
     <ClInclude Include="..\..\Headers\Core\EntitySystem.h" />

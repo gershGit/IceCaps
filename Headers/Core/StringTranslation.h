@@ -55,6 +55,9 @@ std::string getSubComponent(std::string line);
 //Converts a string to a texture type
 texture_type getTextureType(std::string typeAsString);
 
+//Converts a string to a collider type
+collider_type getColliderType(std::string typeAsString);
+
 /*
 	Configuration Structure Functions
 */

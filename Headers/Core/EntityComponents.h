@@ -4,8 +4,6 @@
 #include <vector>
 
 //Enumerations
-enum colliderType {SPHERE, AABB, BOX, CAPSULE, MESH};
-enum light_type {POINT_LIGHT, DIRECTION_LIGHT, SPOT_LIGHT};
 enum component_type {TRANSFORM, PARENT,
 						PREFAB_COMPONENT,
 						PHYSICS, COLLIDER, RIGID_BODY,
@@ -16,8 +14,9 @@ enum component_type {TRANSFORM, PARENT,
 						GL_MESH, GL_MATERIAL,
 						V_DESCRIPTOR, DX12_DESCRIPTOR,
 						LIGHT_COMPONENT,
-						NO_TYPE};
-enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM};
+						COLLISION, NO_TYPE};
+enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, NO_SYSTEM_TYPE = -1};
+enum collision_state {COLLISION_ENTER, COLLISION_CONTINUE, COLLISION_EXIT};
 
 //Entity
 struct entity {
@@ -50,16 +49,53 @@ struct rigid_body {
 	bool is_grounded = false;
 	glm::vec3 lastPosition;
 	glm::vec3 lastVelocity;
+	glm::vec3 lastRotation;
+	glm::vec3 rotationalVelocity;
 	float elasticity = 0.5f;
+	bool isStatic = false;
 };
 
 struct accelerations {
 	std::vector<glm::vec3> accelerationVectors;
 };
 
+struct aabb {
+	glm::vec3 min;
+	glm::vec3 max;
+};
+
+struct mesh_data {
+	std::vector<vertex> vertices;
+	std::vector<unsigned int> indices;
+};
+
+struct box {
+	glm::vec3 pointA;
+	glm::vec3 pointB;
+};
+
 struct collider {
-	colliderType type;
+	collider_type type;
 	bool CCD; //Is continuous ccd on
+	float radius;
+	aabb * boundingBox;
+	box * hitBox;
+	mesh_data * mesh;
+};
+
+struct sphere_collider : collider {
+	float radius;
+};
+
+struct collision {
+	bool collision;
+	collision_state state;
+	int entityA;
+	int entityB;
+	glm::vec3 collisionPointA;
+	glm::vec3 collisionPointB;
+	glm::vec3 collisionNormalA;
+	glm::vec3 collisionNormalB;
 };
 
 struct camera {

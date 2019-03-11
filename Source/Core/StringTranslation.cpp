@@ -898,18 +898,24 @@ component_type getComponentType(std::string value) {
 	else if (strcmp(value.c_str(), "RIGID_BODY") == 0) {
 		return RIGID_BODY;
 	}
+	else if (strcmp(value.c_str(), "COLLIDER") == 0) {
+		return COLLIDER;
+	}
 	return NO_TYPE;
 }
 
 //Gets a system type from a line value
 system_type getSystemType(std::string value) {
-	if (strcmp(value.c_str(), "RENDER_SYSTEM") == 0) {
+	if (strcmp(value.c_str(), "RENDER") == 0) {
 		return RENDER_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "RIGID_BODY_SYSTEM") == 0) {
+	else if (strcmp(value.c_str(), "RIGID_BODY") == 0) {
 		return RIGID_BODY_SYSTEM;
 	}
-	return system_type();
+	else if (strcmp(value.c_str(), "COLLISION") == 0) {
+		return COLLISION_SYSTEM;
+	}
+	return NO_SYSTEM_TYPE;
 }
 
 //Strips leading tabs and spaces and returns a string
@@ -949,6 +955,27 @@ texture_type getTextureType(std::string typeAsString) {
 		return ROUGHNESS;
 	}
 	return NO_TEXTURE_TYPE;
+}
+
+//Converts a string to a collider type
+collider_type getColliderType(std::string typeAsString)
+{
+	if (strcmp(typeAsString.c_str(), "SPHERE") == 0) {
+		return SPHERE_COLLIDER;
+	}
+	else if (strcmp(typeAsString.c_str(), "AABB") == 0) {
+		return AABB_COLLIDER;
+	}
+	else if (strcmp(typeAsString.c_str(), "BOX") == 0) {
+		return BOX_COLLIDER;
+	}
+	else if (strcmp(typeAsString.c_str(), "MESH") == 0) {
+		return MESH_COLLIDER;
+	}
+	else if (strcmp(typeAsString.c_str(), "CAPSULE") == 0) {
+		return CAPSULE_COLLIDER;
+	}
+	return NO_COLLIDER_TYPE;
 }
 
 /*

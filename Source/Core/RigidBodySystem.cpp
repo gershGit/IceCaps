@@ -19,23 +19,13 @@ void RigidBodySystem::onUpdate()
 	for (int i = 0; i < entities->size(); i++) {
 		//Create a temporary body to store update information
 		rigid_body tempBody = rManager->getComponent(entities->at(i));
-		if (!tempBody.is_grounded) {
+		if (!tempBody.isStatic && !tempBody.is_grounded) {
 			//Calulate change in position
 			glm::vec3 deltaPos = (float) GameTimer::getDeltaTime() * (tempBody.lastVelocity + (float) GameTimer::getDeltaTime() * gravity * 0.5f);
 
 			//Update position and velocity
 			tempBody.lastPosition += deltaPos;
 			tempBody.lastVelocity += (float)GameTimer::getDeltaTime() * gravity;
-
-			//Check for grounding
-			if (tempBody.lastPosition.y <= groundPlane) {
-				tempBody.lastVelocity.y = -tempBody.lastVelocity.y * tempBody.elasticity;
-				//Check if now static
-				if (glm::length(tempBody.lastVelocity) < staticSpeed) {
-					tManager->transformArray[entities->at(i)].pos = tempBody.lastPosition;
-					tempBody.is_grounded = true;
-				}
-			}
 			
 			//Update components
 			tManager->transformArray[entities->at(i)].pos = tempBody.lastPosition;

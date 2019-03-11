@@ -13,6 +13,8 @@
 #include "Core/LightManager.h"
 #include "Core/CameraManager.h"
 #include "Core/RigidBodyManager.h"
+#include "Core/ColliderManager.h"
+#include "Core/CollisionManager.h"
 
 #include "Vulkan/V_MeshFactory.h"
 #include "Vulkan/V_MaterialFactory.h"
@@ -26,3 +28,5 @@ PrefabManager* getPrefabManager(std::vector<ComponentManager*> &managers);
 CameraManager* getCameraManager(std::vector<ComponentManager*> &managers);
 LightManager* getLightManager(std::vector<ComponentManager*> &managers);
 RigidBodyManager* getRigidBodyManager(std::vector<ComponentManager*> &managers);
+ColliderManager* getColliderManager(std::vector<ComponentManager*> &managers);
+CollisionManager* getCollisionManager(std::vector<ComponentManager*> &managers);

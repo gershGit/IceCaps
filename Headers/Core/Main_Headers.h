@@ -37,6 +37,8 @@ enum scene_key { SCENE_NAME, MANAGERS, SYSTEMS, ADD_MANAGER, ADD_SYSTEM, ADD_PIP
 enum materialSubComponents { MAT_TYPE, TEXTURE, END };
 enum material_type { PBR };
 enum texture_type { DIFFUSE, METALLIC_SPEC, NORMAL, ROUGHNESS, AO, NO_TEXTURE_TYPE = -1 };
+enum collider_type { SPHERE_COLLIDER, AABB_COLLIDER, BOX_COLLIDER, CAPSULE_COLLIDER, MESH_COLLIDER, NO_COLLIDER_TYPE = -1 };
+enum light_type { POINT_LIGHT, DIRECTION_LIGHT, SPOT_LIGHT };
 
 //API information, specifically useful for instance retrieval
 struct initAPIinfo {

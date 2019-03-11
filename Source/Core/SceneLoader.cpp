@@ -77,6 +77,11 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 				std::cout << "\tAdding Rigid Body Manager" << std::endl;
 				managers.push_back(new RigidBodyManager());
 			}
+			else if (getComponentType(value) == COLLIDER) {
+				std::cout << "\tAdding Collider and Collision Manager" << std::endl;
+				managers.push_back(new ColliderManager());
+				managers.push_back(new CollisionManager());
+			}
 		}
 	}
 }
@@ -104,6 +109,10 @@ void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*
 		}
 		else if (managerType == RIGID_BODY) {
 			system->managers->push_back(getRigidBodyManager(managers));
+		}
+		else if (managerType == COLLIDER) {
+			system->managers->push_back(getColliderManager(managers));
+			system->managers->push_back(getCollisionManager(managers));
 		}
 	}
 }
@@ -156,6 +165,12 @@ void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*
 						break;
 					}
 				}
+				else if (requiredComponent == COLLIDER) {
+					if (!getColliderManager(managers)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
 			}
 			if (validEntity) {
 				system->addEntity(entityID);
@@ -187,6 +202,12 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 				RigidBodySystem* rigidBodySystem = new RigidBodySystem();
 				rigidBodySystem->setConfig(config);
 				systems.push_back(rigidBodySystem);
+			}
+			else if (getSystemType(value) == COLLISION_SYSTEM) {
+				std::cout << "\tAdding collision system" << std::endl;
+				CollisionSystem* collisionSystem = new CollisionSystem();
+				collisionSystem->setConfig(config);
+				systems.push_back(collisionSystem);
 			}
 		}
 	}
@@ -361,11 +382,34 @@ rigid_body buildRigidBody(std::ifstream &fileStream, configurationStructure &con
 		else if (strcmp(subComponent.c_str(), "START_VELOCITY") == 0) {
 			retBody.lastVelocity = getVectorFromString<glm::vec3>(value);
 		}
+		else if (strcmp(subComponent.c_str(), "STATIC") == 0) {
+			retBody.isStatic = getBool(value);
+		}
 		else if (strcmp(subComponent.c_str(), "END") == 0) {
 			break;
 		}
 	}
 	return retBody;
+}
+
+//Creates a collider from a file stream
+collider buildCollider(std::ifstream &fileStream, configurationStructure &config) {
+	collider retCollider = collider();
+	std::string line, value, subComponent;
+	while (std::getline(fileStream, line)) {
+		value = getValue(line);
+		subComponent = getSubComponent(line);
+		if (strcmp(subComponent.c_str(), "TYPE") == 0) {
+			retCollider.type = getColliderType(value);
+		}
+		else if (strcmp(subComponent.c_str(), "RADIUS") == 0) {
+			retCollider.radius = strtof(value.c_str(), nullptr);
+		}
+		else if (strcmp(subComponent.c_str(), "END") == 0) {
+			break;
+		}
+	}
+	return retCollider;
 }
 
 //Loads in an entity under the vulkan api
@@ -419,6 +463,12 @@ void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentMan
 				tempRigid.lastPosition = getTransformManager(componentManagers)->transformArray[entityID].pos;
 				getRigidBodyManager(componentManagers)->addComponent(entityID);
 				getRigidBodyManager(componentManagers)->setComponent(entityID, tempRigid);
+			}
+			else if (getComponentType(value) == COLLIDER) {
+				std::cout << "\tAdding Collider Component" << std::endl;
+				collider tempCollider = buildCollider(fileStream, config);
+				getColliderManager(componentManagers)->addComponent(entityID);
+				getColliderManager(componentManagers)->setComponent(entityID, tempCollider);
 			}
 		}
 	}
