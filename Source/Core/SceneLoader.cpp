@@ -82,6 +82,10 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 				managers.push_back(new ColliderManager());
 				managers.push_back(new CollisionManager());
 			}
+			else if (getComponentType(value) == ANIMATION_COMPONENT) {
+				std::cout << "\tAdding Animation Manager" << std::endl;
+				managers.push_back(new AnimationManager());
+			}
 		}
 	}
 }
@@ -113,6 +117,9 @@ void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*
 		else if (managerType == COLLIDER) {
 			system->managers->push_back(getColliderManager(managers));
 			system->managers->push_back(getCollisionManager(managers));
+		}
+		else if (managerType == ANIMATION_COMPONENT) {
+			system->managers->push_back(getAnimationManager(managers));
 		}
 	}
 }
@@ -171,6 +178,12 @@ void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*
 						break;
 					}
 				}
+				else if (requiredComponent == ANIMATION_COMPONENT) {
+					if (!getAnimationManager(managers)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
 			}
 			if (validEntity) {
 				system->addEntity(entityID);
@@ -208,6 +221,12 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 				CollisionSystem* collisionSystem = new CollisionSystem();
 				collisionSystem->setConfig(config);
 				systems.push_back(collisionSystem);
+			}
+			else if (getSystemType(value) == ANIMATION_SYSTEM) {
+				std::cout << "\tAdding animation system" << std::endl;
+				AnimationSystem* animationSystem = new AnimationSystem();
+				animationSystem->setConfig(config);
+				systems.push_back(animationSystem);
 			}
 		}
 	}
@@ -412,6 +431,24 @@ collider buildCollider(std::ifstream &fileStream, configurationStructure &config
 	return retCollider;
 }
 
+//Creates an animation using an animatoin factory
+animation buildAnimation(std::ifstream &fileStream, configurationStructure &config) {
+	animation retAnim = animation();
+	std::string animFile = config.gamePath;
+	std::string line, value, subComponent;
+	while (std::getline(fileStream, line)) {
+		value = getValue(line);
+		subComponent = getSubComponent(line);
+		if (strcmp(subComponent.c_str(), "FILE_LOAD") == 0) {
+			AnimationFactory::loadFromFile(animFile.append(value).c_str(), retAnim, config);
+		}
+		else if (strcmp(subComponent.c_str(), "END") == 0) {
+			break;
+		}
+	}
+	return retAnim;
+}
+
 //Loads in an entity under the vulkan api
 void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentManagers, std::ifstream &fileStream, configurationStructure &config) {
 	std::cout << "Adding entity: " << entityID << std::endl;
@@ -461,6 +498,7 @@ void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentMan
 				std::cout << "\tAdding Rigid Body Component" << std::endl;
 				rigid_body tempRigid = buildRigidBody(fileStream, config);
 				tempRigid.lastPosition = getTransformManager(componentManagers)->transformArray[entityID].pos;
+				tempRigid.lastRotation = getTransformManager(componentManagers)->transformArray[entityID].rot;
 				getRigidBodyManager(componentManagers)->addComponent(entityID);
 				getRigidBodyManager(componentManagers)->setComponent(entityID, tempRigid);
 			}
@@ -469,6 +507,12 @@ void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentMan
 				collider tempCollider = buildCollider(fileStream, config);
 				getColliderManager(componentManagers)->addComponent(entityID);
 				getColliderManager(componentManagers)->setComponent(entityID, tempCollider);
+			}
+			else if (getComponentType(value) == ANIMATION_COMPONENT) {
+				std::cout << "\tAdding Animation Component" << std::endl;
+				animation tempAnim = buildAnimation(fileStream, config);
+				getAnimationManager(componentManagers)->addComponent(entityID);
+				getAnimationManager(componentManagers)->setComponent(entityID, tempAnim);
 			}
 		}
 	}

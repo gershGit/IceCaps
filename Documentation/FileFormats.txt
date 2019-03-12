@@ -1,6 +1,9 @@
 .ice file (Ice file)
 Static Model file
 
+.spl (Splash file)
+Animation file
+
 .sno file (Snow file)
 Material file
 

@@ -176,6 +176,9 @@ GLFWwindow* opengl_initializeWindow() {
 //The main engine loop for an application using vulkan
 void vulkan_mainloop(configurationStructure &config, std::vector<EntitySystem*> &systems) {
 	GameTimer::Start();
+	for (EntitySystem * system : systems) {
+		system->start();
+	}
 	while (!glfwWindowShouldClose(config.window)) {	
 		glfwPollEvents();
 		GameTimer::Update();

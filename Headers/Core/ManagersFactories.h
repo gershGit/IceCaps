@@ -15,9 +15,11 @@
 #include "Core/RigidBodyManager.h"
 #include "Core/ColliderManager.h"
 #include "Core/CollisionManager.h"
+#include "Core/AnimationManager.h"
 
 #include "Vulkan/V_MeshFactory.h"
 #include "Vulkan/V_MaterialFactory.h"
+#include "Core/AnimationFactory.h"
 
 //Manager Retrieval Functions ---------
 
@@ -30,3 +32,4 @@ LightManager* getLightManager(std::vector<ComponentManager*> &managers);
 RigidBodyManager* getRigidBodyManager(std::vector<ComponentManager*> &managers);
 ColliderManager* getColliderManager(std::vector<ComponentManager*> &managers);
 CollisionManager* getCollisionManager(std::vector<ComponentManager*> &managers);
+AnimationManager* getAnimationManager(std::vector<ComponentManager*> &managers);

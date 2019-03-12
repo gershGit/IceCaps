@@ -14,9 +14,11 @@ enum component_type {TRANSFORM, PARENT,
 						GL_MESH, GL_MATERIAL,
 						V_DESCRIPTOR, DX12_DESCRIPTOR,
 						LIGHT_COMPONENT,
+						ANIMATION_COMPONENT,
 						COLLISION, NO_TYPE};
-enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, NO_SYSTEM_TYPE = -1};
+enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, ANIMATION_SYSTEM, NO_SYSTEM_TYPE = -1};
 enum collision_state {COLLISION_ENTER, COLLISION_CONTINUE, COLLISION_EXIT};
+enum anim_state {ANIMATION_PLAYING, ANIMATION_PAUSED, ANIMATION_OVER};
 
 //Entity
 struct entity {
@@ -117,4 +119,27 @@ struct skinned_mesh {
 struct light {
 	light_type lType;
 	glm::vec4 color;
+};
+
+struct key_frame {
+	double t;
+	unsigned int index;
+	glm::vec3 deltaPosition;
+	glm::vec3 deltaRotation;
+	glm::vec3 deltaScale;
+};
+
+struct animation {
+	std::string name;
+	anim_state state;
+	float animationWeight;
+	bool repeat;	
+	bool playOnStartup = true;
+	double startTime;
+	double length;
+	unsigned int frameCount;
+	key_frame* frames; //Array of frames
+	key_frame* lastFrameStart;
+	key_frame* lastFrameEnd;
+	key_frame lastCalulatedFrame;
 };

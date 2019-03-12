@@ -105,6 +105,7 @@ void V_RenderSystem::addEntity(int entityID)
 //System on update call
 void V_RenderSystem::onUpdate()
 {
+	//std::cout << "Render system update" << std::endl;
 	V_Instance* instance = config->apiInfo.v_Instance;
 	//Wait for the inflight fence associated with the current frame to ensure we don't overfill the gpu with cpu commands
 	vkWaitForFences(instance->getPrimaryDevice()->getLogicalDevice(), 1, &instance->inFlightFences[instance->currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());

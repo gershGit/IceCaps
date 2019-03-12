@@ -7,6 +7,7 @@
 class CollisionSystem : public EntitySystem {
 private:
 	float collisionOffset = 1.01f;
+	float staticSpeed = 0.01f;
 	std::vector<collision>* lastFrameCollisions = new std::vector<collision>();
 public:
 	CollisionSystem() { operatesOn = { COLLIDER, TRANSFORM, RIGID_BODY }; entityListRequiredComponents = { {TRANSFORM, COLLIDER} }; };

@@ -7,3 +7,4 @@
 #include "Vulkan/V_RenderSystem.h"
 #include "Core/RigidBodySystem.h"
 #include "Core/CollisionSystem.h"
+#include "Core/AnimationSystem.h"

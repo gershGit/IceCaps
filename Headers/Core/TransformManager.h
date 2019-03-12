@@ -13,6 +13,9 @@ public:
 	//Array and its size
 	int size;
 	transform *transformArray;
+	glm::vec3 xAxis = glm::vec3(1, 0, 0);
+	glm::vec3 yAxis = glm::vec3(0, 1, 0);
+	glm::vec3 zAxis = glm::vec3(0, 0, 1);
 
 //Functions ---------------------------------	
 	TransformManager() { type = TRANSFORM; }; //Sets the type to transform components

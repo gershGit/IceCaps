@@ -901,6 +901,9 @@ component_type getComponentType(std::string value) {
 	else if (strcmp(value.c_str(), "COLLIDER") == 0) {
 		return COLLIDER;
 	}
+	else if (strcmp(value.c_str(), "ANIMATION") == 0) {
+		return ANIMATION_COMPONENT;
+	}
 	return NO_TYPE;
 }
 
@@ -914,6 +917,9 @@ system_type getSystemType(std::string value) {
 	}
 	else if (strcmp(value.c_str(), "COLLISION") == 0) {
 		return COLLISION_SYSTEM;
+	}
+	else if (strcmp(value.c_str(), "ANIMATION") == 0) {
+		return ANIMATION_SYSTEM;
 	}
 	return NO_SYSTEM_TYPE;
 }

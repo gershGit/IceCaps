@@ -121,6 +121,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Core\AnimationFactory.cpp" />
+    <ClCompile Include="..\..\Source\Core\AnimationManager.cpp" />
+    <ClCompile Include="..\..\Source\Core\AnimationSystem.cpp" />
     <ClCompile Include="..\..\Source\Core\CameraManager.cpp" />
     <ClCompile Include="..\..\Source\Core\ColliderManager.cpp" />
     <ClCompile Include="..\..\Source\Core\CollisionSystem.cpp" />
@@ -155,6 +158,9 @@
     <ClCompile Include="..\..\Source\Vulkan\V_Swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Headers\Core\AnimationFactory.h" />
+    <ClInclude Include="..\..\Headers\Core\AnimationManager.h" />
+    <ClInclude Include="..\..\Headers\Core\AnimationSystem.h" />
     <ClInclude Include="..\..\Headers\Core\CameraManager.h" />
     <ClInclude Include="..\..\Headers\Core\ColliderManager.h" />
     <ClInclude Include="..\..\Headers\Core\CollisionManager.h" />

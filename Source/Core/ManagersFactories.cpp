@@ -80,3 +80,13 @@ CollisionManager * getCollisionManager(std::vector<ComponentManager*>& managers)
 	}
 	return nullptr;
 }
+
+AnimationManager * getAnimationManager(std::vector<ComponentManager*>& managers)
+{
+	for (ComponentManager* manager : managers) {
+		if (manager->type == ANIMATION_COMPONENT) {
+			return dynamic_cast<AnimationManager*>(manager);
+		}
+	}
+	return nullptr;
+}

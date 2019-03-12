@@ -42,13 +42,16 @@ void CollisionSystem::applyCollisionPhysics(int entityID, int oneOrTwo, collisio
 		cPoint = cInfo.collisionPointA;
 		cNormal = cInfo.collisionNormalA;
 	}
-	glm::vec3 collisionToCollider = t->pos - cPoint;
-	glm::vec3 collisionNormal = glm::normalize(t->pos - cPoint);
-	float len = thisCollider.radius - glm::length(t->pos - cPoint);
-	t->pos = t->pos + glm::normalize(t->pos - cPoint) * collisionOffset * (thisCollider.radius - glm::length(t->pos - cPoint));
+	glm::vec3 cToP = glm::normalize(t->pos - cPoint);
+	t->pos = t->pos + cToP * collisionOffset * (thisCollider.radius - glm::length(t->pos - cPoint));
 	rBody->lastPosition = t->pos;
-	rBody->lastVelocity = glm::reflect(rBody->lastVelocity, cNormal) * rBody->elasticity;
-	if (glm::length(rBody->lastVelocity) < 0.1f) {
+
+	float linearPortion = glm::dot(glm::normalize(-rBody->lastVelocity), cToP);
+	
+	glm::vec3 rotationForce = (1.0f - linearPortion) * -rBody->lastVelocity;
+	rBody->rotationalVelocity += glm::cross(rotationForce, cToP);
+	rBody->lastVelocity = glm::reflect(rBody->lastVelocity, cNormal) * rBody->elasticity * linearPortion;
+	if (glm::length(rBody->lastVelocity) < staticSpeed) {
 		rBody->is_grounded = true;
 	}
 }

@@ -27,6 +27,7 @@ public:
 
 	//Functions to be overridden by subclasses
 	virtual void initialize() {};
+	virtual void start() {};
 	virtual void onUpdate() {};
 	virtual void onConfigurationChange() {};
 	virtual void addEntity(int entityID) { entities->push_back(entityID); };

@@ -1,7 +1,7 @@
 #include "Core/TransformManager.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/transform.hpp>
-#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <chrono>
 
 void TransformManager::setSize(int size_in)
@@ -14,7 +14,7 @@ void TransformManager::setSize(int size_in)
 glm::mat4 TransformManager::getTransformMatrix(int entityID)
 {
 	glm::mat4 scaleMat = glm::scale(glm::mat4(1), transformArray[entityID].scale);
-	glm::mat4 rotMat = glm::mat4_cast(glm::quat(transformArray[entityID].rot));
+	glm::mat4 rotMat = glm::toMat4(glm::quat(transformArray[entityID].rot));
 	glm::mat4 transMat = glm::translate(glm::mat4(1), transformArray[entityID].pos);
 
 	return transMat * rotMat * scaleMat;
