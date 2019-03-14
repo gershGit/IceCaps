@@ -21,10 +21,31 @@ static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	auto instance = reinterpret_cast<V_Instance*>(glfwGetWindowUserPointer(window));
 	instance->framebufferResized = true;
 }
+
+//Called when glw rexognizes a key press, or mouse event
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	InputSystem::setKey(key, scancode, action, mods);
+}
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	InputSystem::setCursor(xpos, ypos);
+}
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	InputSystem::setMouseButton(button, action, mods);
+}
 //-----------------------------------------------------------------------------------------
 
 //Loads settings for the engine and game
 void loadConfiguration(configurationStructure &config) {
+#ifdef _WIN32
+	config.platform = Windows;
+#else
+	config.platform = Linux;
+#endif // WIN32
+
+
 	config.cpu_info = new cpuInfo();
 	config.cpu_info->coreCount = std::thread::hardware_concurrency();
 	if (config.cpu_info->coreCount == 0) {
@@ -220,6 +241,10 @@ V_Instance* vulkan_initialize(configurationStructure &config) {
 	instance->createSurface();
 	glfwSetWindowUserPointer(config.window, instance);
 	glfwSetFramebufferSizeCallback(config.window, framebufferResizeCallback);
+	glfwSetKeyCallback(config.window, key_callback);
+	glfwSetCursorPosCallback(config.window, cursor_position_callback);
+	glfwSetInputMode(config.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetMouseButtonCallback(config.window, mouse_button_callback);
 	instance->attachDevices(config.cpu_info->coreCount);
 	instance->createTransferCommandPools();
 	instance->createSwapChain();

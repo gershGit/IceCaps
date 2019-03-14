@@ -870,6 +870,9 @@ scene_key getSceneKey(std::string line) {
 	else if (strcmp(key_string.c_str(), "END_ENTITIES") == 0) {
 		return END_ENTITIES;
 	}
+	else if (strcmp(key_string.c_str(), "ADD_TAG") == 0) {
+		return ADD_TAG;
+	}
 	else {
 		return NO_SCENE_KEY;
 	}
@@ -904,6 +907,9 @@ component_type getComponentType(std::string value) {
 	else if (strcmp(value.c_str(), "ANIMATION") == 0) {
 		return ANIMATION_COMPONENT;
 	}
+	else if (strcmp(value.c_str(), "TAGS") == 0) {
+		return TAGS_COMPONENT;
+	}
 	return NO_TYPE;
 }
 
@@ -920,6 +926,18 @@ system_type getSystemType(std::string value) {
 	}
 	else if (strcmp(value.c_str(), "ANIMATION") == 0) {
 		return ANIMATION_SYSTEM;
+	}
+	else if (strcmp(value.c_str(), "CLIENT") == 0) {
+		return CLIENT_NET_SYSTEM;
+	}
+	else if (strcmp(value.c_str(), "SERVER") == 0) {
+		return SERVER_NET_SYSTEM;
+	}
+	else if (strcmp(value.c_str(), "PEER") == 0) {
+		return PEER_NET_SYSTEM;
+	}
+	else if (strcmp(value.c_str(), "INPUT") == 0) {
+		return INPUT_SYSTEM;
 	}
 	return NO_SYSTEM_TYPE;
 }

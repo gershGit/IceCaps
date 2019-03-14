@@ -50,7 +50,6 @@ LightManager* getLightManager(std::vector<ComponentManager*> &managers) {
 	}
 	return nullptr;
 }
-
 RigidBodyManager * getRigidBodyManager(std::vector<ComponentManager*>& managers)
 {
 	for (ComponentManager* manager : managers) {
@@ -60,7 +59,6 @@ RigidBodyManager * getRigidBodyManager(std::vector<ComponentManager*>& managers)
 	}
 	return nullptr;
 }
-
 ColliderManager * getColliderManager(std::vector<ComponentManager*>& managers)
 {
 	for (ComponentManager* manager : managers) {
@@ -70,7 +68,6 @@ ColliderManager * getColliderManager(std::vector<ComponentManager*>& managers)
 	}
 	return nullptr;
 }
-
 CollisionManager * getCollisionManager(std::vector<ComponentManager*>& managers)
 {
 	for (ComponentManager* manager : managers) {
@@ -80,12 +77,20 @@ CollisionManager * getCollisionManager(std::vector<ComponentManager*>& managers)
 	}
 	return nullptr;
 }
-
 AnimationManager * getAnimationManager(std::vector<ComponentManager*>& managers)
 {
 	for (ComponentManager* manager : managers) {
 		if (manager->type == ANIMATION_COMPONENT) {
 			return dynamic_cast<AnimationManager*>(manager);
+		}
+	}
+	return nullptr;
+}
+TagManager * getTagManager(std::vector<ComponentManager*>& managers)
+{
+	for (ComponentManager* manager : managers) {
+		if (manager->type == TAGS_COMPONENT) {
+			return dynamic_cast<TagManager*>(manager);
 		}
 	}
 	return nullptr;

@@ -131,6 +131,7 @@
     <ClCompile Include="..\..\Source\Core\EntitySystem.cpp" />
     <ClCompile Include="..\..\Source\Core\GameTimer.cpp" />
     <ClCompile Include="..\..\Source\Core\Global_Callbacks.cpp" />
+    <ClCompile Include="..\..\Source\Core\InputSystem.cpp" />
     <ClCompile Include="..\..\Source\Core\LightManager.cpp" />
     <ClCompile Include="..\..\Source\Core\main.cpp" />
     <ClCompile Include="..\..\Source\Core\ManagersFactories.cpp" />
@@ -170,6 +171,8 @@
     <ClInclude Include="..\..\Headers\Core\EntitySystem.h" />
     <ClInclude Include="..\..\Headers\Core\GameTimer.h" />
     <ClInclude Include="..\..\Headers\Core\Global_Callbacks.h" />
+    <ClInclude Include="..\..\Headers\Core\InputSystem.h" />
+    <ClInclude Include="..\..\Headers\Core\KeyDefines.h" />
     <ClInclude Include="..\..\Headers\Core\Lifecycle_Functions.h" />
     <ClInclude Include="..\..\Headers\Core\LightManager.h" />
     <ClInclude Include="..\..\Headers\Core\Main_Headers.h" />
@@ -183,6 +186,7 @@
     <ClInclude Include="..\..\Headers\Core\SceneLoader.h" />
     <ClInclude Include="..\..\Headers\Core\StringTranslation.h" />
     <ClInclude Include="..\..\Headers\Core\SystemsHeader.h" />
+    <ClInclude Include="..\..\Headers\Core\TagManager.h" />
     <ClInclude Include="..\..\Headers\Core\TransformManager.h" />
     <ClInclude Include="..\..\Headers\ThirdParty\stb_image.h" />
     <ClInclude Include="..\..\Headers\Vulkan\Vulkan_Headers.h" />

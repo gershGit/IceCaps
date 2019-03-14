@@ -8,3 +8,4 @@
 #include "Core/RigidBodySystem.h"
 #include "Core/CollisionSystem.h"
 #include "Core/AnimationSystem.h"
+#include "Core/InputSystem.h"

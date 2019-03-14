@@ -15,10 +15,14 @@ enum component_type {TRANSFORM, PARENT,
 						V_DESCRIPTOR, DX12_DESCRIPTOR,
 						LIGHT_COMPONENT,
 						ANIMATION_COMPONENT,
+						TAGS_COMPONENT,
 						COLLISION, NO_TYPE};
-enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, ANIMATION_SYSTEM, NO_SYSTEM_TYPE = -1};
+enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, ANIMATION_SYSTEM, INPUT_SYSTEM, CLIENT_NET_SYSTEM, SERVER_NET_SYSTEM, PEER_NET_SYSTEM, NO_SYSTEM_TYPE = -1};
 enum collision_state {COLLISION_ENTER, COLLISION_CONTINUE, COLLISION_EXIT};
 enum anim_state {ANIMATION_PLAYING, ANIMATION_PAUSED, ANIMATION_OVER};
+
+#define ICE_TAG_INPUT 0b01
+#define ICE_TAG_FPS 0b10
 
 //Entity
 struct entity {
@@ -142,4 +146,8 @@ struct animation {
 	key_frame* lastFrameStart;
 	key_frame* lastFrameEnd;
 	key_frame lastCalulatedFrame;
+};
+
+struct entity_tags {
+	uint64_t tags; //Bitwise tags
 };

@@ -16,6 +16,7 @@
 #include "Core/ColliderManager.h"
 #include "Core/CollisionManager.h"
 #include "Core/AnimationManager.h"
+#include "Core/TagManager.h"
 
 #include "Vulkan/V_MeshFactory.h"
 #include "Vulkan/V_MaterialFactory.h"
@@ -33,3 +34,4 @@ RigidBodyManager* getRigidBodyManager(std::vector<ComponentManager*> &managers);
 ColliderManager* getColliderManager(std::vector<ComponentManager*> &managers);
 CollisionManager* getCollisionManager(std::vector<ComponentManager*> &managers);
 AnimationManager* getAnimationManager(std::vector<ComponentManager*> &managers);
+TagManager* getTagManager(std::vector<ComponentManager*> &managers);

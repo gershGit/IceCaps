@@ -86,6 +86,10 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 				std::cout << "\tAdding Animation Manager" << std::endl;
 				managers.push_back(new AnimationManager());
 			}
+			else if (getComponentType(value) == TAGS_COMPONENT) {
+				std::cout << "\tAdding Tags Manager" << std::endl;
+				managers.push_back(new TagManager());
+			}
 		}
 	}
 }
@@ -120,6 +124,9 @@ void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*
 		}
 		else if (managerType == ANIMATION_COMPONENT) {
 			system->managers->push_back(getAnimationManager(managers));
+		}
+		else if (managerType == TAGS_COMPONENT) {
+			system->managers->push_back(getTagManager(managers));
 		}
 	}
 }
@@ -184,6 +191,12 @@ void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*
 						break;
 					}
 				}
+				else if (requiredComponent == TAGS_COMPONENT) {
+					if (!getAnimationManager(managers)->hasEntity(entityID) || !getTagManager(managers)->hasTag(entityID, system->requiredTags)) {
+						validEntity = false;
+						break;
+					}
+				}
 			}
 			if (validEntity) {
 				system->addEntity(entityID);
@@ -213,20 +226,23 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 			else if (getSystemType(value) == RIGID_BODY_SYSTEM) {
 				std::cout << "\tAdding rigid body system" << std::endl;
 				RigidBodySystem* rigidBodySystem = new RigidBodySystem();
-				rigidBodySystem->setConfig(config);
 				systems.push_back(rigidBodySystem);
 			}
 			else if (getSystemType(value) == COLLISION_SYSTEM) {
 				std::cout << "\tAdding collision system" << std::endl;
 				CollisionSystem* collisionSystem = new CollisionSystem();
-				collisionSystem->setConfig(config);
 				systems.push_back(collisionSystem);
 			}
 			else if (getSystemType(value) == ANIMATION_SYSTEM) {
 				std::cout << "\tAdding animation system" << std::endl;
 				AnimationSystem* animationSystem = new AnimationSystem();
-				animationSystem->setConfig(config);
 				systems.push_back(animationSystem);
+			}
+			else if (getSystemType(value) == INPUT_SYSTEM) {
+				std::cout << "\tAdding input system" << std::endl;
+				InputSystem* inputSystem = new InputSystem();
+				inputSystem->setEntityComponents(managers, { {TAGS_COMPONENT} }, ICE_TAG_INPUT);
+				systems.push_back(inputSystem);
 			}
 		}
 	}
@@ -515,6 +531,12 @@ void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentMan
 				getAnimationManager(componentManagers)->setComponent(entityID, tempAnim);
 			}
 		}
+		else if (getSceneKey(line) == ADD_TAG) {
+			if (strcmp(value.c_str(), "ICE_TAG_INPUT")==0) {
+				std::cout << "\tAdding input tag" << std::endl;
+				getTagManager(componentManagers)->addTag(entityID, ICE_TAG_INPUT);
+			}
+		}
 	}
 }
 
@@ -611,6 +633,7 @@ void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std
 		}
 		else if (key == ENTITY_COUNT) {
 			getTransformManager(componentManagers)->setSize(atoi(value.c_str()));
+			getTagManager(componentManagers)->setSize(atoi(value.c_str()));
 		}
 		else if (key == ENTITY) {
 			loadEntity(atoi(value.c_str()), config, componentManagers, sceneIn);
