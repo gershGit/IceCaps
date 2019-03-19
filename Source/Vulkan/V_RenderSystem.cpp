@@ -230,7 +230,11 @@ void V_RenderSystem::buildCommandBuffers()
 		int entitiesPerCore = (int)renderTrees[pipelineIndex].size() / config->cpu_info->coreCount;
 		int sentEntities = 0;
 		for (unsigned int coreID = 0; coreID < config->cpu_info->coreCount; coreID++) {
-			config->cpu_info->threads[coreID] = std::thread(&V_RenderSystem::renderEntities, this, sentEntities, entitiesPerCore, pipelineIndex, config->apiInfo.v_Instance->getGraphicsPipeline(pipelineTypes->at(pipelineIndex)), coreID);
+			//TODO thread pooling so threads aren't created and destroyed constantly
+
+			//config->cpu_info->threads[coreID] = std::thread(&V_RenderSystem::renderEntities, this, sentEntities, entitiesPerCore, pipelineIndex, config->apiInfo.v_Instance->getGraphicsPipeline(pipelineTypes->at(pipelineIndex)), coreID);
+			
+			renderEntities(sentEntities, entitiesPerCore, pipelineIndex, config->apiInfo.v_Instance->getGraphicsPipeline(pipelineTypes->at(pipelineIndex)), coreID);
 			sentEntities += entitiesPerCore;
 		}
 		//Handles odd numbers of entities
@@ -238,7 +242,7 @@ void V_RenderSystem::buildCommandBuffers()
 			renderEntities(sentEntities, (int)renderTrees[pipelineIndex].size() - sentEntities, pipelineIndex, config->apiInfo.v_Instance->getGraphicsPipeline(pipelineTypes->at(pipelineIndex)), 0);
 		}
 		for (unsigned int i = 0; i < config->cpu_info->coreCount; i++) {
-			config->cpu_info->threads[i].join();
+			//config->cpu_info->threads[i].join();
 		}
 	}	
 }

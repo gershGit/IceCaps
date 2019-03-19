@@ -16,6 +16,10 @@ public:
 	static double unscaledDeltaTime;
 	static double timeScalar;
 	static double pausedTime;
+	static double framesPerSecond;
+	static double timeSinceLastFPS;
+	static double fpsSampleTime;
+	static int lastFrames;
 
 	GameTimer() {};
 	~GameTimer() {};
@@ -27,6 +31,7 @@ public:
 	static void Update();
 
 	//Setter and getters
+	static int getFPS();
 	static void setScalar(double scalar);
 	static double getDeltaTime();
 	static double getUnscaledDeltaTime();

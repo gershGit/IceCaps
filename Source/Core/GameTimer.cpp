@@ -9,6 +9,10 @@ double GameTimer::deltaTime;
 double GameTimer::unscaledDeltaTime;
 double GameTimer::timeScalar;
 double GameTimer::pausedTime;
+int GameTimer::lastFrames;
+double GameTimer::timeSinceLastFPS;
+double GameTimer::fpsSampleTime;
+double GameTimer::framesPerSecond;
 
 void GameTimer::Start()
 {
@@ -18,6 +22,9 @@ void GameTimer::Start()
 	baseTime = high_resolution_clock::now();
 	lastTime = baseTime;
 	currentTime = baseTime;
+	framesPerSecond = 0.0;
+	lastFrames = 0;
+	fpsSampleTime = 0.5;
 }
 
 void GameTimer::Pause()
@@ -36,8 +43,20 @@ void GameTimer::Continue()
 void GameTimer::Update() {
 	currentTime = high_resolution_clock::now();
 	unscaledDeltaTime = duration_cast<duration<double>>(currentTime - lastTime).count();
+	timeSinceLastFPS += unscaledDeltaTime;
 	deltaTime = unscaledDeltaTime * timeScalar;
 	lastTime = currentTime;
+	lastFrames++;
+	if (timeSinceLastFPS > fpsSampleTime) {
+		framesPerSecond = (int) lastFrames / timeSinceLastFPS;
+		timeSinceLastFPS = 0.0;
+		lastFrames = 0;
+	}
+}
+
+int GameTimer::getFPS()
+{
+	return (int) framesPerSecond;
 }
 
 void GameTimer::setScalar(double scalar) {

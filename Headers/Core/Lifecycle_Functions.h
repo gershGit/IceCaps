@@ -243,7 +243,7 @@ V_Instance* vulkan_initialize(configurationStructure &config) {
 	glfwSetFramebufferSizeCallback(config.window, framebufferResizeCallback);
 	glfwSetKeyCallback(config.window, key_callback);
 	glfwSetCursorPosCallback(config.window, cursor_position_callback);
-	glfwSetInputMode(config.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(config.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetMouseButtonCallback(config.window, mouse_button_callback);
 	instance->attachDevices(config.cpu_info->coreCount);
 	instance->createTransferCommandPools();
