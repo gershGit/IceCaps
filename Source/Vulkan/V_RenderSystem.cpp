@@ -7,6 +7,7 @@
 //Constructor sets information
 V_RenderSystem::V_RenderSystem()
 {
+	systemType = RENDER_SYSTEM;
 	operatesOn = { TRANSFORM, V_MESH, V_MATERIAL, CAMERA, LIGHT_COMPONENT, PREFAB_COMPONENT };
 	entityListRequiredComponents = { {V_MESH, V_MATERIAL} };
 
@@ -89,7 +90,7 @@ void V_RenderSystem::onConfigurationChange()
 //Adds an entity into the trees
 void V_RenderSystem::addEntity(int entityID)
 {
-	material_type entityPipelineType = getVulkanMaterialManager(*managers)->getEntity(entityID)->matType;
+	material_type entityPipelineType = getCManager<v_material>(*managers, V_MATERIAL)->getComponent(entityID).matType;
 	for (int i = 0; i < pipelineTypes->size(); i++) {
 		if (entityPipelineType == pipelineTypes->at(i)) {
 			renderTrees->at(i).push_back(entityID);
@@ -147,12 +148,7 @@ void V_RenderSystem::cullMeshes()
 void V_RenderSystem::updateCameraBuffers()
 {
 	ViewPersp viewPersp = ViewPersp();
-	if (activeCamera == nullptr) {
-		activeCamera = &getCameraManager(*managers)->getComponents()->at(0);
-		activeCameraID = getCameraManager(*managers)->getEntityAt(0);
-	}
-
-	glm::vec3 cameraPos = getTransformManager(*managers)->transformArray[activeCameraID].pos;
+	glm::vec3 cameraPos = getCManager<transform>(*managers,TRANSFORM)->getComponent(activeCameraID).pos;
 	viewPersp.view = glm::lookAt(cameraPos, cameraPos + activeCamera->lookDirection, activeCamera->upDirection);
 	viewPersp.persp = glm::perspective(glm::radians((float) activeCamera->fov), swapchain->getExtent().width / (float)swapchain->getExtent().height, activeCamera->near, activeCamera->far);
 
@@ -188,19 +184,21 @@ void V_RenderSystem::updateLightBuffers(int lightCount, transform objectTrans, i
 	float maxDistance = std::numeric_limits<float>::infinity();
 	int lightsFound = 0;
 
-	for (int lightID : *getLightManager(*managers)->getEntities()) {
-		transform lightTrans = getTransformManager(*managers)->transformArray[lightID];
+	for (int lightID : getCManager<light>(*managers, LIGHT_COMPONENT)->getEntities()) {
+		transform lightTrans = getCManager<transform>(*managers, TRANSFORM)->getComponent(lightID);
 		float currentLightDistance = glm::length(lightTrans.pos - objectTrans.pos);
 		if (currentLightDistance < maxDistance) {
 			if (lightsFound < lightCount) {
-				lightsData[coreID][lightsFound] = { glm::vec4(lightTrans.pos,getLightManager(*managers)->getComponent(lightID).lType), getLightManager(*managers)->getComponent(lightID).color };
+				lightsData[coreID][lightsFound] = { glm::vec4(lightTrans.pos,getCManager<light>(*managers, LIGHT_COMPONENT)->getComponent(lightID).lType),getCManager<light>(*managers, LIGHT_COMPONENT)->getComponent(lightID).color };
 				lightsFound++;
 				if (lightsFound == lightCount) {
 					maxDistance = currentLightDistance;
 				}
 			}
 			else {
-				lightsData[coreID][replacedLightIndex(lightCount, objectTrans, currentLightDistance, coreID)] = { glm::vec4(lightTrans.pos,getLightManager(*managers)->getComponent(lightID).lType), getLightManager(*managers)->getComponent(lightID).color };
+				lightsData[coreID][replacedLightIndex(lightCount, objectTrans, currentLightDistance, coreID)] = { 
+					glm::vec4(lightTrans.pos,getCManager<light>(*managers, LIGHT_COMPONENT)->getComponent(lightID).lType), 
+					getCManager<light>(*managers, LIGHT_COMPONENT)->getComponent(lightID).color };
 			}
 		}
 	}
@@ -271,22 +269,22 @@ void V_RenderSystem::renderEntities(int entitiesStart, int entityCount, int rend
 
 		int limit = entitiesStart + entityCount;
 		for (entitiesStart; entitiesStart < limit; entitiesStart++) {
-			VkBuffer vertexBuffers[] = { getVulkanMeshManager(*managers)->getComponent(renderTree->at(entitiesStart)).vBuffer };
+			VkBuffer vertexBuffers[] = { getCManager<v_mesh>(*managers,V_MESH)->getComponent(renderTree->at(entitiesStart)).vBuffer };
 			VkDeviceSize offsets[] = { 0 };
 
 			vkCmdBindVertexBuffers(thisBuffer, 0, 1, vertexBuffers, offsets);
 
-			vkCmdBindIndexBuffer(thisBuffer, getVulkanMeshManager(*managers)->getComponent(renderTree->at(entitiesStart)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+			vkCmdBindIndexBuffer(thisBuffer, getCManager<v_mesh>(*managers,V_MESH)->getComponent(renderTree->at(entitiesStart)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-			updateLightBuffers(pipeline->max_lights, getTransformManager(*managers)->transformArray[renderTree->at(entitiesStart)], coreID);
+			updateLightBuffers(pipeline->max_lights, getCManager<transform>(*managers,TRANSFORM)->getComponent(renderTree->at(entitiesStart)), coreID);
 
 			vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1, &pipeline->lightViewDescriptorSets[frameID], 0, nullptr);
-			vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 1, 1, &getVulkanMaterialManager(*managers)->getComponents()->at(entitiesStart).descriptorSet, 0, nullptr);
+			vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 1, 1, &getCManager<v_material>(*managers,V_MATERIAL)->getComponentAddress(entitiesStart)->descriptorSet, 0, nullptr);
 
-			glm::mat4 transformPush = getTransformManager(*managers)->getTransformMatrix(renderTree->at(entitiesStart));
+			glm::mat4 transformPush = getTransformationMatrix(getCManager<transform>(*managers,TRANSFORM)->getComponent(renderTree->at(entitiesStart)));
 			vkCmdPushConstants(thisBuffer, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, static_cast<size_t>(sizeof(glm::mat4)), &transformPush);
 
-			vkCmdDrawIndexed(thisBuffer, getVulkanMeshManager(*managers)->getComponent(renderTree->at(entitiesStart)).indicesCount, 1, 0, 0, 0); //Draw call
+			vkCmdDrawIndexed(thisBuffer, getCManager<v_mesh>(*managers,V_MESH)->getComponent(renderTree->at(entitiesStart)).indicesCount, 1, 0, 0, 0); //Draw call
 		}
 
 		vkCmdEndRenderPass(thisBuffer);

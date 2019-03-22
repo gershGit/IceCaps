@@ -87,55 +87,16 @@
     <ClCompile Include="..\..\Source\Core\Global_Callbacks.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Core\CameraManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\ComponentManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\EntitySystem.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\LightManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\ManagersFactories.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\MappedComponentManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\MaterialManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\MeshManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\PrefabManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Core\SceneLoader.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Core\StringTranslation.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Core\TransformManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Core\RigidBodySystem.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\Core\RigidBodyManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\ColliderManager.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\Core\CollisionSystem.cpp">
-      <Filter>Source Files\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\Core\AnimationManager.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Core\AnimationSystem.cpp">
@@ -147,15 +108,21 @@
     <ClCompile Include="..\..\Source\Core\InputSystem.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Core\MemoryManager.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Core\ThreadPool.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Core\ManagersFactories.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Core\Lifecycle_Functions.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\Main_Headers.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\CameraManager.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\ComponentManager.h">
@@ -173,22 +140,7 @@
     <ClInclude Include="..\..\Headers\Core\Global_Callbacks.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\LightManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Headers\Core\ManagersFactories.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\MappedComponentManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\MaterialManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\MeshManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\PrefabManager.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\SceneLoader.h">
@@ -198,9 +150,6 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\SystemsHeader.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\TransformManager.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Vulkan\V_BufferHelper.h">
@@ -248,19 +197,7 @@
     <ClInclude Include="..\..\Headers\Core\RigidBodySystem.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\RigidBodyManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\ColliderManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Headers\Core\CollisionSystem.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\CollisionManager.h">
-      <Filter>Header Files\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\AnimationManager.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\AnimationSystem.h">
@@ -275,7 +212,13 @@
     <ClInclude Include="..\..\Headers\Core\KeyDefines.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Headers\Core\TagManager.h">
+    <ClInclude Include="..\..\Headers\Core\JobQueue.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\MemoryManager.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\ThreadPool.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

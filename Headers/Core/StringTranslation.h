@@ -102,3 +102,16 @@ std::string presentModeToString(VkPresentModeKHR mode);
 
 //Returns whether or not the format conatins a stencil component
 bool hasStencilComponent(VkFormat format);
+
+//Tag operations
+
+template<typename TagType>
+inline bool hasTag(TagType tags_active, TagType tags_wanted) {
+	return tags_active & tags_wanted;
+}
+
+template<typename TagType>
+inline TagType addTag(TagType current_tags, TagType new_tag)
+{
+	return current_tags | new_tag;
+}

@@ -1,6 +1,4 @@
-#include "ThreadPool.h"
-#include <stdio.h>
-#include <iostream>
+#include "Core/ThreadPool.h"
 
 std::vector<std::thread> ThreadPool::pool;
 int ThreadPool::threadsInPool = 0;

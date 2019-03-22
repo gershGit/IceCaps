@@ -6,8 +6,7 @@
 
 class CollisionSystem : public EntitySystem {
 private:
-	float collisionOffset = 1.01f;
-	float staticSpeed = 0.01f;
+	float collisionOffset = 1.001f;
 	std::vector<collision>* lastFrameCollisions = new std::vector<collision>();
 public:
 	CollisionSystem() { operatesOn = { COLLIDER, TRANSFORM, RIGID_BODY }; entityListRequiredComponents = { {TRANSFORM, COLLIDER} }; };
@@ -17,13 +16,13 @@ public:
 
 	void applyCollisionPhysics(int entityID, int oneOrTwo, collision cInfo, collider thisCollider);
 
-	void manageCollisionPhysics(int entityOneID, int entityTwoID, collision collisionInfo, RigidBodyManager * rManager, TransformManager * tManager);
+	void manageCollisionPhysics(int entityOneID, int entityTwoID, collision collisionInfo, MappedManager<rigid_body> * rManager, ArrayManager<transform> * tManager);
 
 	void setLastCollisions(std::vector<collision>* lastCollisions);
 
-	void addCollision(collision detectedCol, CollisionManager * manager);
+	void addCollision(collision &detectedCol, VectorManager<collision> * manager);
 
-	void addExitCollisions(CollisionManager * manager);
+	void addExitCollisions(VectorManager<collision> * manager);
 
 	void onUpdate();
 	void manageCollision(collision cInfo);

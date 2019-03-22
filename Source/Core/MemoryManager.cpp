@@ -1,7 +1,4 @@
-#include "MemoryManager.h"
-#include <stdio.h>
-#include <iostream>
-
+#include "Core/MemoryManager.h"
 
 MemoryManager::MemoryManager()
 {
@@ -29,7 +26,6 @@ void * MemoryManager::allocateOnStack(int stackID, size_t allocation_size)
 	void* retVal = stacks[stackID].ptr;
 	stacks[stackID].allocated += allocation_size;
 	if (stacks[stackID].allocated > stacks[stackID].allocated) {
-		std::cout << "Out of memory error!" << std::endl;
 		return nullptr;
 	}
 	stacks[stackID].ptr = (void*)((char*)stacks[stackID].ptr + allocation_size);

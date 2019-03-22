@@ -148,6 +148,10 @@ struct animation {
 	key_frame lastCalulatedFrame;
 };
 
+struct gl_material {
+
+};
+
 struct entity_tags {
 	uint64_t tags; //Bitwise tags
 };

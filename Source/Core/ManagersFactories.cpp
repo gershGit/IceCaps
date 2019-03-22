@@ -1,97 +1,52 @@
 #include "Core/ManagersFactories.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
-//Manager retrieval ------------------------------------------------------------------------
+int countImages(MappedManager<v_material>* vulkanMaterialManager)
+{
+	int count = 0;
+	for (std::pair<int, v_material> material : vulkanMaterialManager->componentMap) {
+		if (material.second.matType == PBR) {
+			count += 5;
+		}
+	}
+	return count;
+}
 
-TransformManager* getTransformManager(std::vector<ComponentManager*>& managers) {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == TRANSFORM) {
-			return dynamic_cast<TransformManager*>(manager);
-		}
-	}
-	return nullptr;
-}
-V_MeshManager* getVulkanMeshManager(std::vector<ComponentManager*>& managers) {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == V_MESH) {
-			return dynamic_cast<V_MeshManager*>(manager);
-		}
-	}
-	return nullptr;
-}
-V_MaterialManager* getVulkanMaterialManager(std::vector<ComponentManager*>& managers) {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == V_MATERIAL) {
-			return dynamic_cast<V_MaterialManager*>(manager);
-		}
-	}
-	return nullptr;
-}
-PrefabManager* getPrefabManager(std::vector<ComponentManager*> &managers) {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == PREFAB_COMPONENT) {
-			return dynamic_cast<PrefabManager*>(manager);
-		}
-	}
-	return nullptr;
-}
-CameraManager* getCameraManager(std::vector<ComponentManager*> &managers) {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == CAMERA) {
-			return dynamic_cast<CameraManager*>(manager);
-		}
-	}
-	return nullptr;
-}
-LightManager* getLightManager(std::vector<ComponentManager*> &managers) {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == LIGHT_COMPONENT) {
-			return dynamic_cast<LightManager*>(manager);
-		}
-	}
-	return nullptr;
-}
-RigidBodyManager * getRigidBodyManager(std::vector<ComponentManager*>& managers)
+void cleanup(MappedManager<v_material>* manager)
 {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == RIGID_BODY) {
-			return dynamic_cast<RigidBodyManager*>(manager);
-		}
-	}
-	return nullptr;
+
 }
-ColliderManager * getColliderManager(std::vector<ComponentManager*>& managers)
+
+glm::mat4 getTransformationMatrix(transform transform_component)
 {
-	for (ComponentManager* manager : managers) {
-		if (manager->type == COLLIDER) {
-			return dynamic_cast<ColliderManager*>(manager);
-		}
-	}
-	return nullptr;
+	glm::mat4 scaleMat = glm::scale(glm::mat4(1), transform_component.scale);
+	glm::mat4 rotMat = glm::toMat4(glm::quat(transform_component.rot));
+	glm::mat4 transMat = glm::translate(glm::mat4(1), transform_component.pos);
+
+	return transMat * rotMat * scaleMat;
 }
-CollisionManager * getCollisionManager(std::vector<ComponentManager*>& managers)
-{
-	for (ComponentManager* manager : managers) {
-		if (manager->type == COLLISION) {
-			return dynamic_cast<CollisionManager*>(manager);
+
+void managerCleanup(MappedManager<v_material>* manager, V_Device * device) {
+	for (std::pair<int, v_material> material : manager->componentMap) {
+		for (VkImageView view : material.second.textureViews) {
+			vkDestroyImageView(device->getLogicalDevice(), view, nullptr);
+		}
+		for (VkImage image : material.second.textures) {
+			vkDestroyImage(device->getLogicalDevice(), image, nullptr);
+		}
+		for (VkDeviceMemory mem : material.second.textureMemories) {
+			vkFreeMemory(device->getLogicalDevice(), mem, nullptr);
 		}
 	}
-	return nullptr;
 }
-AnimationManager * getAnimationManager(std::vector<ComponentManager*>& managers)
-{
-	for (ComponentManager* manager : managers) {
-		if (manager->type == ANIMATION_COMPONENT) {
-			return dynamic_cast<AnimationManager*>(manager);
-		}
+
+void managerCleanup(MappedManager<v_mesh>* manager, V_Device * device) {
+	for (std::pair<int, v_mesh> mesh : manager->componentMap) {
+		vkDestroyBuffer(device->getLogicalDevice(), mesh.second.indexBuffer, nullptr);
+		vkFreeMemory(device->getLogicalDevice(), mesh.second.iBufferVRAM, nullptr);
+		vkDestroyBuffer(device->getLogicalDevice(), mesh.second.vBuffer, nullptr);
+		vkFreeMemory(device->getLogicalDevice(), mesh.second.vBufferVRAM, nullptr);
 	}
-	return nullptr;
-}
-TagManager * getTagManager(std::vector<ComponentManager*>& managers)
-{
-	for (ComponentManager* manager : managers) {
-		if (manager->type == TAGS_COMPONENT) {
-			return dynamic_cast<TagManager*>(manager);
-		}
-	}
-	return nullptr;
 }

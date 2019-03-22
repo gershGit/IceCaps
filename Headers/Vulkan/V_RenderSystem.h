@@ -65,7 +65,8 @@ public:
 	void submitCommandBuffer(VkCommandBuffer &buffer, int coreID);
 	void submitCommandBuffers(std::vector<VkCommandBuffer> &buffers, int coreID);
 	void presentRender();
-
+	
+	void setActiveCamera(int id, camera * cam) { activeCameraID = id; activeCamera = cam; }
 	void setSwapchain(V_Swapchain* swapchain_in) { swapchain = swapchain_in; };
 	~V_RenderSystem();
 };

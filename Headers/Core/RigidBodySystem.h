@@ -10,7 +10,7 @@ class RigidBodySystem : public EntitySystem {
 private:	
 	glm::vec3 gravity = glm::vec3(0.0f, -9.8f, 0.0f);	//Gravitaional vector
 public:
-	float airResistance = 0.001f;
+	float airResistance = 0.0001f;
 	RigidBodySystem();
 	~RigidBodySystem();
 

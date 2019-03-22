@@ -51,7 +51,7 @@ void InputSystem::setMouseButton(int button, int action, int mods)
 void InputSystem::setEntityComponents(std::vector<ComponentManager*> &managers, std::vector<std::vector<component_type>> required, uint64_t tags)
 {
 	for (ComponentManager* manager : managers) {
-		operatesOn.push_back(manager->type);
+		operatesOn.push_back(manager->componentType);
 	}
 	entityListRequiredComponents = required;
 	requiredTags = tags;

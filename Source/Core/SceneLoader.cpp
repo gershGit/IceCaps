@@ -1,5 +1,4 @@
 #include "Core/SceneLoader.h"
-#include "Core/TransformManager.h"
 #include "Vulkan/V_Instance.h"
 #include "Vulkan/V_Components.h"
 #include "Core/ManagersFactories.h"
@@ -47,48 +46,51 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 		else if (getSceneKey(line) == ADD_MANAGER) {
 			if (getComponentType(value) == TRANSFORM) {
 				std::cout << "\tAdding Transform Manager" << std::endl;
-				managers.push_back(new TransformManager());
+				managers.push_back(new ArrayManager<transform>(TRANSFORM));
 			}
 			else if (getComponentType(value) == PREFAB_COMPONENT) {
 				std::cout << "\tAdding Prefab Manager" << std::endl;
-				managers.push_back(new PrefabManager());
+				managers.push_back(new MappedManager<prefab>(PREFAB_COMPONENT));
 			}
 			else if (getComponentType(value) == MATERIAL_COMPONENT) {
 				std::cout << "\tAdding Material Manager" << std::endl;
-				if (config.api = Vulkan) {
-					managers.push_back(new V_MaterialManager());
+				if (config.api == Vulkan) {
+					managers.push_back(new MappedManager<v_material>(V_MATERIAL));
+				}
+				else if (config.api == openGL) {
+					managers.push_back(new MappedManager<gl_material>(GL_MATERIAL));
 				}
 			}
 			else if (getComponentType(value) == MESH_COMPONENT) {
 				std::cout << "\tAdding Mesh Manager" << std::endl;
-				if (config.api = Vulkan) {
-					managers.push_back(new V_MeshManager());
+				if (config.api == Vulkan) {
+					managers.push_back(new MappedManager<v_mesh>(V_MESH));
 				}
 			}
 			else if (getComponentType(value) == CAMERA) {
 				std::cout << "\tAdding Camera Manager" << std::endl;
-				managers.push_back(new CameraManager());
+				managers.push_back(new MappedManager<camera>(CAMERA));
 			}
 			else if (getComponentType(value) == LIGHT_COMPONENT) {
 				std::cout << "\tAdding Light Manager" << std::endl;
-				managers.push_back(new LightManager());
+				managers.push_back(new MappedManager<light>(LIGHT_COMPONENT));
 			}
 			else if (getComponentType(value) == RIGID_BODY) {
 				std::cout << "\tAdding Rigid Body Manager" << std::endl;
-				managers.push_back(new RigidBodyManager());
+				managers.push_back(new MappedManager<rigid_body>(RIGID_BODY));
 			}
 			else if (getComponentType(value) == COLLIDER) {
 				std::cout << "\tAdding Collider and Collision Manager" << std::endl;
-				managers.push_back(new ColliderManager());
-				managers.push_back(new CollisionManager());
+				managers.push_back(new MappedManager<collider>(COLLIDER));
+				managers.push_back(new VectorManager<collision>(COLLISION));
 			}
 			else if (getComponentType(value) == ANIMATION_COMPONENT) {
 				std::cout << "\tAdding Animation Manager" << std::endl;
-				managers.push_back(new AnimationManager());
+				managers.push_back(new MappedManager<animation>(ANIMATION_COMPONENT));
 			}
 			else if (getComponentType(value) == TAGS_COMPONENT) {
 				std::cout << "\tAdding Tags Manager" << std::endl;
-				managers.push_back(new TagManager());
+				managers.push_back(new ArrayManager<uint64_t>(TAGS_COMPONENT));
 			}
 		}
 	}
@@ -98,101 +100,106 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*> &managers) {
 	for (component_type managerType : system->operatesOn) {
 		if (managerType == TRANSFORM) {
-			system->managers->push_back(getTransformManager(managers));
+			system->managers->push_back(getCManager<transform>(managers, TRANSFORM));
 		}
 		else if (managerType == PREFAB_COMPONENT) {
-			system->managers->push_back(getPrefabManager(managers));
+			system->managers->push_back(getCManager<prefab>(managers, PREFAB_COMPONENT));
 		}
 		else if (managerType == CAMERA) {
-			system->managers->push_back(getCameraManager(managers));
+			system->managers->push_back(getCManager<camera>(managers, CAMERA));
 		}
 		else if (managerType == LIGHT_COMPONENT) {
-			system->managers->push_back(getLightManager(managers));
+			system->managers->push_back(getCManager<light>(managers, LIGHT_COMPONENT));
 		}
 		else if (managerType == V_MESH) {
-			system->managers->push_back(getVulkanMeshManager(managers));
+			system->managers->push_back(getCManager<v_mesh>(managers, V_MESH));
 		}
 		else if (managerType == V_MATERIAL) {
-			system->managers->push_back(getVulkanMaterialManager(managers));
+			system->managers->push_back(getCManager<v_material>(managers, V_MATERIAL));
 		}
 		else if (managerType == RIGID_BODY) {
-			system->managers->push_back(getRigidBodyManager(managers));
+			system->managers->push_back(getCManager<rigid_body>(managers, RIGID_BODY));
 		}
 		else if (managerType == COLLIDER) {
-			system->managers->push_back(getColliderManager(managers));
-			system->managers->push_back(getCollisionManager(managers));
+			system->managers->push_back(getCManager<collider>(managers, COLLIDER));
+			system->managers->push_back(getCManager<collision>(managers, COLLISION));
 		}
 		else if (managerType == ANIMATION_COMPONENT) {
-			system->managers->push_back(getAnimationManager(managers));
+			system->managers->push_back(getCManager<animation>(managers, ANIMATION_COMPONENT));
 		}
 		else if (managerType == TAGS_COMPONENT) {
-			system->managers->push_back(getTagManager(managers));
+			system->managers->push_back(getCManager<uint64_t>(managers, TAGS_COMPONENT));
 		}
 	}
 }
 
 //Fills a systems entity list with all matching entities it runs on
 void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*> &managers, int entityCount) {
+	if (system->systemType == RENDER_SYSTEM) {
+		MappedManager<camera>* cManager = dynamic_cast<MappedManager<camera>*>(getCManager<camera>(managers, CAMERA));
+		V_RenderSystem* rSystem = dynamic_cast<V_RenderSystem*>(system);
+		rSystem->setActiveCamera(cManager->getFirst().first, cManager->getFirst().second);
+	}
 	for (std::vector<component_type> requiredSet : system->entityListRequiredComponents) {
 		for (int entityID = 0; entityID < entityCount; entityID++) {
 			bool validEntity = true;
 			for (component_type requiredComponent : requiredSet) {
 				if (requiredComponent == TRANSFORM) {
-					if (!getTransformManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<transform>(managers, TRANSFORM)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				} 
 				else if (requiredComponent == PREFAB_COMPONENT) {
-					if (!getPrefabManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<prefab>(managers, PREFAB_COMPONENT)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == V_MESH) {
-					if (!getVulkanMeshManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<v_mesh>(managers, V_MESH)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == V_MATERIAL) {
-					if (!getVulkanMaterialManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<v_material>(managers, V_MATERIAL)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == CAMERA) {
-					if (!getCameraManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<camera>(managers, CAMERA)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == LIGHT_COMPONENT) {
-					if (!getLightManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<light>(managers, LIGHT_COMPONENT)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == RIGID_BODY) {
-					if (!getRigidBodyManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<rigid_body>(managers, RIGID_BODY)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == COLLIDER) {
-					if (!getColliderManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<collider>(managers, COLLIDER)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == ANIMATION_COMPONENT) {
-					if (!getAnimationManager(managers)->hasEntity(entityID)) {
+					if (!getCManager<animation>(managers, ANIMATION_COMPONENT)->hasEntity(entityID)) {
 						validEntity = false;
 						break;
 					}
 				}
 				else if (requiredComponent == TAGS_COMPONENT) {
-					if (!getAnimationManager(managers)->hasEntity(entityID) || !getTagManager(managers)->hasTag(entityID, system->requiredTags)) {
+					if (!hasTag(getCManager<uint64_t>(managers, TAGS_COMPONENT)->getComponent(entityID), system->requiredTags)) {
 						validEntity = false;
 						break;
 					}
@@ -477,64 +484,50 @@ void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentMan
 		else if (getSceneKey(line) == ADD_COMPONENT) {
 			if (getComponentType(value) == TRANSFORM) {
 				std::cout << "\tAdding Transform Component" << std::endl;
-				transform tempTransform = buildTransformComponent(fileStream);
-				getTransformManager(componentManagers)->setTransform(entityID, tempTransform);
+				getCManager<transform>(componentManagers, TRANSFORM)->addComponent(entityID, buildTransformComponent(fileStream));
 			}
 			else if (getComponentType(value) == MESH_COMPONENT) {
-				v_mesh tempMesh = buildVulkanMeshComponent(fileStream, config);
-				getVulkanMeshManager(componentManagers)->addComponent(entityID);
-				getVulkanMeshManager(componentManagers)->setComponent(entityID, tempMesh);
+				getCManager<v_mesh>(componentManagers, V_MESH)->addComponent(entityID, buildVulkanMeshComponent(fileStream, config));
 			}
 			else if (getComponentType(value) == MATERIAL_COMPONENT) {
-				v_material tempMaterial = buildVulkanMaterialComponent(fileStream, config);
-				getVulkanMaterialManager(componentManagers)->addComponent(entityID);
-				getVulkanMaterialManager(componentManagers)->setComponent(entityID, tempMaterial);
+				getCManager<v_material>(componentManagers, V_MATERIAL)->addComponent(entityID, buildVulkanMaterialComponent(fileStream, config));
 			}
 			else if (getComponentType(value) == PREFAB_COMPONENT) {
 				std::cout << "\tAdding Prefab Component" << std::endl;
 				prefab tempPrefab = prefab();
 				std::getline(fileStream, line);
 				tempPrefab.baseEntity = atoi(getValue(line).c_str());
-				getPrefabManager(componentManagers)->addComponent(entityID);
-				getPrefabManager(componentManagers)->setComponent(entityID, tempPrefab);
+				getCManager<prefab>(componentManagers, PREFAB_COMPONENT)->addComponent(entityID, tempPrefab);
 			}
 			else if (getComponentType(value) == CAMERA) {
 				std::cout << "\tAdding Camera Component" << std::endl;
-				camera tempCam = buildCamera(fileStream, config);
-				getCameraManager(componentManagers)->addComponent(entityID);
-				getCameraManager(componentManagers)->setComponent(entityID, tempCam);
+				getCManager<camera>(componentManagers, CAMERA)->addComponent(entityID, buildCamera(fileStream, config));
 			}
 			else if (getComponentType(value) == LIGHT_COMPONENT) {
 				std::cout << "\tAdding Light Component" << std::endl;
-				light tempLight = buildLight(fileStream, config);
-				getLightManager(componentManagers)->addComponent(entityID);
-				getLightManager(componentManagers)->setComponent(entityID, tempLight);
+				getCManager<light>(componentManagers, LIGHT_COMPONENT)->addComponent(entityID, buildLight(fileStream, config));
 			}
 			else if (getComponentType(value) == RIGID_BODY) {
 				std::cout << "\tAdding Rigid Body Component" << std::endl;
 				rigid_body tempRigid = buildRigidBody(fileStream, config);
-				tempRigid.lastPosition = getTransformManager(componentManagers)->transformArray[entityID].pos;
-				tempRigid.lastRotation = getTransformManager(componentManagers)->transformArray[entityID].rot;
-				getRigidBodyManager(componentManagers)->addComponent(entityID);
-				getRigidBodyManager(componentManagers)->setComponent(entityID, tempRigid);
+				tempRigid.lastPosition = getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos;
+				tempRigid.lastRotation = getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).rot;
+				getCManager<rigid_body>(componentManagers, RIGID_BODY)->addComponent(entityID, tempRigid);
 			}
 			else if (getComponentType(value) == COLLIDER) {
 				std::cout << "\tAdding Collider Component" << std::endl;
-				collider tempCollider = buildCollider(fileStream, config);
-				getColliderManager(componentManagers)->addComponent(entityID);
-				getColliderManager(componentManagers)->setComponent(entityID, tempCollider);
+				getCManager<collider>(componentManagers, COLLIDER)->addComponent(entityID, buildCollider(fileStream, config));
 			}
 			else if (getComponentType(value) == ANIMATION_COMPONENT) {
 				std::cout << "\tAdding Animation Component" << std::endl;
-				animation tempAnim = buildAnimation(fileStream, config);
-				getAnimationManager(componentManagers)->addComponent(entityID);
-				getAnimationManager(componentManagers)->setComponent(entityID, tempAnim);
+				getCManager<animation>(componentManagers, ANIMATION_COMPONENT)->addComponent(entityID, buildAnimation(fileStream, config));
 			}
 		}
 		else if (getSceneKey(line) == ADD_TAG) {
-			if (strcmp(value.c_str(), "ICE_TAG_INPUT")==0) {
+			if (strcmp(value.c_str(), "ICE_TAG_INPUT") == 0) {
 				std::cout << "\tAdding input tag" << std::endl;
-				getTagManager(componentManagers)->addTag(entityID, ICE_TAG_INPUT);
+				uint64_t new_tag = addTag<uint64_t>(getCManager<uint64_t>(componentManagers, TAGS_COMPONENT)->getComponent(entityID), ICE_TAG_INPUT);
+				getCManager<uint64_t>(componentManagers, TAGS_COMPONENT)->setComponent(entityID, new_tag);
 			}
 		}
 	}
@@ -557,10 +550,10 @@ void buildVulkanDescriptors(std::vector<ComponentManager*>& componentManagers, c
 	int camLightDescCount = 2 * config.swapchainBuffering;
 
 	//Only need as many descriptors as are textures as they can be rebound each draw call
-	int imageBuffersNeeded = getVulkanMaterialManager(componentManagers)->getImageCount();
+	int imageBuffersNeeded = countImages(dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(componentManagers, V_MATERIAL)));
 
 	//1 set per buffering (set includes viewPersp descriptor and lights descriptor) + 1 set per material
-	int setsNeeded = getVulkanMaterialManager(componentManagers)->getSize() + config.swapchainBuffering;
+	int setsNeeded = getCManager<v_material>(componentManagers, V_MATERIAL)->getSize() + config.swapchainBuffering;
 
 	//Call to create a descriptor pool large enough for viewpersp descriptors, light descriptors, and image descriptors
 	config.apiInfo.v_Instance->createStaticDescriptorPool(camLightDescCount, imageBuffersNeeded, setsNeeded);
@@ -574,12 +567,16 @@ void buildVulkanDescriptors(std::vector<ComponentManager*>& componentManagers, c
 	config.apiInfo.v_Instance->getStaticDescriptorPool()->configureVulkanPipelineDescriptorSets(config.apiInfo.v_Instance->getGraphicsPipeline(PBR));
 
 	//Creates and configures descriptor sets for each material
-	for (v_material &material : *getVulkanMaterialManager(componentManagers)->getComponents()) {
-		//Allocates a descriptor set for material
-		config.apiInfo.v_Instance->getStaticDescriptorPool()->allocateTextureSet(config.apiInfo.v_Instance->getPipelineDescriptorSetLayout(PBR, MATERIAL_SET), material);
+	//TODO descriptor sets are not being initialized
+	MappedManager<v_material>* matManager = dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(componentManagers, V_MATERIAL));
+	for (int i = 0; i < matManager->getEntities().size(); i++){
+		config.apiInfo.v_Instance->getStaticDescriptorPool()->allocateTextureSet(
+			config.apiInfo.v_Instance->getPipelineDescriptorSetLayout(PBR, MATERIAL_SET),
+			*matManager->getComponentAddress(matManager->getEntities().at(0)));
 
-		//Configure descriptor set for material
-		config.apiInfo.v_Instance->getStaticDescriptorPool()->configureTextureSet(material, config.apiInfo.v_Instance->textureSampler);
+		config.apiInfo.v_Instance->getStaticDescriptorPool()->configureTextureSet(
+			*matManager->getComponentAddress(matManager->getEntities().at(0)),
+			config.apiInfo.v_Instance->textureSampler);
 	}
 	std::cout << "Finished configuring descriptor sets" << std::endl;
 }
@@ -632,8 +629,8 @@ void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std
 			addPipeline(config, value, sceneIn);
 		}
 		else if (key == ENTITY_COUNT) {
-			getTransformManager(componentManagers)->setSize(atoi(value.c_str()));
-			getTagManager(componentManagers)->setSize(atoi(value.c_str()));
+			dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(componentManagers,TRANSFORM))->setSize(atoi(value.c_str()));
+			dynamic_cast<ArrayManager<uint64_t>*>(getCManager<uint64_t>(componentManagers, TAGS_COMPONENT))->setSize(atoi(value.c_str()));
 		}
 		else if (key == ENTITY) {
 			loadEntity(atoi(value.c_str()), config, componentManagers, sceneIn);
@@ -656,12 +653,12 @@ void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std
 void SceneLoader::unloadScene(configurationStructure &config, std::vector<ComponentManager*>& managers)
 {
 	std::cout << "Unloading Scene" << std::endl;
-	getTransformManager(managers)->cleanup();
+	managerCleanup(dynamic_cast<ArrayManager<transform>*>( getCManager<transform>(managers,TRANSFORM) ));
 	if (config.api == Vulkan) {
 		std::cout << "\tCleaning vulkan meshes" << std::endl;
-		getVulkanMeshManager(managers)->cleanup(config.apiInfo.v_Instance->getPrimaryDevice());
+		managerCleanup(dynamic_cast<MappedManager<v_mesh>*>( getCManager<v_mesh>(managers,V_MESH)), config.apiInfo.v_Instance->getPrimaryDevice());
 		std::cout << "\tCleaning vulkan materials" << std::endl;
-		getVulkanMaterialManager(managers)->cleanup(config.apiInfo.v_Instance->getPrimaryDevice());
+		managerCleanup(dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(managers, V_MATERIAL)), config.apiInfo.v_Instance->getPrimaryDevice());
 		std::cout << "\tCleaning vulkan graphics pipelines" << std::endl;
 		for (V_GraphicsPipeline* pipeline : *config.apiInfo.v_Instance->getGraphicsPipelines()) {
 			pipeline->cleanup();

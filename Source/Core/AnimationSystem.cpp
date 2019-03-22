@@ -5,7 +5,7 @@
 void AnimationSystem::start()
 {
 	for (int id : *entities) {
-		animation * anim = getAnimationManager(*managers)->getComponentAddress(id);
+		animation * anim = getCManager<animation>(*managers, ANIMATION_COMPONENT)->getComponentAddress(id);
 		if (anim->playOnStartup) {
 			anim->startTime = GameTimer::getCurrentTime();
 			anim->lastFrameEnd = &(anim->frames[0]);
@@ -70,7 +70,7 @@ key_frame getLeftOver(double t, animation *anim, key_frame* leftOverStart, key_f
 }
 
 //Applies an animation to an entity
-void AnimationSystem::applyAnimation(animation *anim, int entityID, TransformManager* tManager)
+void AnimationSystem::applyAnimation(animation *anim, int entityID, ArrayManager<transform>* tManager)
 {
 	if (anim->state == ANIMATION_PLAYING) {
 		double currentTime = GameTimer::getCurrentTime();
@@ -79,7 +79,7 @@ void AnimationSystem::applyAnimation(animation *anim, int entityID, TransformMan
 			return;
 		}
 
-		transform * t = &tManager->transformArray[entities->at(entityID)];
+		transform * t = tManager->getComponentAddress(entities->at(entityID));
 		glm::vec3 newDeltaPos;
 		glm::vec3 newDeltaRot;
 		glm::vec3 newDeltaScale;
@@ -122,8 +122,8 @@ void AnimationSystem::applyAnimation(animation *anim, int entityID, TransformMan
 //Applies animations to all entities
 void AnimationSystem::onUpdate()
 {
-	TransformManager* tManager = getTransformManager(*managers);
-	AnimationManager* aManager = getAnimationManager(*managers);
+	ArrayManager<transform>* tManager = dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(*managers, TRANSFORM));
+	MappedManager<animation>* aManager = dynamic_cast<MappedManager<animation>*>( getCManager<animation>(*managers, ANIMATION_COMPONENT));
 	for (int i = 0; i < entities->size(); i++) {
 		applyAnimation( aManager->getComponentAddress(entities->at(i)), entities->at(i), tManager );
 	}

@@ -17,6 +17,6 @@ public:
 	glm::vec3 linearInterpolation(glm::vec3 start, glm::vec3 end, double time);
 	glm::vec3 quaternionInterpolation(glm::vec3 start, glm::vec3 end, double time);
 
-	void applyAnimation(animation *anim, int entityID, TransformManager* tManager);
+	void applyAnimation(animation *anim, int entityID, ArrayManager<transform>* tManager);
 	void onUpdate();
 };

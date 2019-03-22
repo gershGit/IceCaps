@@ -19,12 +19,13 @@ protected:
 	std::vector<int> *entities = new std::vector<int>();
 	configurationStructure * config;
 public:
+	system_type systemType = NO_SYSTEM_TYPE;
 	std::vector<ComponentManager*> *managers = new std::vector<ComponentManager*>();//Managers needed by this system
 	std::vector<component_type> operatesOn = std::vector<component_type>();			//Components that qualify for this system
 	uint64_t requiredTags = 0;
 	//A list of possible component combinations that meet the requirements to be used by the system
 	std::vector<std::vector<component_type>> entityListRequiredComponents = std::vector<std::vector<component_type>>();
-	EntitySystem();
+	EntitySystem() {};
 
 	//Functions to be overridden by subclasses
 	virtual void initialize() {};
@@ -36,6 +37,6 @@ public:
 
 	void setConfig(configurationStructure &config_in) { config = &config_in; };	//Adds a reference to a configuration structure
 
-	~EntitySystem();
+	~EntitySystem() {};
 };
 
