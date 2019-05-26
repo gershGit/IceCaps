@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Global_Callbacks.h"
+#include "Vulkan/V_GraphicsPipeline.h"
 #include <algorithm>
 
 //Prints the queue families available on a physical device
@@ -263,4 +264,436 @@ VkSampleCountFlagBits intToSampleFlagBits(int bits) {
 	if (bits == 2) { return VK_SAMPLE_COUNT_2_BIT; }
 
 	return VK_SAMPLE_COUNT_1_BIT;
+}
+
+//Frustum culling calculations
+glm::vec3 worldAxis[3] = {
+	glm::vec3(1,0,0),
+	glm::vec3(0,1,0),
+	glm::vec3(0,0,1)
+};
+glm::vec2 project(AABB bounds, glm::vec3 axis) {
+	float min = glm::dot(bounds.points[0], axis);
+	float max = min;
+	float val;
+	for (int i = 1; i < 8; i++) {
+		val = glm::dot(bounds.points[i], axis);
+		if (val < min) {
+			min = val;
+		}
+		else if (val > max) {
+			max = val;
+		}
+	}
+	return glm::vec2(min, max);
+}
+glm::vec2 project(frustum * frus, glm::vec3 axis) {
+	float min = glm::dot(frus->points[0], axis);
+	float max = min;
+	float val;
+	for (int i = 1; i < 8; i++) {
+		val = glm::dot(frus->points[i], axis);
+		if (val < min) {
+			min = val;
+		}
+		else if (val > max) {
+			max = val;
+		}
+	}
+	return glm::vec2(min, max);
+}
+bool overlap(glm::vec2 a, glm::vec2 b) {
+	return (a.y >= b.x && b.y >= a.x);
+}
+bool fullOverlap(glm::vec2 outer, glm::vec2 inner) {
+	return outer.x <= inner.x && outer.y >= inner.y;
+}
+
+void initializeABBB(AABB * bounds)
+{
+	bounds->size = glm::vec3(0);
+	bounds->pos = glm::vec3(0);
+	/*
+	   5-------7
+	  /|      /|
+	 / |     / |
+	1--|----3  |
+	|  4----|--6
+	| /     | /
+	0-------2
+	*/
+	bounds->points[0] = glm::vec3(-INFINITY, -INFINITY, -INFINITY);
+	bounds->points[1] = glm::vec3(-INFINITY, INFINITY, -INFINITY);
+	bounds->points[2] = glm::vec3(INFINITY, -INFINITY, -INFINITY);
+	bounds->points[3] = glm::vec3(INFINITY, INFINITY, -INFINITY);
+	bounds->points[4] = glm::vec3(-INFINITY, -INFINITY, INFINITY);
+	bounds->points[5] = glm::vec3(-INFINITY, INFINITY, INFINITY);
+	bounds->points[6] = glm::vec3(INFINITY, -INFINITY, INFINITY);
+	bounds->points[7] = glm::vec3(INFINITY, INFINITY, INFINITY);
+}
+
+//Compares two bounding boxes to see if an area completely encloses an object
+bool isInside(AABB * area, AABB * object)
+{
+	if (fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))
+		&& fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))
+		&& fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))) {
+		return true;
+	}
+	return false;
+}
+float getMin(AABB*a, AABB*b, int axis) {
+	float min = INFINITY;
+	for (int i = 0; i < 8; i++) {
+		if (a->points[i][axis] < min) {
+			min = a->points[i][axis];
+		}
+		if (b->points[i][axis] < min) {
+			min = b->points[i][axis];
+		}
+	}
+	return min;
+}
+float getMax(AABB*a, AABB*b, int axis) {
+	float max = -INFINITY;
+	for (int i = 0; i < 8; i++) {
+		if (a->points[i][axis] > max) {
+			max = a->points[i][axis];
+		}
+		if (b->points[i][axis] > max) {
+			max = b->points[i][axis];
+		}
+	}
+	return max;
+}
+AABB getMaxBounds(AABB * a, AABB * b)
+{
+	float minX= getMin(a, b, 0);
+	float minY = getMin(a, b, 1);
+	float minZ = getMin(a, b, 2);
+	float maxX = getMax(a, b, 0);
+	float maxY = getMax(a, b, 1);
+	float maxZ = getMax(a, b, 2);
+	AABB newBounds = AABB();
+	newBounds.points[0] = glm::vec3(minX, minY, minZ);
+	newBounds.points[1] = glm::vec3(minX, maxY, minZ);
+	newBounds.points[2] = glm::vec3(maxX, minY, minZ);
+	newBounds.points[3] = glm::vec3(maxX, maxY, minZ);
+	newBounds.points[4] = glm::vec3(minX, minY, maxZ);
+	newBounds.points[5] = glm::vec3(minX, maxY, maxZ);
+	newBounds.points[6] = glm::vec3(maxX, minY, maxZ);
+	newBounds.points[7] = glm::vec3(maxX, maxY, maxZ);
+	return newBounds;
+}
+AABB getBounds(collider & col, glm::vec3 pos)
+{
+	AABB bounds = AABB();
+	if (col.type == SPHERE_COLLIDER) {
+		bounds.pos = pos;
+		bounds.size.x = col.radius;
+		bounds.size.y = col.radius;
+		bounds.size.z = col.radius;
+		bounds.points[0] = pos + glm::vec3(-col.radius, -col.radius, -col.radius);
+		bounds.points[1] = pos + glm::vec3(-col.radius, col.radius, -col.radius);
+		bounds.points[2] = pos + glm::vec3(col.radius, -col.radius, -col.radius);
+		bounds.points[3] = pos + glm::vec3(col.radius, col.radius, -col.radius);
+		bounds.points[4] = pos + glm::vec3(-col.radius, -col.radius, col.radius);
+		bounds.points[5] = pos + glm::vec3(-col.radius, col.radius, col.radius);
+		bounds.points[6] = pos + glm::vec3(col.radius, -col.radius, col.radius);
+		bounds.points[7] = pos + glm::vec3(col.radius, col.radius, col.radius);
+	}
+	return bounds;
+}
+AABB getMeshBounds(AABB * bounds_in, glm::vec3 pos)
+{
+	AABB bounds = AABB();
+	bounds.pos = pos;
+	bounds.size = bounds_in->size;
+	bounds.points[0] = pos + glm::vec3(-bounds.size.x, -bounds.size.y, -bounds.size.z);
+	bounds.points[1] = pos + glm::vec3(-bounds.size.x, bounds.size.y, -bounds.size.z);
+	bounds.points[2] = pos + glm::vec3(bounds.size.x, -bounds.size.y, -bounds.size.z);
+	bounds.points[3] = pos + glm::vec3(bounds.size.x, bounds.size.y, -bounds.size.z);
+	bounds.points[4] = pos + glm::vec3(-bounds.size.x, -bounds.size.y, bounds.size.z);
+	bounds.points[5] = pos + glm::vec3(-bounds.size.x, bounds.size.y, bounds.size.z);
+	bounds.points[6] = pos + glm::vec3(bounds.size.x, -bounds.size.y, bounds.size.z);
+	bounds.points[7] = pos + glm::vec3(bounds.size.x, bounds.size.y, bounds.size.z);
+	return bounds;
+}
+bool boundsIntersect(AABB & a, AABB & b)
+{
+	if (overlap(project(a, worldAxis[0]), project(b, worldAxis[0]))
+		&& overlap(project(a, worldAxis[1]), project(b, worldAxis[1]))
+		&& overlap(project(a, worldAxis[2]), project(b, worldAxis[2]))) {
+		return true;
+	}
+	return false;
+}
+//TODO frustum points calculation, frustum axis calculations
+int isVisible(AABB bounds, frustum * frus)
+{
+	//Test frustrum axes
+	glm::vec2 objProj;
+	glm::vec2 frusProj;
+	for (int i = 0; i < 5; i++) {
+		objProj = project(bounds, frus->axis[i]);
+		frusProj = project(frus, frus->axis[i]);
+		if (!overlap(objProj, frusProj)) {
+			return 0;
+		}
+	}
+
+	//Test AABB axes
+	for (int i = 0; i < 3; i++) {
+		objProj = project(bounds, worldAxis[i]);
+		frusProj = project(frus, worldAxis[i]);
+		if (!overlap(objProj, frusProj)) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+AABB getLightBounds(LightObject l, float r) {
+	AABB bounds = AABB();
+	bounds.pos = l.position;
+	bounds.size.x = r;
+	bounds.size.y = r;
+	bounds.size.z = r;
+	bounds.points[0] = bounds.pos + glm::vec3(-r, -r, -r);
+	bounds.points[1] = bounds.pos + glm::vec3(-r, r, -r);
+	bounds.points[2] = bounds.pos + glm::vec3(r, -r, -r);
+	bounds.points[3] = bounds.pos + glm::vec3(r, r, -r);
+	bounds.points[4] = bounds.pos + glm::vec3(-r, -r, r);
+	bounds.points[5] = bounds.pos + glm::vec3(-r, r, r);
+	bounds.points[6] = bounds.pos + glm::vec3(r, -r, r);
+	bounds.points[7] = bounds.pos + glm::vec3(r, r, r);
+	return bounds;
+}
+bool lightAffects(AABB bounds, LightObject lightObj, float range)
+{
+	AABB lightBounds = getLightBounds(lightObj, range);
+	if (boundsIntersect(bounds,lightBounds)) {
+		return true;
+	}
+	return false;
+}
+
+int getPipelineIndex(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, material_type mType)
+{
+	for (int i = 0; i < renderNodes->size(); i++) {
+		if (renderNodes->at(i)->pipelineType == mType) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+int countRenderNodeDescriptors(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes)
+{
+	int count = 0;
+	for (NodeManager<VulkanSceneNode> * pipelineMap : *renderNodes) {
+		count += pipelineMap->getSize();
+	}
+	return count;
+}
+
+void printNode(SceneNode * scene_node, int childCount)
+{
+	printf("--------------------\n"); //20 dashes
+	printf("|    ID: %.4d      |\n", scene_node->id);
+	printf("|@ %p|\n", (void*)scene_node);
+	printf("| Bounds Position: |\n");
+	printf("|    x: %7.2lf    |\n", scene_node->bounds.pos.x);
+	printf("|    y: %7.2lf    |\n", scene_node->bounds.pos.y);
+	printf("|    z: %7.2lf    |\n", scene_node->bounds.pos.z);
+	printf("| Bounds Size:     |\n");
+	printf("|    x: %7.2lf    |\n", scene_node->bounds.size.x);
+	printf("|    y: %7.2lf    |\n", scene_node->bounds.size.y);
+	printf("|    z: %7.2lf    |\n", scene_node->bounds.size.z);
+	if (scene_node->isLeaf) {
+		printf("|       LEAF       |\n");
+	}
+	else {
+		printf("|      BRANCH      |\n");
+		printf("|Children:         |\n");
+		for (int i = 0; i < childCount; i++) {
+			printf("| %p |\n", (void*)&scene_node->children[i]);
+		}
+	}
+	printf("--------------------\n");
+}
+
+void printNodeSimple(SceneNode * scene_node, int tabs)
+{
+	printf(" ....\n"); //6 dashes
+	printf("|%.4d|\n", scene_node->id);
+	printf(" ''''\n");
+}
+
+void printSimpleBranch(SceneNode* node, int tabs, bool last) {
+	//TODO print | for all depths higher up in the tree so they stay unbroken
+	for (int i = 0; i < tabs-1; i++) {
+		printf("\t");
+	}
+	printf("   |     ....\n");
+	for (int i = 0; i < tabs-1; i++) {
+		printf("\t");
+	}
+	printf("   -----|%.4d|\n", node->id);
+	if (!last) {
+		for (int i = 0; i < tabs - 1; i++) {
+			printf("\t");
+		}
+		printf("   |     ''''\n");
+	}
+	else {
+		for (int i = 0; i < tabs; i++) {
+			printf("\t");
+		}
+		printf(" ''''\n");
+	}
+}
+
+void printNodeEntities(SceneNode * scene_node, int tabs)
+{
+	printf(" ....\n"); //6 dashes
+	printf("|%.4d|<", scene_node->id);
+	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
+		printf("%d,", scene_node->dynamicEntities->at(i));
+	}
+	printf("|");
+	for (int i = 0; i < scene_node->staticEntityCount; i++) {
+		printf("%d,", scene_node->staticEntities[i]);
+	}
+	printf(">\n");
+	printf(" ''''\n");
+}
+
+void printBranchEntities(SceneNode* node, int tabs, bool last) {
+	for (int i = 0; i < tabs - 1; i++) {
+		printf("\t");
+	}
+	printf("   |     ....\n");
+	for (int i = 0; i < tabs - 1; i++) {
+		printf("\t");
+	}
+	printf("   -----|%.4d|<", node->id);
+	for (int i = 0; i < node->dynamicEntities->size(); i++) {
+		printf("%d,", node->dynamicEntities->at(i));
+	}
+	printf("|");
+	for (int i = 0; i < node->staticEntityCount; i++) {
+		printf("%d,", node->staticEntities[i]);
+	}
+	printf(">\n");
+	if (!last) {
+		for (int i = 0; i < tabs - 1; i++) {
+			printf("\t");
+		}
+		printf("   |     ''''\n");
+	}
+	else {
+		for (int i = 0; i < tabs; i++) {
+			printf("\t");
+		}
+		printf(" ''''\n");
+	}
+}
+
+void printSceneTree(SceneNode * scene_node, int childCount, int depth, int maxDepth)
+{
+	if (depth != 0) {
+		if (scene_node->id % childCount == 0) {
+			printSimpleBranch(scene_node, depth, true);
+		}
+		else {
+			printSimpleBranch(scene_node, depth, false);
+		}
+	}
+	else {
+		printNodeSimple(scene_node, depth);
+	}
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < childCount; i++) {
+			printSceneTree(&scene_node->children[i], childCount, depth + 1, maxDepth);
+		}
+	}
+}
+
+void printSceneTreeWithEntities(SceneNode * scene_node, int childCount, int depth, int maxDepth)
+{
+	if (depth != 0) {
+		if (scene_node->id % childCount == 0) {
+			printBranchEntities(scene_node, depth, true);
+		}
+		else {
+			printBranchEntities(scene_node, depth, false);
+		}
+	}
+	else {
+		printNodeEntities(scene_node, depth);
+	}
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < childCount; i++) {
+			printSceneTreeWithEntities(&scene_node->children[i], childCount, depth + 1, maxDepth);
+		}
+	}
+}
+
+bool locateEntity(SceneNode * scene_node, int entityID, int childCount)
+{
+	for (int e : *scene_node->dynamicEntities) {
+		if (e == entityID) {
+			printf("Entity %d is in node %d\n", entityID, scene_node->id);
+			return true;
+		}
+	}
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < childCount; i++) {
+			if (locateEntity(&scene_node->children[i], entityID, childCount) == true) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+SceneNode* getParentNode(SceneNode * scene_node, int nodeID, int childCount)
+{
+	if (scene_node->isLeaf) {
+		return nullptr;
+	}
+	for (int i = 0; i < childCount; i++) {
+		if (scene_node->children[i].id == nodeID) {
+			return scene_node;
+		}
+	}
+	SceneNode* tempNode = nullptr;
+	for (int i = 0; i < childCount; i++) {
+		tempNode = getParentNode(&scene_node->children[i], nodeID, childCount);
+		if (tempNode != nullptr) {
+			return tempNode;
+		}
+	}
+	return nullptr;
+}
+
+int getMaxLights(std::vector<V_GraphicsPipeline*>* pipelines)
+{
+	int max = 0;
+	for (V_GraphicsPipeline* pipe : *pipelines) {
+		if (pipe->max_lights > max) {
+			max = pipe->max_lights;
+		}
+	}
+	return max;
+}
+
+LightObject toLightObject(light light_in, glm::vec3 pos_in)
+{
+	LightObject retObject = LightObject();
+	retObject.position = glm::vec4(pos_in, 1.0);
+	retObject.color = light_in.color;
+	return retObject;
 }

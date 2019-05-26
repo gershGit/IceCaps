@@ -51,6 +51,29 @@ public:
 	std::pair<int, CType*> getFirst() {return std::pair<int,CType*>(componentMap.begin()->first, &componentMap.begin()->second);}
 };
 
+template<typename CType>
+class NodeManager : public CManager<CType> {
+public:
+	material_type pipelineType;
+	std::map<int, CType> componentMap;
+	NodeManager(component_type type_in, material_type mType) { this->componentType = type_in; this->pipelineType = mType; };
+	int getSize() { return (int)componentMap.size(); };
+	bool hasEntity(int entityID) { return (componentMap.count(entityID) > 0); };
+	CType getComponent(int entityID) { return componentMap.at(entityID); };
+	CType* getComponentAddress(int entityID) { return &componentMap.at(entityID); };
+	void addComponent(int entityID, CType component) { componentMap.insert(std::pair<int, CType>(entityID, component)); };
+	void setComponent(int entityID, CType component) { componentMap.at(entityID) = component; };
+	std::vector<int> getEntities() {
+		std::vector<int> vec = std::vector<int>();
+		for (std::pair<int, CType> pair : componentMap) {
+			vec.push_back(pair.first);
+		}
+		return vec;
+	}
+	std::pair<int, CType*> getFirst() { return std::pair<int, CType*>(componentMap.begin()->first, &componentMap.begin()->second); }
+	~NodeManager() {};
+};
+
 template <typename CType>
 class ArrayManager : public CManager<CType> {
 public:
@@ -86,7 +109,6 @@ public:
 template <typename CType>
 class VectorManager : public CManager<CType> {
 private:
-	//TODO use custom memory manager
 	std::vector<CType> components = std::vector<CType>();
 public:
 	VectorManager(component_type type_in) { this->componentType = type_in; };

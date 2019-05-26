@@ -27,3 +27,8 @@ struct v_material {
 	std::vector<VkImageView> textureViews;
 	VkDescriptorSet descriptorSet;
 };
+
+struct v_camera : camera {
+	VkDeviceMemory* camVRAM;
+	VkBuffer* camBuffers;
+};

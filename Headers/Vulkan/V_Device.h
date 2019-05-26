@@ -4,7 +4,6 @@
 
 #pragma once
 #include "Vulkan/Vulkan_Headers.h"
-#include "Core/Global_Callbacks.h"
 
 class V_Device
 {

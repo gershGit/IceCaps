@@ -93,7 +93,7 @@ void InputSystem::updateKeys()
 }
 
 InputSystem::InputSystem() {
-
+	systemType = INPUT_SYSTEM;
 }
 
 void InputSystem::applyInputs()

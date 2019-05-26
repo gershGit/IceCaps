@@ -12,14 +12,15 @@
 
 class EntitySystem
 {
-private:
-	
 protected:
 	//Vector that stores all the entity IDs that will be processed by the system
 	std::vector<int> *entities = new std::vector<int>();
-	configurationStructure * config;
+	configurationStructure * config = nullptr;
+	SceneNode* scene = nullptr;
 public:
 	system_type systemType = NO_SYSTEM_TYPE;
+	bool usesScene = false;
+
 	std::vector<ComponentManager*> *managers = new std::vector<ComponentManager*>();//Managers needed by this system
 	std::vector<component_type> operatesOn = std::vector<component_type>();			//Components that qualify for this system
 	uint64_t requiredTags = 0;
@@ -34,9 +35,11 @@ public:
 	virtual void onConfigurationChange() {};
 	virtual void addEntity(int entityID) { entities->push_back(entityID); };
 	virtual void removeEntity(entity deadEntity) {};
+	virtual void cleanup() {};
 
+	void setScene(SceneNode* scene_in) { scene = scene_in; };
 	void setConfig(configurationStructure &config_in) { config = &config_in; };	//Adds a reference to a configuration structure
 
-	~EntitySystem() {};
+	~EntitySystem() { delete entities; };
 };
 

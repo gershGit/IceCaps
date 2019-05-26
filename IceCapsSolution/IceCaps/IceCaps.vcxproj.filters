@@ -117,6 +117,9 @@
     <ClCompile Include="..\..\Source\Core\ManagersFactories.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Core\SceneTreeSystem.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Core\Lifecycle_Functions.h">
@@ -219,6 +222,9 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\ThreadPool.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\SceneTreeSystem.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,5 +4,5 @@
 
 class AnimationFactory {
 public:
-	static void loadFromFile(std::string fileIn, animation &anim, configurationStructure &config);
+	static void loadFromFile(char * fileIn, animation &anim, configurationStructure &config);
 };

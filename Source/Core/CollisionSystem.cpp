@@ -4,10 +4,10 @@
 collision CollisionSystem::checkCollision(int entityOne, int entityTwo) {
 	collision collisionInfo = collision();
 	collisionInfo.collision = false;
-	collider *collider_one = &getCManager<collider>(*managers, COLLIDER)->getComponent(entityOne);
-	collider *collider_two = &getCManager<collider>(*managers, COLLIDER)->getComponent(entityTwo);
-	transform t1 = getCManager<transform>(*managers, TRANSFORM)->getComponent(entityOne);
-	transform t2 = getCManager<transform>(*managers, TRANSFORM)->getComponent(entityTwo);
+	collider *collider_one = cManager->getComponentAddress(entityOne);
+	collider *collider_two = cManager->getComponentAddress(entityTwo);
+	transform t1 = tManager->getComponent(entityOne);
+	transform t2 = tManager->getComponent(entityTwo);
 
 	if (collider_one->type == SPHERE_COLLIDER) {
 		if (collider_two->type == SPHERE_COLLIDER) {
@@ -31,8 +31,8 @@ collision CollisionSystem::checkCollision(int entityOne, int entityTwo) {
 }
 
 void CollisionSystem::applyCollisionPhysics(int entityID, int oneOrTwo, collision cInfo, collider thisCollider) {
-	transform * t = &getCManager<transform>(*managers, TRANSFORM)->getComponent(entityID);
-	rigid_body * rBody = getCManager<rigid_body>(*managers, RIGID_BODY)->getComponentAddress(entityID);
+	transform * t = tManager->getComponentAddress(entityID);
+	rigid_body * rBody = rManager->getComponentAddress(entityID);
 	glm::vec3 cPoint, cNormal;
 	if (oneOrTwo == 1) {
 		cPoint = cInfo.collisionPointB;
@@ -67,10 +67,10 @@ void CollisionSystem::manageCollisionPhysics(int entityOneID, int entityTwoID, c
 		return;
 	}
 	else if (rBodyOne->isStatic) {
-		applyCollisionPhysics(entityTwoID, 2, collisionInfo, getCManager<collider>(*managers, COLLIDER)->getComponent(entityTwoID));
+		applyCollisionPhysics(entityTwoID, 2, collisionInfo, cManager->getComponent(entityTwoID));
 	}
 	else if (rBodyTwo->isStatic) {
-		applyCollisionPhysics(entityOneID, 1, collisionInfo, getCManager<collider>(*managers, COLLIDER)->getComponent(entityTwoID));
+		applyCollisionPhysics(entityOneID, 1, collisionInfo, cManager->getComponent(entityTwoID));
 	}
 	else {
 		//Dynamic dynamic collision
@@ -106,32 +106,98 @@ void CollisionSystem::addExitCollisions(VectorManager<collision>* manager) {
 	}
 }
 
-void CollisionSystem::onUpdate()
+void CollisionSystem::searchNodeForCollisions(SceneNode * scene_node)
 {
-	//TODO for ALL systems, this should be done once during initialization not during every update
-	MappedManager<collider>* cManager = dynamic_cast<MappedManager<collider>*>(getCManager<collider>(*managers, COLLIDER));
-	MappedManager<rigid_body>* rManager = dynamic_cast<MappedManager<rigid_body>*>( getCManager<rigid_body>(*managers, RIGID_BODY ));
-	ArrayManager<transform>* tManager = dynamic_cast<ArrayManager<transform>*>( getCManager<transform>(*managers, TRANSFORM) );
-	VectorManager<collision>* clManager = dynamic_cast<VectorManager<collision>*>( getCManager<collision>(*managers, COLLISION) );
-	
-	setLastCollisions(clManager->getComponents());
-	clManager->getComponents()->clear();
-	for (int i = 0; i < entities->size() - 1; i++) {
-		for (int j = i+1; j < entities->size(); j++) {
-			collision possibleCollision = checkCollision(entities->at(i), entities->at(j));
+	//Check for collisions between dynamic objects and objects within its bounds
+	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
+		checkForCollisions(scene_node->dynamicEntities->at(i), scene_node); //TODO thread pool call?
+		SceneNode* parent = getParentNode(scene, scene_node->id, config->sceneChildren);
+		if (parent != nullptr) {
+			checkForCollisionsInParent(scene_node->dynamicEntities->at(i), parent); //TODO thread pool call?
+		} 
+	}
+
+	//Search all subscene_nodes for collisions
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < config->sceneChildren; i++) {
+			searchNodeForCollisions(&scene_node->children[i]); //TODO thread pool call
+		}
+	}
+}
+
+void CollisionSystem::checkForCollisionsInParent(int entity, SceneNode * scene_node) {
+	//Only need to check against static objects as parent dynamic objects will already have been checked
+	for (int i = 0; i < scene_node->staticEntityCount; i++) {
+		collision possibleCollision = checkCollision(entity, scene_node->staticEntities[i]);
+		if (possibleCollision.collision) {
+			addCollision(possibleCollision, clManager);
+			if (possibleCollision.state == COLLISION_ENTER) {
+				manageCollisionPhysics(entity, scene_node->staticEntities[i], possibleCollision, rManager, tManager);
+			}
+		}
+	}
+}
+
+void CollisionSystem::checkForCollisions(int entity, SceneNode * scene_node)
+{
+	//Checks to see if the entity collides with scene_node as a whole
+	//TODO optimize for less reference passing
+	collider col = cManager->getComponent(entity);
+	glm::vec3 pos = tManager->getComponent(entity).pos;
+	AABB bounds = getBounds(col, pos);
+	if (!boundsIntersect(scene_node->bounds, bounds)) {
+		return;
+	}
+
+	//Check for collisions between the entity and static objects in the scene_node
+	for (int i = 0; i < scene_node->staticEntityCount; i++) {
+		collision possibleCollision = checkCollision(entity, scene_node->staticEntities[i]);
+		if (possibleCollision.collision) {
+			addCollision(possibleCollision, clManager);
+			if (possibleCollision.state == COLLISION_ENTER) {
+				manageCollisionPhysics(entity, scene_node->staticEntities[i], possibleCollision, rManager, tManager);
+			}
+		}
+	}
+
+	//Check for collisions between the entity and dynamic objects in the scene_node
+	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
+		if (scene_node->dynamicEntities->at(i) != entity) {
+			collision possibleCollision = checkCollision(entity, scene_node->dynamicEntities->at(i));
 			if (possibleCollision.collision) {
 				addCollision(possibleCollision, clManager);
-
-				//Attempt to apply physics only if it is a new collision, as repeating collisions only occur if something besides physics is involved
 				if (possibleCollision.state == COLLISION_ENTER) {
-					manageCollisionPhysics(entities->at(i), entities->at(j), possibleCollision, rManager, tManager);
+					manageCollisionPhysics(entity, scene_node->dynamicEntities->at(i), possibleCollision, rManager, tManager);
 				}
 			}
 		}
 	}
+
+	//Check if the entity collides with any objects in subscene_nodes
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < config->sceneChildren; i++) {
+			checkForCollisions(entity, &scene_node->children[i]); //TODO thread pool call
+		}
+	}
+}
+
+void CollisionSystem::initialize()
+{
+	cManager = dynamic_cast<MappedManager<collider>*>(getCManager<collider>(*managers, COLLIDER));
+	rManager = dynamic_cast<MappedManager<rigid_body>*>(getCManager<rigid_body>(*managers, RIGID_BODY));
+	tManager = dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(*managers, TRANSFORM));
+	clManager = dynamic_cast<VectorManager<collision>*>(getCManager<collision>(*managers, COLLISION));
+	delete managers;
+}
+
+void CollisionSystem::onUpdate()
+{
+	setLastCollisions(clManager->getComponents());
+	clManager->getComponents()->clear(); //TODO optimize by using custom stack instead of vector?
+	searchNodeForCollisions(scene); //TODO thread pool call
 	addExitCollisions(clManager);
 	for (collision cInfo : *clManager->getComponents()) {
-		manageCollision(cInfo);
+		manageCollision(cInfo); //TODO thread pool call
 	}
 }
 

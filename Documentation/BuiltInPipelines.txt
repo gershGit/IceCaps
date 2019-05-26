@@ -1,0 +1,13 @@
+PBR (Physically Based Rendered)
+Textures:
+    Albedo:
+        - Base Color = RGB
+        - Emission   = A
+    Bit Maps:
+        - Metallic  =   R
+        - Roughness =   G
+        - AO        =   B
+        - Height    =   A
+    Normal Map:
+        - Normal vector = RGB
+        - Thickness    = A

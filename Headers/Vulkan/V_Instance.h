@@ -8,9 +8,10 @@
 #include "Vulkan/V_Device.h"
 #include "Vulkan/V_Swapchain.h"
 #include "Vulkan/V_GraphicsPipeline.h"
-#include "Vulkan/V_CommandPool.h"
-#include "Vulkan/V_DescriptorPool.h"
 #include <optional>
+
+class V_CommandPool;
+class V_DescriptorPool;
 
 class V_Instance {
 private:
@@ -100,6 +101,7 @@ public:
 	void recreateSwapchain();
 
 	//Cleans up all still living vulkan handles
+	~V_Instance();
 	void cleanup();
 
 	//Getter functions

@@ -5,6 +5,7 @@
 RigidBodySystem::RigidBodySystem() {
 	operatesOn = { TRANSFORM, PREFAB_COMPONENT, RIGID_BODY };
 	entityListRequiredComponents = { {TRANSFORM, RIGID_BODY} };
+	systemType = RIGID_BODY_SYSTEM;
 }
 
 RigidBodySystem::~RigidBodySystem() {

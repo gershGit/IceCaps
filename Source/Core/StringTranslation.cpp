@@ -4,145 +4,128 @@
 #include "Vulkan/V_Components.h"
 
 //Parses the key from a line
-config_key getConfigKey(std::string line) {
-	int length = 0;
-	for (int i = 0; i < line.length(); i++) {
+config_key getConfigKey(char * line, int buffer_size) {
+	char ck[64];
+	int pos = 0;
+	for (int i = 0; i < buffer_size; i++) {
 		if (line[i] == '=') {
+			ck[pos] = '\0';
 			break;
 		}
 		else {
-			length++;
+			ck[pos] = line[i];
+			pos++;
 		}
 	}
-	std::string key_string = line.substr(0, length);
 
-	if (strcmp(key_string.c_str(), "PREFERRED_API") == 0) {
+	if (strcmp(ck, "PREFERRED_API") == 0) {
 		return PREFERRED_API;
 	}
-	else  if (strcmp(key_string.c_str(), "DEFAULT_API") == 0) {
+	else  if (strcmp(ck, "DEFAULT_API") == 0) {
 		return DEFAULT_API;
 	}
-	else if (strcmp(key_string.c_str(), "WINDOW_MODE") == 0) {
+	else if (strcmp(ck, "WINDOW_MODE") == 0) {
 		return WINDOW_MODE;
 	}
-	else if (strcmp(key_string.c_str(), "MONITOR") == 0) {
+	else if (strcmp(ck, "MONITOR") == 0) {
 		return MONITOR;
 	}
-	else if (strcmp(key_string.c_str(), "REFRESH_RATE") == 0) {
+	else if (strcmp(ck, "REFRESH_RATE") == 0) {
 		return REFRESH_RATE;
 	}
-	else if (strcmp(key_string.c_str(), "RESOLUTION") == 0) {
+	else if (strcmp(ck, "RESOLUTION") == 0) {
 		return RESOLUTION;
 	}
-	else if (strcmp(key_string.c_str(), "APP_NAME") == 0) {
+	else if (strcmp(ck, "APP_NAME") == 0) {
 		return APP_NAME;
 	}
-	else if (strcmp(key_string.c_str(), "APP_VERSION") == 0) {
+	else if (strcmp(ck, "APP_VERSION") == 0) {
 		return APP_VERSION;
 	}
-	else if (strcmp(key_string.c_str(), "MULTI_GPU") == 0) {
+	else if (strcmp(ck, "MULTI_GPU") == 0) {
 		return MULTI_GPU;
 	}
-	else if (strcmp(key_string.c_str(), "GPU") == 0) {
+	else if (strcmp(ck, "GPU") == 0) {
 		return GPU_SELECTED;
 	}
-	else if (strcmp(key_string.c_str(), "COMPUTE_REQUIRED") == 0) {
+	else if (strcmp(ck, "COMPUTE_REQUIRED") == 0) {
 		return COMPUTE_REQUIRED;
 	}
-	else if (strcmp(key_string.c_str(), "GPU_FEATURE") == 0) {
+	else if (strcmp(ck, "GPU_FEATURE") == 0) {
 		return GPU_FEATURE;
 	}
-	else if (strcmp(key_string.c_str(), "SURFACE_FORMAT") == 0) {
+	else if (strcmp(ck, "SURFACE_FORMAT") == 0) {
 		return SURFACE_FORMAT;
 	}
-	else if (strcmp(key_string.c_str(), "SURFACE_COLOR_SPACE") == 0) {
+	else if (strcmp(ck, "SURFACE_COLOR_SPACE") == 0) {
 		return SURFACE_COLORSPACE;
 	}
-	else if (strcmp(key_string.c_str(), "PRESENT_MODE") == 0) {
+	else if (strcmp(ck, "PRESENT_MODE") == 0) {
 		return PRESENT_MODE;
 	}
-	else if (strcmp(key_string.c_str(), "SWAPCHAIN_BUFFERING") == 0) {
+	else if (strcmp(ck, "SWAPCHAIN_BUFFERING") == 0) {
 		return SWAPCHAIN_BUFFERING;
 	}
-	else if (strcmp(key_string.c_str(), "DEPTH_FORMAT") == 0) {
+	else if (strcmp(ck, "DEPTH_FORMAT") == 0) {
 		return DEPTH_FORMAT;
 	}
-	else if (strcmp(key_string.c_str(), "GAME_PATH") == 0) {
+	else if (strcmp(ck, "GAME_PATH") == 0) {
 		return GAME_PATH;
 	}
-	else if (strcmp(key_string.c_str(), "ANTI_ALIASING") == 0) {
+	else if (strcmp(ck, "ANTI_ALIASING") == 0) {
 		return ANTI_ALIASING;
 	}
-	else if (strcmp(key_string.c_str(), "ANTI_ALIASING_RES") == 0) {
+	else if (strcmp(ck, "ANTI_ALIASING_RES") == 0) {
 		return ANTI_ALIASING_RES;
 	}
-	else if (strcmp(key_string.c_str(), "ANISOTROPY_RES") == 0) {
+	else if (strcmp(ck, "ANISOTROPY_RES") == 0) {
 		return ANISOTROPY_RES;
 	}
 	return NO_KEY_VALUE;
 }
 
-//Parses the value from a configuration line
-std::string getConfigValue(std::string line) {
-	bool started = false;
-	int length = 0, start = 0;
-	for (int i = 0; i < line.length(); i++) {
-		if (line[i] == '=') {
-			started = true;
-			start = i + 1;
-		}
-		else if (line[i] == ';') {
-			break;
-		}
-		else if (started) {
-			length++;
-		}
-	}
-	return line.substr(start, length);
-}
-
 //Converts a string to an api identifier
-API_used getAPI(std::string value) {
-	if (strcmp(value.c_str(), "VULKAN") == 0) {
+API_used getAPI(char * value) {
+	if (strcmp(value, "VULKAN") == 0) {
 		return Vulkan;
 	}
-	else if (strcmp(value.c_str(), "GL") == 0) {
+	else if (strcmp(value, "GL") == 0) {
 		return openGL;
 	}
-	else if (strcmp(value.c_str(), "DX11") == 0) {
+	else if (strcmp(value, "DX11") == 0) {
 		return DX_11;
 	}
-	else if (strcmp(value.c_str(), "DX12") == 0) {
+	else if (strcmp(value, "DX12") == 0) {
 		return DX_12;
 	}
 	return openGL;
 }
 
 //Converts a string to a window mode
-window_mode getWindowMode(std::string value) {
-	if (strcmp(value.c_str(), "FULL") == 0) {
+window_mode getWindowMode(char * value) {
+	if (strcmp(value, "FULL") == 0) {
 		return FULL;
 	}
-	else if (strcmp(value.c_str(), "BORDERLESS") == 0) {
+	else if (strcmp(value, "BORDERLESS") == 0) {
 		return BORDERLESS;
 	}
-	else if (strcmp(value.c_str(), "WINDOWED") == 0) {
+	else if (strcmp(value, "WINDOWED") == 0) {
 		return WINDOWED;
 	}
-	else if (strcmp(value.c_str(), "NO_RESIZE") == 0) {
+	else if (strcmp(value, "NO_RESIZE") == 0) {
 		return NO_RESIZE;
 	}
 	return WINDOWED;
 }
 
 //Converts a string to a glfw monitor handle
-GLFWmonitor* getMonitor(std::string value) {
-	if (strcmp(value.c_str(), "-1") == 0) {
+GLFWmonitor* getMonitor(char * value) {
+	if (strcmp(value, "-1") == 0) {
 		return glfwGetPrimaryMonitor();
 	}
 	int count;
 	GLFWmonitor** monitors = glfwGetMonitors(&count);
-	int index = atoi(value.c_str());
+	int index = atoi(value);
 	if (index < count) {
 		return monitors[index];
 	}
@@ -150,561 +133,561 @@ GLFWmonitor* getMonitor(std::string value) {
 }
 
 //Translates a string to a vulkan format
-VkFormat getFormat(std::string value) {
-	if (strcmp(value.c_str(), "UNDEFINED") == 0) {
+VkFormat getFormat(char * value) {
+	if (strcmp(value, "UNDEFINED") == 0) {
 		return VK_FORMAT_UNDEFINED;
 	}
-	else if (strcmp(value.c_str(), "R4G4_UNORM_PACK8") == 0) {
+	else if (strcmp(value, "R4G4_UNORM_PACK8") == 0) {
 		return VK_FORMAT_R4G4_UNORM_PACK8;
 	}
-	else if (strcmp(value.c_str(), "R4G4B4A4_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "R4G4B4A4_UNORM_PACK16") == 0) {
 		return VK_FORMAT_R4G4B4A4_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "B4G4R4A4_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "B4G4R4A4_UNORM_PACK16") == 0) {
 		return VK_FORMAT_B4G4R4A4_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "R5G6B5_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "R5G6B5_UNORM_PACK16") == 0) {
 		return VK_FORMAT_R5G6B5_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "B5G6R5_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "B5G6R5_UNORM_PACK16") == 0) {
 		return VK_FORMAT_B5G6R5_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "R5G5B5A1_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "R5G5B5A1_UNORM_PACK16") == 0) {
 		return VK_FORMAT_R5G5B5A1_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "B5G5R5A1_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "B5G5R5A1_UNORM_PACK16") == 0) {
 		return VK_FORMAT_B5G5R5A1_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "A1R5G5B5_UNORM_PACK16") == 0) {
+	else if (strcmp(value, "A1R5G5B5_UNORM_PACK16") == 0) {
 		return VK_FORMAT_A1R5G5B5_UNORM_PACK16;
 	}
-	else if (strcmp(value.c_str(), "R8_UNORM") == 0) {
+	else if (strcmp(value, "R8_UNORM") == 0) {
 		return VK_FORMAT_R8_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R8_SNORM") == 0) {
+	else if (strcmp(value, "R8_SNORM") == 0) {
 		return VK_FORMAT_R8_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R8_USCALED") == 0) {
+	else if (strcmp(value, "R8_USCALED") == 0) {
 		return VK_FORMAT_R8_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R8_SSCALED") == 0) {
+	else if (strcmp(value, "R8_SSCALED") == 0) {
 		return VK_FORMAT_R8_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R8_UINT") == 0) {
+	else if (strcmp(value, "R8_UINT") == 0) {
 		return VK_FORMAT_R8_UINT;
 	}
-	else if (strcmp(value.c_str(), "R8_SINT") == 0) {
+	else if (strcmp(value, "R8_SINT") == 0) {
 		return VK_FORMAT_R8_SINT;
 	}
-	else if (strcmp(value.c_str(), "R8_SRGB") == 0) {
+	else if (strcmp(value, "R8_SRGB") == 0) {
 		return VK_FORMAT_R8_SRGB;
 	}
-	else if (strcmp(value.c_str(), "R8G8_UNORM") == 0) {
+	else if (strcmp(value, "R8G8_UNORM") == 0) {
 		return VK_FORMAT_R8G8_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R8G8_SNORM") == 0) {
+	else if (strcmp(value, "R8G8_SNORM") == 0) {
 		return VK_FORMAT_R8G8_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R8G8_USCALED") == 0) {
+	else if (strcmp(value, "R8G8_USCALED") == 0) {
 		return VK_FORMAT_R8G8_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R8G8_SSCALED") == 0) {
+	else if (strcmp(value, "R8G8_SSCALED") == 0) {
 		return VK_FORMAT_R8G8_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R8G8_UINT") == 0) {
+	else if (strcmp(value, "R8G8_UINT") == 0) {
 		return VK_FORMAT_R8G8_UINT;
 	}
-	else if (strcmp(value.c_str(), "R8G8_SINT") == 0) {
+	else if (strcmp(value, "R8G8_SINT") == 0) {
 		return VK_FORMAT_R8G8_SINT;
 	}
-	else if (strcmp(value.c_str(), "R8G8_SRGB") == 0) {
+	else if (strcmp(value, "R8G8_SRGB") == 0) {
 		return VK_FORMAT_R8G8_SRGB;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_UNORM") == 0) {
+	else if (strcmp(value, "R8G8B8_UNORM") == 0) {
 		return VK_FORMAT_R8G8B8_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_SNORM") == 0) {
+	else if (strcmp(value, "R8G8B8_SNORM") == 0) {
 		return VK_FORMAT_R8G8B8_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_USCALED") == 0) {
+	else if (strcmp(value, "R8G8B8_USCALED") == 0) {
 		return VK_FORMAT_R8G8B8_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_SSCALED") == 0) {
+	else if (strcmp(value, "R8G8B8_SSCALED") == 0) {
 		return VK_FORMAT_R8G8B8_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_UINT") == 0) {
+	else if (strcmp(value, "R8G8B8_UINT") == 0) {
 		return VK_FORMAT_R8G8B8_UINT;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_SINT") == 0) {
+	else if (strcmp(value, "R8G8B8_SINT") == 0) {
 		return VK_FORMAT_R8G8B8_SINT;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8_SRGB") == 0) {
+	else if (strcmp(value, "R8G8B8_SRGB") == 0) {
 		return VK_FORMAT_R8G8B8_SRGB;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_UNORM") == 0) {
+	else if (strcmp(value, "B8G8R8_UNORM") == 0) {
 		return VK_FORMAT_B8G8R8_UNORM;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_SNORM") == 0) {
+	else if (strcmp(value, "B8G8R8_SNORM") == 0) {
 		return VK_FORMAT_B8G8R8_SNORM;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_USCALED") == 0) {
+	else if (strcmp(value, "B8G8R8_USCALED") == 0) {
 		return VK_FORMAT_B8G8R8_USCALED;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_SSCALED") == 0) {
+	else if (strcmp(value, "B8G8R8_SSCALED") == 0) {
 		return VK_FORMAT_B8G8R8_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_UINT") == 0) {
+	else if (strcmp(value, "B8G8R8_UINT") == 0) {
 		return VK_FORMAT_B8G8R8_UINT;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_SINT") == 0) {
+	else if (strcmp(value, "B8G8R8_SINT") == 0) {
 		return VK_FORMAT_B8G8R8_SINT;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8_SRGB") == 0) {
+	else if (strcmp(value, "B8G8R8_SRGB") == 0) {
 		return VK_FORMAT_B8G8R8_SRGB;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_UNORM") == 0) {
+	else if (strcmp(value, "R8G8B8A8_UNORM") == 0) {
 		return VK_FORMAT_R8G8B8A8_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_SNORM") == 0) {
+	else if (strcmp(value, "R8G8B8A8_SNORM") == 0) {
 		return VK_FORMAT_R8G8B8A8_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_USCALED") == 0) {
+	else if (strcmp(value, "R8G8B8A8_USCALED") == 0) {
 		return VK_FORMAT_R8G8B8A8_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_SSCALED") == 0) {
+	else if (strcmp(value, "R8G8B8A8_SSCALED") == 0) {
 		return VK_FORMAT_R8G8B8A8_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_UINT") == 0) {
+	else if (strcmp(value, "R8G8B8A8_UINT") == 0) {
 		return VK_FORMAT_R8G8B8A8_UINT;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_SINT") == 0) {
+	else if (strcmp(value, "R8G8B8A8_SINT") == 0) {
 		return VK_FORMAT_R8G8B8A8_SINT;
 	}
-	else if (strcmp(value.c_str(), "R8G8B8A8_SRGB") == 0) {
+	else if (strcmp(value, "R8G8B8A8_SRGB") == 0) {
 		return VK_FORMAT_R8G8B8A8_SRGB;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_UNORM") == 0) {
+	else if (strcmp(value, "B8G8R8A8_UNORM") == 0) {
 		return VK_FORMAT_B8G8R8A8_UNORM;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_SNORM") == 0) {
+	else if (strcmp(value, "B8G8R8A8_SNORM") == 0) {
 		return VK_FORMAT_B8G8R8A8_SNORM;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_USCALED") == 0) {
+	else if (strcmp(value, "B8G8R8A8_USCALED") == 0) {
 		return VK_FORMAT_B8G8R8A8_USCALED;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_SSCALED") == 0) {
+	else if (strcmp(value, "B8G8R8A8_SSCALED") == 0) {
 		return VK_FORMAT_B8G8R8A8_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_UINT") == 0) {
+	else if (strcmp(value, "B8G8R8A8_UINT") == 0) {
 		return VK_FORMAT_B8G8R8A8_UINT;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_SINT") == 0) {
+	else if (strcmp(value, "B8G8R8A8_SINT") == 0) {
 		return VK_FORMAT_B8G8R8A8_SINT;
 	}
-	else if (strcmp(value.c_str(), "B8G8R8A8_SRGB") == 0) {
+	else if (strcmp(value, "B8G8R8A8_SRGB") == 0) {
 		return VK_FORMAT_B8G8R8A8_SRGB;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_UNORM_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_UNORM_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_UNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_SNORM_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_SNORM_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_SNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_USCALED_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_USCALED_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_USCALED_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_SSCALED_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_SSCALED_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_SSCALED_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_UINT_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_UINT_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_UINT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_SINT_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_SINT_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_SINT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A8B8G8R8_SRGB_PACK32") == 0) {
+	else if (strcmp(value, "A8B8G8R8_SRGB_PACK32") == 0) {
 		return VK_FORMAT_A8B8G8R8_SRGB_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2R10G10B10_UNORM_PACK32") == 0) {
+	else if (strcmp(value, "A2R10G10B10_UNORM_PACK32") == 0) {
 		return VK_FORMAT_A2R10G10B10_UNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2R10G10B10_SNORM_PACK32") == 0) {
+	else if (strcmp(value, "A2R10G10B10_SNORM_PACK32") == 0) {
 		return VK_FORMAT_A2R10G10B10_SNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2R10G10B10_USCALED_PACK32") == 0) {
+	else if (strcmp(value, "A2R10G10B10_USCALED_PACK32") == 0) {
 		return VK_FORMAT_A2R10G10B10_USCALED_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2R10G10B10_SSCALED_PACK32") == 0) {
+	else if (strcmp(value, "A2R10G10B10_SSCALED_PACK32") == 0) {
 		return VK_FORMAT_A2R10G10B10_SSCALED_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2R10G10B10_UINT_PACK32") == 0) {
+	else if (strcmp(value, "A2R10G10B10_UINT_PACK32") == 0) {
 		return VK_FORMAT_A2R10G10B10_UINT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2R10G10B10_SINT_PACK32") == 0) {
+	else if (strcmp(value, "A2R10G10B10_SINT_PACK32") == 0) {
 		return VK_FORMAT_A2R10G10B10_SINT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2B10G10R10_UNORM_PACK32") == 0) {
+	else if (strcmp(value, "A2B10G10R10_UNORM_PACK32") == 0) {
 		return VK_FORMAT_A2B10G10R10_UNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2B10G10R10_SNORM_PACK32") == 0) {
+	else if (strcmp(value, "A2B10G10R10_SNORM_PACK32") == 0) {
 		return VK_FORMAT_A2B10G10R10_SNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2B10G10R10_USCALED_PACK32") == 0) {
+	else if (strcmp(value, "A2B10G10R10_USCALED_PACK32") == 0) {
 		return VK_FORMAT_A2B10G10R10_USCALED_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2B10G10R10_SSCALED_PACK32") == 0) {
+	else if (strcmp(value, "A2B10G10R10_SSCALED_PACK32") == 0) {
 		return VK_FORMAT_A2B10G10R10_SSCALED_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2B10G10R10_UINT_PACK32") == 0) {
+	else if (strcmp(value, "A2B10G10R10_UINT_PACK32") == 0) {
 		return VK_FORMAT_A2B10G10R10_UINT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "A2B10G10R10_SINT_PACK32") == 0) {
+	else if (strcmp(value, "A2B10G10R10_SINT_PACK32") == 0) {
 		return VK_FORMAT_A2B10G10R10_SINT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "R16_UNORM") == 0) {
+	else if (strcmp(value, "R16_UNORM") == 0) {
 		return VK_FORMAT_R16_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R16_SNORM") == 0) {
+	else if (strcmp(value, "R16_SNORM") == 0) {
 		return VK_FORMAT_R16_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R16_USCALED") == 0) {
+	else if (strcmp(value, "R16_USCALED") == 0) {
 		return VK_FORMAT_R16_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R16_SSCALED") == 0) {
+	else if (strcmp(value, "R16_SSCALED") == 0) {
 		return VK_FORMAT_R16_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R16_UINT") == 0) {
+	else if (strcmp(value, "R16_UINT") == 0) {
 		return VK_FORMAT_R16_UINT;
 	}
-	else if (strcmp(value.c_str(), "R16_SINT") == 0) {
+	else if (strcmp(value, "R16_SINT") == 0) {
 		return VK_FORMAT_R16_SINT;
 	}
-	else if (strcmp(value.c_str(), "R16_SFLOAT") == 0) {
+	else if (strcmp(value, "R16_SFLOAT") == 0) {
 		return VK_FORMAT_R16_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R16G16_UNORM") == 0) {
+	else if (strcmp(value, "R16G16_UNORM") == 0) {
 		return VK_FORMAT_R16G16_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R16G16_SNORM") == 0) {
+	else if (strcmp(value, "R16G16_SNORM") == 0) {
 		return VK_FORMAT_R16G16_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R16G16_USCALED") == 0) {
+	else if (strcmp(value, "R16G16_USCALED") == 0) {
 		return VK_FORMAT_R16G16_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R16G16_SSCALED") == 0) {
+	else if (strcmp(value, "R16G16_SSCALED") == 0) {
 		return VK_FORMAT_R16G16_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R16G16_UINT") == 0) {
+	else if (strcmp(value, "R16G16_UINT") == 0) {
 		return VK_FORMAT_R16G16_UINT;
 	}
-	else if (strcmp(value.c_str(), "R16G16_SINT") == 0) {
+	else if (strcmp(value, "R16G16_SINT") == 0) {
 		return VK_FORMAT_R16G16_SINT;
 	}
-	else if (strcmp(value.c_str(), "R16G16_SFLOAT") == 0) {
+	else if (strcmp(value, "R16G16_SFLOAT") == 0) {
 		return VK_FORMAT_R16G16_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_UNORM") == 0) {
+	else if (strcmp(value, "R16G16B16_UNORM") == 0) {
 		return VK_FORMAT_R16G16B16_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_SNORM") == 0) {
+	else if (strcmp(value, "R16G16B16_SNORM") == 0) {
 		return VK_FORMAT_R16G16B16_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_USCALED") == 0) {
+	else if (strcmp(value, "R16G16B16_USCALED") == 0) {
 		return VK_FORMAT_R16G16B16_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_SSCALED") == 0) {
+	else if (strcmp(value, "R16G16B16_SSCALED") == 0) {
 		return VK_FORMAT_R16G16B16_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_UINT") == 0) {
+	else if (strcmp(value, "R16G16B16_UINT") == 0) {
 		return VK_FORMAT_R16G16B16_UINT;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_SINT") == 0) {
+	else if (strcmp(value, "R16G16B16_SINT") == 0) {
 		return VK_FORMAT_R16G16B16_SINT;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16_SFLOAT") == 0) {
+	else if (strcmp(value, "R16G16B16_SFLOAT") == 0) {
 		return VK_FORMAT_R16G16B16_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_UNORM") == 0) {
+	else if (strcmp(value, "R16G16B16A16_UNORM") == 0) {
 		return VK_FORMAT_R16G16B16A16_UNORM;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_SNORM") == 0) {
+	else if (strcmp(value, "R16G16B16A16_SNORM") == 0) {
 		return VK_FORMAT_R16G16B16A16_SNORM;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_USCALED") == 0) {
+	else if (strcmp(value, "R16G16B16A16_USCALED") == 0) {
 		return VK_FORMAT_R16G16B16A16_USCALED;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_SSCALED") == 0) {
+	else if (strcmp(value, "R16G16B16A16_SSCALED") == 0) {
 		return VK_FORMAT_R16G16B16A16_SSCALED;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_UINT") == 0) {
+	else if (strcmp(value, "R16G16B16A16_UINT") == 0) {
 		return VK_FORMAT_R16G16B16A16_UINT;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_SINT") == 0) {
+	else if (strcmp(value, "R16G16B16A16_SINT") == 0) {
 		return VK_FORMAT_R16G16B16A16_SINT;
 	}
-	else if (strcmp(value.c_str(), "R16G16B16A16_SFLOAT") == 0) {
+	else if (strcmp(value, "R16G16B16A16_SFLOAT") == 0) {
 		return VK_FORMAT_R16G16B16A16_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R32_UINT") == 0) {
+	else if (strcmp(value, "R32_UINT") == 0) {
 		return VK_FORMAT_R32_UINT;
 	}
-	else if (strcmp(value.c_str(), "R32_SINT") == 0) {
+	else if (strcmp(value, "R32_SINT") == 0) {
 		return VK_FORMAT_R32_SINT;
 	}
-	else if (strcmp(value.c_str(), "R32_SFLOAT") == 0) {
+	else if (strcmp(value, "R32_SFLOAT") == 0) {
 		return VK_FORMAT_R32_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R32G32_UINT") == 0) {
+	else if (strcmp(value, "R32G32_UINT") == 0) {
 		return VK_FORMAT_R32G32_UINT;
 	}
-	else if (strcmp(value.c_str(), "R32G32_SINT") == 0) {
+	else if (strcmp(value, "R32G32_SINT") == 0) {
 		return VK_FORMAT_R32G32_SINT;
 	}
-	else if (strcmp(value.c_str(), "R32G32_SFLOAT") == 0) {
+	else if (strcmp(value, "R32G32_SFLOAT") == 0) {
 		return VK_FORMAT_R32G32_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R32G32B32_UINT") == 0) {
+	else if (strcmp(value, "R32G32B32_UINT") == 0) {
 		return VK_FORMAT_R32G32B32_UINT;
 	}
-	else if (strcmp(value.c_str(), "R32G32B32_SINT") == 0) {
+	else if (strcmp(value, "R32G32B32_SINT") == 0) {
 		return VK_FORMAT_R32G32B32_SINT;
 	}
-	else if (strcmp(value.c_str(), "R32G32B32_SFLOAT") == 0) {
+	else if (strcmp(value, "R32G32B32_SFLOAT") == 0) {
 		return VK_FORMAT_R32G32B32_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R32G32B32A32_UINT") == 0) {
+	else if (strcmp(value, "R32G32B32A32_UINT") == 0) {
 		return VK_FORMAT_R32G32B32A32_UINT;
 	}
-	else if (strcmp(value.c_str(), "R32G32B32A32_SINT") == 0) {
+	else if (strcmp(value, "R32G32B32A32_SINT") == 0) {
 		return VK_FORMAT_R32G32B32A32_SINT;
 	}
-	else if (strcmp(value.c_str(), "R32G32B32A32_SFLOAT") == 0) {
+	else if (strcmp(value, "R32G32B32A32_SFLOAT") == 0) {
 		return VK_FORMAT_R32G32B32A32_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R64_UINT") == 0) {
+	else if (strcmp(value, "R64_UINT") == 0) {
 		return VK_FORMAT_R64_UINT;
 	}
-	else if (strcmp(value.c_str(), "R64_SINT") == 0) {
+	else if (strcmp(value, "R64_SINT") == 0) {
 		return VK_FORMAT_R64_SINT;
 	}
-	else if (strcmp(value.c_str(), "R64_SFLOAT") == 0) {
+	else if (strcmp(value, "R64_SFLOAT") == 0) {
 		return VK_FORMAT_R64_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R64G64_UINT") == 0) {
+	else if (strcmp(value, "R64G64_UINT") == 0) {
 		return VK_FORMAT_R64G64_UINT;
 	}
-	else if (strcmp(value.c_str(), "R64G64_SINT") == 0) {
+	else if (strcmp(value, "R64G64_SINT") == 0) {
 		return VK_FORMAT_R64G64_SINT;
 	}
-	else if (strcmp(value.c_str(), "R64G64_SFLOAT") == 0) {
+	else if (strcmp(value, "R64G64_SFLOAT") == 0) {
 		return VK_FORMAT_R64G64_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R64G64B64_UINT") == 0) {
+	else if (strcmp(value, "R64G64B64_UINT") == 0) {
 		return VK_FORMAT_R64G64B64_UINT;
 	}
-	else if (strcmp(value.c_str(), "R64G64B64_SINT") == 0) {
+	else if (strcmp(value, "R64G64B64_SINT") == 0) {
 		return VK_FORMAT_R64G64B64_SINT;
 	}
-	else if (strcmp(value.c_str(), "R64G64B64_SFLOAT") == 0) {
+	else if (strcmp(value, "R64G64B64_SFLOAT") == 0) {
 		return VK_FORMAT_R64G64B64_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "R64G64B64A64_UINT") == 0) {
+	else if (strcmp(value, "R64G64B64A64_UINT") == 0) {
 		return VK_FORMAT_R64G64B64A64_UINT;
 	}
-	else if (strcmp(value.c_str(), "R64G64B64A64_SINT") == 0) {
+	else if (strcmp(value, "R64G64B64A64_SINT") == 0) {
 		return VK_FORMAT_R64G64B64A64_SINT;
 	}
-	else if (strcmp(value.c_str(), "R64G64B64A64_SFLOAT") == 0) {
+	else if (strcmp(value, "R64G64B64A64_SFLOAT") == 0) {
 		return VK_FORMAT_R64G64B64A64_SFLOAT;
 	}
 
-	if (strcmp(value.c_str(), "B10G11R11_UFLOAT_PACK32") == 0) {
+	if (strcmp(value, "B10G11R11_UFLOAT_PACK32") == 0) {
 		return VK_FORMAT_B10G11R11_UFLOAT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "E5B9G9R9_UFLOAT_PACK32") == 0) {
+	else if (strcmp(value, "E5B9G9R9_UFLOAT_PACK32") == 0) {
 		return VK_FORMAT_E5B9G9R9_UFLOAT_PACK32;
 	}
-	else if (strcmp(value.c_str(), "D16_UNORM") == 0) {
+	else if (strcmp(value, "D16_UNORM") == 0) {
 		return VK_FORMAT_D16_UNORM;
 	}
-	else if (strcmp(value.c_str(), "X8_D24_UNORM_PACK32") == 0) {
+	else if (strcmp(value, "X8_D24_UNORM_PACK32") == 0) {
 		return VK_FORMAT_X8_D24_UNORM_PACK32;
 	}
-	else if (strcmp(value.c_str(), "D32_SFLOAT") == 0) {
+	else if (strcmp(value, "D32_SFLOAT") == 0) {
 		return VK_FORMAT_D32_SFLOAT;
 	}
-	else if (strcmp(value.c_str(), "S8_UINT") == 0) {
+	else if (strcmp(value, "S8_UINT") == 0) {
 		return VK_FORMAT_S8_UINT;
 	}
-	else if (strcmp(value.c_str(), "D16_UNORM_S8_UINT") == 0) {
+	else if (strcmp(value, "D16_UNORM_S8_UINT") == 0) {
 		return VK_FORMAT_D16_UNORM_S8_UINT;
 	}
-	else if (strcmp(value.c_str(), "D24_UNORM_S8_UINT") == 0) {
+	else if (strcmp(value, "D24_UNORM_S8_UINT") == 0) {
 		return VK_FORMAT_D24_UNORM_S8_UINT;
 	}
-	else if (strcmp(value.c_str(), "D32_SFLOAT_S8_UINT") == 0) {
+	else if (strcmp(value, "D32_SFLOAT_S8_UINT") == 0) {
 		return VK_FORMAT_D32_SFLOAT_S8_UINT;
 	}
-	else if (strcmp(value.c_str(), "BC1_RGB_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC1_RGB_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC1_RGB_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC1_RGB_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "BC1_RGB_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_BC1_RGB_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC1_RGBA_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC1_RGBA_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC1_RGBA_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC1_RGBA_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "BC1_RGBA_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_BC1_RGBA_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC2_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC2_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC2_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC2_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "BC2_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_BC2_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC3_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC3_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC3_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC3_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "BC3_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_BC3_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC4_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC4_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC4_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC4_SNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC4_SNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC4_SNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC5_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC5_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC5_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC5_SNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC5_SNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC5_SNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC6H_UFLOAT_BLOCK") == 0) {
+	else if (strcmp(value, "BC6H_UFLOAT_BLOCK") == 0) {
 		return VK_FORMAT_BC6H_UFLOAT_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC6H_SFLOAT_BLOCK") == 0) {
+	else if (strcmp(value, "BC6H_SFLOAT_BLOCK") == 0) {
 		return VK_FORMAT_BC6H_SFLOAT_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC7_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "BC7_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_BC7_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "BC7_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "BC7_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_BC7_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ETC2_R8G8B8_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ETC2_R8G8B8_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ETC2_R8G8B8_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ETC2_R8G8B8_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ETC2_R8G8B8_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ETC2_R8G8B8_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ETC2_R8G8B8A1_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ETC2_R8G8B8A1_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ETC2_R8G8B8A1_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ETC2_R8G8B8A1_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ETC2_R8G8B8A1_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ETC2_R8G8B8A1_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ETC2_R8G8B8A8_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ETC2_R8G8B8A8_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ETC2_R8G8B8A8_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ETC2_R8G8B8A8_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ETC2_R8G8B8A8_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ETC2_R8G8B8A8_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "EAC_R11_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "EAC_R11_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_EAC_R11_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "EAC_R11_SNORM_BLOCK") == 0) {
+	else if (strcmp(value, "EAC_R11_SNORM_BLOCK") == 0) {
 		return VK_FORMAT_EAC_R11_SNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "EAC_R11G11_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "EAC_R11G11_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_EAC_R11G11_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "EAC_R11G11_SNORM_BLOCK") == 0) {
+	else if (strcmp(value, "EAC_R11G11_SNORM_BLOCK") == 0) {
 		return VK_FORMAT_EAC_R11G11_SNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_4x4_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_4x4_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_4x4_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_4x4_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_4x4_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_4x4_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_5x4_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_5x4_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_5x4_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_5x4_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_5x4_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_5x4_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_5x5_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_5x5_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_5x5_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_5x5_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_5x5_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_5x5_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_6x5_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_6x5_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_6x5_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_6x5_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_6x5_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_6x5_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_6x6_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_6x6_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_6x6_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_6x6_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_6x6_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_6x6_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_8x5_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_8x5_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_8x5_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_8x5_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_8x5_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_8x5_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_8x6_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_8x6_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_8x6_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_8x6_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_8x6_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_8x6_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_8x8_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_8x8_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_8x8_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_8x8_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_8x8_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_8x8_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x5_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x5_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x5_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x5_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x5_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x5_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x6_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x6_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x6_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x6_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x6_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x6_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x8_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x8_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x8_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x8_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x8_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x8_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x10_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x10_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x10_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_10x10_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_10x10_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_10x10_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_12x10_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_12x10_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_12x10_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_12x10_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_12x10_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_12x10_SRGB_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_12x12_UNORM_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_12x12_UNORM_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_12x12_UNORM_BLOCK;
 	}
-	else if (strcmp(value.c_str(), "ASTC_12x12_SRGB_BLOCK") == 0) {
+	else if (strcmp(value, "ASTC_12x12_SRGB_BLOCK") == 0) {
 		return VK_FORMAT_ASTC_12x12_SRGB_BLOCK;
 	}
 
@@ -712,50 +695,50 @@ VkFormat getFormat(std::string value) {
 };
 
 //Translates a string to a vulkan color space
-VkColorSpaceKHR getColorSpace(std::string value) {
-	if (strcmp(value.c_str(), "SRGB_NONLINEAR") == 0) {
+VkColorSpaceKHR getColorSpace(char * value) {
+	if (strcmp(value, "SRGB_NONLINEAR") == 0) {
 		return VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 	}
-	else if (strcmp(value.c_str(), "DISPLAY_P3_NONLINEAR") == 0) {
+	else if (strcmp(value, "DISPLAY_P3_NONLINEAR") == 0) {
 		return VK_COLOR_SPACE_DISPLAY_P3_NONLINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "EXTENDED_SRGB_LINEAR") == 0) {
+	else if (strcmp(value, "EXTENDED_SRGB_LINEAR") == 0) {
 		return VK_COLOR_SPACE_EXTENDED_SRGB_LINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "DCI_P3_LINEAR") == 0) {
+	else if (strcmp(value, "DCI_P3_LINEAR") == 0) {
 		return VK_COLOR_SPACE_DCI_P3_LINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "DCI_P3_NONLINEAR") == 0) {
+	else if (strcmp(value, "DCI_P3_NONLINEAR") == 0) {
 		return VK_COLOR_SPACE_DCI_P3_NONLINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "BT709_LINEAR") == 0) {
+	else if (strcmp(value, "BT709_LINEAR") == 0) {
 		return VK_COLOR_SPACE_BT709_LINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "BT709_NONLINEAR") == 0) {
+	else if (strcmp(value, "BT709_NONLINEAR") == 0) {
 		return VK_COLOR_SPACE_BT709_NONLINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "BT2020_LINEAR") == 0) {
+	else if (strcmp(value, "BT2020_LINEAR") == 0) {
 		return VK_COLOR_SPACE_BT2020_LINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "HDR10_ST2084") == 0) {
+	else if (strcmp(value, "HDR10_ST2084") == 0) {
 		return VK_COLOR_SPACE_HDR10_ST2084_EXT;
 	}
-	else if (strcmp(value.c_str(), "DOLBYVISION") == 0) {
+	else if (strcmp(value, "DOLBYVISION") == 0) {
 		return VK_COLOR_SPACE_DOLBYVISION_EXT;
 	}
-	else if (strcmp(value.c_str(), "HDR10_HLG") == 0) {
+	else if (strcmp(value, "HDR10_HLG") == 0) {
 		return VK_COLOR_SPACE_HDR10_HLG_EXT;
 	}
-	else if (strcmp(value.c_str(), "ADOBERGB_LINEAR") == 0) {
+	else if (strcmp(value, "ADOBERGB_LINEAR") == 0) {
 		return VK_COLOR_SPACE_ADOBERGB_LINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "ADOBERGB_NONLINEAR") == 0) {
+	else if (strcmp(value, "ADOBERGB_NONLINEAR") == 0) {
 		return VK_COLOR_SPACE_ADOBERGB_NONLINEAR_EXT;
 	}
-	else if (strcmp(value.c_str(), "PASS_THROUGH") == 0) {
+	else if (strcmp(value, "PASS_THROUGH") == 0) {
 		return VK_COLOR_SPACE_PASS_THROUGH_EXT;
 	}
-	else if (strcmp(value.c_str(), "EXTENDED_SRGB_NONLINEAR") == 0) {
+	else if (strcmp(value, "EXTENDED_SRGB_NONLINEAR") == 0) {
 		return VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT;
 	}
 
@@ -763,23 +746,23 @@ VkColorSpaceKHR getColorSpace(std::string value) {
 }
 
 //Returns a vulkan present mode from a string value
-VkPresentModeKHR getPresentMode(std::string value) {
-	if (strcmp(value.c_str(), "MAILBOX") == 0) {
+VkPresentModeKHR getPresentMode(char * value) {
+	if (strcmp(value, "MAILBOX") == 0) {
 		return VK_PRESENT_MODE_MAILBOX_KHR;
 	}
-	else if (strcmp(value.c_str(), "FIFO") == 0) {
+	else if (strcmp(value, "FIFO") == 0) {
 		return VK_PRESENT_MODE_FIFO_KHR;
 	}
-	else if (strcmp(value.c_str(), "FIFO_RELAXED") == 0) {
+	else if (strcmp(value, "FIFO_RELAXED") == 0) {
 		return VK_PRESENT_MODE_FIFO_RELAXED_KHR;
 	}
-	else if (strcmp(value.c_str(), "IMMEDIATE") == 0) {
+	else if (strcmp(value, "IMMEDIATE") == 0) {
 		return VK_PRESENT_MODE_IMMEDIATE_KHR;
 	}
-	else if (strcmp(value.c_str(), "DEMAND") == 0) {
+	else if (strcmp(value, "DEMAND") == 0) {
 		return VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR;
 	}
-	else if (strcmp(value.c_str(), "CONTINUOUS") == 0) {
+	else if (strcmp(value, "CONTINUOUS") == 0) {
 		return VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR;
 	}
 
@@ -787,20 +770,21 @@ VkPresentModeKHR getPresentMode(std::string value) {
 }
 
 //Returns a bool from a string
-bool getBool(std::string value) {
-	return (strcmp(value.c_str(), "TRUE") == 0);
+bool getBool(char * value)
+{
+	return (strcmp(value, "TRUE") == 0);
 }
 
 //Converts a string to a material type
-material_type stringToMaterialType(std::string value) {
-	if (strcmp(value.c_str(), "PBR") == 0) {
+material_type stringToMaterialType(char * value) {
+	if (strcmp(value, "PBR") == 0) {
 		return PBR;
 	}
 	return material_type();
 }
 
 //Returns only the value portion of a string from a KEY=VALUE line
-std::string getValue(std::string line) {
+std::string getValue(std::string &line) {
 	bool started = false;
 	int length = 0, start = 0;
 	for (int i = 0; i < line.length(); i++) {
@@ -818,60 +802,92 @@ std::string getValue(std::string line) {
 	return line.substr(start, length);
 }
 
-//Converts a line to a scene key
-scene_key getSceneKey(std::string line) {
-	int length = 0, startIndex = 0;
+int getValue(char * buffer, char * value, int bufferSize)
+{
 	bool started = false;
-	for (int i = 0; i < line.length(); i++) {
-		if (line[i] == '=' || line[i] == ';') {
-			length++;
+	int pos = 0;
+	for (int i = 0; i < bufferSize; i++) {
+		if (buffer[i] == '=') {
+			started = true;
+		}
+		else if (buffer[i] == ';') {
+			value[pos] = '\0';
+			return pos+1;
+		}
+		else if (started && buffer[i]!= ' ' && buffer[i]!='\t') {
+			value[pos] = buffer[i];
+			pos++;
+		}
+	}
+	return -1;
+}
+
+//Converts a line to a scene key
+scene_key getSceneKey(char * buffer, int bufferSize)
+{
+	char key[64];
+	int keyPos = 0;
+	for (int i = 0; i < bufferSize; i++) {
+		if (buffer[i] == '=' || buffer[i] == ';') {
+			key[keyPos] = '\0';
 			break;
 		}
-		else if (!started && line[i] != '\t' && line[i] != ' ') {
-			started = true;
-			startIndex = i;
-		}
-		else if (started) {
-			length++;
+		else if (buffer[i] != ' ' && buffer[i] != '\t') {
+			key[keyPos] = buffer[i];
+			keyPos++;
 		}
 	}
-	std::string key_string = line.substr(startIndex, length);
 
-	if (strcmp(key_string.c_str(), "NAME") == 0) {
+	if (strcmp(key, "NAME") == 0) {
 		return SCENE_NAME;
 	}
-	else  if (strcmp(key_string.c_str(), "MANAGERS") == 0) {
+	else  if (strcmp(key, "MANAGERS") == 0) {
 		return MANAGERS;
 	}
-	else  if (strcmp(key_string.c_str(), "SYSTEMS") == 0) {
+	else  if (strcmp(key, "SYSTEMS") == 0) {
 		return SYSTEMS;
 	}
-	else  if (strcmp(key_string.c_str(), "ADD_MANAGER") == 0) {
+	else  if (strcmp(key, "ADD_MANAGER") == 0) {
 		return ADD_MANAGER;
 	}
-	else  if (strcmp(key_string.c_str(), "ADD_SYSTEM") == 0) {
+	else  if (strcmp(key, "ADD_SYSTEM") == 0) {
 		return ADD_SYSTEM;
 	}
-	else  if (strcmp(key_string.c_str(), "ENTITY_COUNT") == 0) {
+	else  if (strcmp(key, "ENTITY_COUNT") == 0) {
 		return ENTITY_COUNT;
 	}
-	else if (strcmp(key_string.c_str(), "ADD_PIPELINE") == 0) {
+	else if (strcmp(key, "ADD_PIPELINE") == 0) {
 		return ADD_PIPELINE;
 	}
-	else if (strcmp(key_string.c_str(), "ENTITY") == 0) {
+	else if (strcmp(key, "ENTITY") == 0) {
 		return ENTITY;
 	}
-	else if (strcmp(key_string.c_str(), "ADD_COMPONENT") == 0) {
+	else if (strcmp(key, "ADD_COMPONENT") == 0) {
 		return ADD_COMPONENT;
 	}
-	else if (strcmp(key_string.c_str(), "END") == 0) {
+	else if (strcmp(key, "END") == 0) {
 		return END_STATEMENT;
 	}
-	else if (strcmp(key_string.c_str(), "END_ENTITIES") == 0) {
+	else if (strcmp(key, "END_ENTITIES") == 0) {
 		return END_ENTITIES;
 	}
-	else if (strcmp(key_string.c_str(), "ADD_TAG") == 0) {
+	else if (strcmp(key, "ADD_TAG") == 0) {
 		return ADD_TAG;
+	}
+	else if (strcmp(key, "SIZE") == 0) {
+		return SCENE_SIZE;
+	}
+	else if (strcmp(key, "DEPTH") == 0) {
+		return TREE_DEPTH;
+	}
+	else if (strcmp(key, "SCENE_STRUCTURE") == 0) {
+		return SCENE_STRUCTURE;
+	}
+	else if (strcmp(key, "FILE_LOAD") == 0) {
+		return FILE_LOAD_KEY;
+	}
+	else if (strcmp(key, "DYNAMIC") == 0) {
+		return IS_DYNAMIC;
 	}
 	else {
 		return NO_SCENE_KEY;
@@ -879,127 +895,157 @@ scene_key getSceneKey(std::string line) {
 }
 
 //Gets a component type from a line value
-component_type getComponentType(std::string value) {
-	if (strcmp(value.c_str(), "TRANSFORM") == 0) {
+component_type getComponentType(char * value)
+{
+	if (strcmp(value, "TRANSFORM") == 0) {
 		return TRANSFORM;
 	}
-	else if (strcmp(value.c_str(), "MESH") == 0) {
+	else if (strcmp(value, "MESH") == 0) {
 		return MESH_COMPONENT;
 	}
-	else if (strcmp(value.c_str(), "MATERIAL") == 0) {
+	else if (strcmp(value, "MATERIAL") == 0) {
 		return MATERIAL_COMPONENT;
 	}
-	else if (strcmp(value.c_str(), "CAMERA") == 0) {
+	else if (strcmp(value, "CAMERA") == 0) {
 		return CAMERA;
 	}
-	else if (strcmp(value.c_str(), "LIGHT") == 0) {
+	else if (strcmp(value, "LIGHT") == 0) {
 		return LIGHT_COMPONENT;
 	}
-	else if (strcmp(value.c_str(), "PREFAB") == 0) {
+	else if (strcmp(value, "PREFAB") == 0) {
 		return PREFAB_COMPONENT;
 	}
-	else if (strcmp(value.c_str(), "RIGID_BODY") == 0) {
+	else if (strcmp(value, "RIGID_BODY") == 0) {
 		return RIGID_BODY;
 	}
-	else if (strcmp(value.c_str(), "COLLIDER") == 0) {
+	else if (strcmp(value, "COLLIDER") == 0) {
 		return COLLIDER;
 	}
-	else if (strcmp(value.c_str(), "ANIMATION") == 0) {
+	else if (strcmp(value, "ANIMATION") == 0) {
 		return ANIMATION_COMPONENT;
 	}
-	else if (strcmp(value.c_str(), "TAGS") == 0) {
+	else if (strcmp(value, "TAGS") == 0) {
 		return TAGS_COMPONENT;
+	}
+	else if (strcmp(value, "BOUNDS") == 0) {
+		return AABB_COMPONENT;
 	}
 	return NO_TYPE;
 }
 
 //Gets a system type from a line value
-system_type getSystemType(std::string value) {
-	if (strcmp(value.c_str(), "RENDER") == 0) {
+system_type getSystemType(char * value)
+{
+	if (strcmp(value, "RENDER") == 0) {
 		return RENDER_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "RIGID_BODY") == 0) {
+	else if (strcmp(value, "RIGID_BODY") == 0) {
 		return RIGID_BODY_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "COLLISION") == 0) {
+	else if (strcmp(value, "COLLISION") == 0) {
 		return COLLISION_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "ANIMATION") == 0) {
+	else if (strcmp(value, "ANIMATION") == 0) {
 		return ANIMATION_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "CLIENT") == 0) {
+	else if (strcmp(value, "CLIENT") == 0) {
 		return CLIENT_NET_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "SERVER") == 0) {
+	else if (strcmp(value, "SERVER") == 0) {
 		return SERVER_NET_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "PEER") == 0) {
+	else if (strcmp(value, "PEER") == 0) {
 		return PEER_NET_SYSTEM;
 	}
-	else if (strcmp(value.c_str(), "INPUT") == 0) {
+	else if (strcmp(value, "INPUT") == 0) {
 		return INPUT_SYSTEM;
 	}
 	return NO_SYSTEM_TYPE;
 }
 
 //Strips leading tabs and spaces and returns a string
-std::string getSubComponent(std::string line) {
-	int length = 0, startPos = 0;
+void getSubComponent(char * buffer, char * keyString, int buffer_size)
+{
+	int pos = 0;
 	bool started = false;
-	for (int i = 0; i < line.length(); i++) {
-		if (line[i] == '=' || line[i] == ';') {
+	for (int i = 0; i < buffer_size; i++) {
+		if (buffer[i] == '=' || buffer[i] == ';') {
+			keyString[pos] = '\0';
 			break;
 		}
-		else if (!started && line[i] != '\t' && line[i] != ' ') {
+		else if (!started && buffer[i] != '\t' && buffer[i] != ' ') {
 			started = true;
-			startPos = i;
+			keyString[pos] = buffer[i];
+			pos++;
 		}
 		else if (started) {
-			length++;
+			keyString[pos] = buffer[i];
+			pos++;
 		}
 	}
-	return line.substr(startPos, ++length);
 }
 
 //Converts a string to a texture type
-texture_type getTextureType(std::string typeAsString) {
-	if (strcmp(typeAsString.c_str(), "DIFFUSE") == 0) {
+texture_type getTextureType(char * typeAsString) {
+	if (strcmp(typeAsString, "DIFFUSE") == 0) {
 		return DIFFUSE;
 	}
-	else if (strcmp(typeAsString.c_str(), "METALLIC_SPEC") == 0) {
+	else if (strcmp(typeAsString, "METALLIC_SPEC") == 0) {
 		return METALLIC_SPEC;
 	}
-	else if (strcmp(typeAsString.c_str(), "NORMAL") == 0) {
+	else if (strcmp(typeAsString, "NORMAL") == 0) {
 		return NORMAL;
 	}
-	else if (strcmp(typeAsString.c_str(), "AO") == 0) {
+	else if (strcmp(typeAsString, "AO") == 0) {
 		return AO;
 	}
-	else if (strcmp(typeAsString.c_str(), "ROUGHNESS") == 0) {
+	else if (strcmp(typeAsString, "ROUGHNESS") == 0) {
 		return ROUGHNESS;
 	}
 	return NO_TEXTURE_TYPE;
 }
 
 //Converts a string to a collider type
-collider_type getColliderType(std::string typeAsString)
+collider_type getColliderType(char * typeAsString)
 {
-	if (strcmp(typeAsString.c_str(), "SPHERE") == 0) {
+	if (strcmp(typeAsString, "SPHERE") == 0) {
 		return SPHERE_COLLIDER;
 	}
-	else if (strcmp(typeAsString.c_str(), "AABB") == 0) {
+	else if (strcmp(typeAsString, "AABB") == 0) {
 		return AABB_COLLIDER;
 	}
-	else if (strcmp(typeAsString.c_str(), "BOX") == 0) {
+	else if (strcmp(typeAsString, "BOX") == 0) {
 		return BOX_COLLIDER;
 	}
-	else if (strcmp(typeAsString.c_str(), "MESH") == 0) {
+	else if (strcmp(typeAsString, "MESH") == 0) {
 		return MESH_COLLIDER;
 	}
-	else if (strcmp(typeAsString.c_str(), "CAPSULE") == 0) {
+	else if (strcmp(typeAsString, "CAPSULE") == 0) {
 		return CAPSULE_COLLIDER;
 	}
 	return NO_COLLIDER_TYPE;
+}
+
+//Translates a string to a light type
+light_type getLightTypeFromString(char * typeAsString) {
+	if (strcmp(typeAsString, "POINT") == 0) {
+		return POINT_LIGHT;
+	}
+	else if (strcmp(typeAsString, "DIRECTION") == 0) {
+		return DIRECTION_LIGHT;
+	}
+	else if (strcmp(typeAsString, "SPOT") == 0) {
+		return SPOT_LIGHT;
+	}
+	return POINT_LIGHT;
+}
+
+//Parses an int from a scene structure word
+int getChildCount(char * value) {
+	if (strcmp(value, "QUAD") == 0) {
+		return 4;
+	}
+	return 0;
 }
 
 /*
@@ -1007,8 +1053,8 @@ collider_type getColliderType(std::string typeAsString)
 */
 
 //Converts a string to a window mode
-void getRefreshRate(std::string value, configurationStructure &config) {
-	int rate = atoi(value.c_str());
+void getRefreshRate(char * value, configurationStructure &config) {
+	int rate = atoi(value);
 	if (rate == -1) {
 		int count;
 		const GLFWvidmode* modes = glfwGetVideoModes(config.monitor, &count);
@@ -1023,89 +1069,87 @@ void getRefreshRate(std::string value, configurationStructure &config) {
 }
 
 //Converts a string to a window mode
-void getResolution(std::string value, configurationStructure &config) {
-	int start = 0, length_0 = 0, length_1 = 0;
+void getResolution(char * value, configurationStructure &config, int valSize) {
+	char res[64];
+	int pos = 0;
 	bool started = false;
-	for (int i = 0; i < value.length(); i++) {
+	for (int i = 0; i < valSize; i++) {
 		if (value[i] == ',') {
-			started = true;
-			start = i + 1;
-		}
-		else if (started) {
-			length_1++;
+			res[pos] = '\0';
+			config.videoSettings->width = atoi(res);
+			pos = 0;
 		}
 		else {
-			length_0++;
+			res[pos] = value[i];
+			pos++;
 		}
 	}
-	std::string width = value.substr(0, length_0);
-	std::string height = value.substr(start, length_1);
-
-	config.videoSettings->width = atoi(width.c_str());
-	config.videoSettings->height = atoi(height.c_str());
+	res[pos] = '\0';
+	config.videoSettings->height = atoi(res);
 }
 
 //Sets the version numbers from the string value
-void getAppVersion(std::string value, configurationStructure &config) {
-	int start_0 = 0, start_1 = 0, length_0 = 0, length_1 = 0, length_2 = 0;
+void getAppVersion(char * value, configurationStructure &config, int length) {
+	int index = 0, pos = 0;
+	char ver[64];
 	bool started_0 = false, started_1 = false;
-	for (int i = 0; i < value.length(); i++) {
+	for (int i = 0; i < length; i++) {
 		if (value[i] == ',') {
-			if (started_0) {
-				started_0 = false;
-				started_1 = true;
-				start_1 = i + 1;
-			}
-			else {
-				started_0 = true;
-				start_0 = i + 1;
-			}
+			ver[pos] = '\0';
+			config.appVersion[index] = atoi(ver);
+			pos = 0;
+			index++;
 		}
-		else if (started_1) {
-			length_2++;
-		}
-		else if (started_0) {
-			length_1++;
+		else if (value[i] == ';') {
+			ver[pos] = '\0';
+			config.appVersion[index] = atoi(ver);
+			break;
 		}
 		else {
-			length_0++;
+			ver[pos] = value[i];
+			pos++;
 		}
 	}
-	std::string major = value.substr(0, length_0);
-	std::string minor = value.substr(start_0, length_1);
-	std::string patch = value.substr(start_1, length_2);
-
-	config.appVersion[0] = atoi(major.c_str());
-	config.appVersion[1] = atoi(minor.c_str());
-	config.appVersion[2] = atoi(patch.c_str());
 }
 
-//Adds a feature to the config
-void addGpuFeature(std::string value, configurationStructure &config);
-
 //Sets the format in the configuration file
-void setFormat(std::string value, configurationStructure &config) {
+void setFormat(char * value, configurationStructure &config) {
 	config.surfaceFormat.format = getFormat(value);
 }
 
 //Sets the color space in the configuration file from a string
-void setColorSpace(std::string value, configurationStructure &config) {
+void setColorSpace(char * value, configurationStructure &config) {
 	config.surfaceFormat.colorSpace = getColorSpace(value);
 }
 
 //Sets the present mode of a configuration structure
-void setPresentMode(std::string value, configurationStructure &config) {
+void setPresentMode(char * value, configurationStructure &config) {
 	config.presentMode = getPresentMode(value);
 }
 
 //Sets the depth format of a configuration structure
-void setDepthFormat(std::string value, configurationStructure &config) {
+void setDepthFormat(char * value, configurationStructure &config) {
 	config.depthFormat = getFormat(value);
-};
+}
+
+int powerFact(int base, int depth)
+{
+	if (depth == 0) {
+		return 1;
+	}
+	else {
+		return (int) pow(base, depth) + powerFact(base, (depth-1));
+	}
+}
+
+void setNodeCount(configurationStructure & config, int base, int depth)
+{
+	config.sceneNodesCount = powerFact(base, depth-1);
+}
 
 //Adds a feature to the config
-void addGpuFeature(std::string value, configurationStructure &config) {
-	if (strcmp(value.c_str(), "SAMPLER_ANISOTROPY") == 0) {
+void addGpuFeature(char * value, configurationStructure &config) {
+	if (strcmp(value, "SAMPLER_ANISOTROPY") == 0) {
 		config.featuresRequired.samplerAnisotropy = true;
 	}
 }

@@ -10,3 +10,15 @@
 #include <GLFW/glfw3.h>
 
 #include <functional>
+
+struct VulkanSceneNode {
+	material_type mType;
+	std::vector<int> dynamicEntities;
+
+	VkBuffer* lightBuffers;
+	VkDeviceMemory* lightBufferVRAM;
+	VkDescriptorSet* camLightDescSets;
+
+	bool hasCommandBuffer = false;
+	VkCommandBuffer staticDrawCommands;
+};

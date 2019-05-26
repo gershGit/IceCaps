@@ -1,4 +1,6 @@
 #include "Vulkan/V_Instance.h"
+#include "Vulkan/V_CommandPool.h"
+#include "Vulkan/V_DescriptorPool.h"
 #include <set>
 #include "Core/StringTranslation.h"
 #include <array>
@@ -542,6 +544,29 @@ void V_Instance::recreateSwapchain()
 			pipeline->swapchainReset();
 		}
 	}
+}
+
+V_Instance::~V_Instance()
+{
+	for (V_Device* dev : devices) {
+		delete dev;
+	}
+	for (V_CommandPool* pool : graphicsCommandPools) {
+		delete pool;
+	}
+	for (V_CommandPool* pool : computeCommandPools) {
+		delete pool;
+	}
+	delete transferCommandPool;
+	delete imageOperationsPool;
+	for (V_GraphicsPipeline* pipe : *graphicsPipelines) {
+		delete pipe;
+	}
+	delete staticObjectsDescriptorPool;
+	for (V_DescriptorPool* pool : descriptorPools) {
+		delete pool;
+	}
+	delete swapchain;
 }
 
 //Cleans up the V_Instance

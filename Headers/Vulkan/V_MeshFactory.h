@@ -14,7 +14,7 @@ public:
 	//Static builder functions
 	static void buildVertexBuffer(v_mesh & mesh, std::vector<vertex> &vertices, V_CommandPool * transferPool, V_Device * device);
 	static void buildIndexBuffer(v_mesh &mesh, std::vector<uint16_t> &indices, V_CommandPool* transferPool, V_Device * device);
-	static void loadFromFile(const char * fileName, v_mesh & mesh, configurationStructure &config);
+	static void loadFromFile(const char * fileName, v_mesh & mesh, configurationStructure &config, AABB * bounds);
 
 	V_MeshFactory();
 	~V_MeshFactory();

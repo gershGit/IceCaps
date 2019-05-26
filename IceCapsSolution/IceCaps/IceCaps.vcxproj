@@ -22,32 +22,32 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{D4CCE5EE-875D-430C-9A21-465571125809}</ProjectGuid>
     <RootNamespace>IceCaps</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -132,6 +132,7 @@
     <ClCompile Include="..\..\Source\Core\MemoryManager.cpp" />
     <ClCompile Include="..\..\Source\Core\RigidBodySystem.cpp" />
     <ClCompile Include="..\..\Source\Core\SceneLoader.cpp" />
+    <ClCompile Include="..\..\Source\Core\SceneTreeSystem.cpp" />
     <ClCompile Include="..\..\Source\Core\StringTranslation.cpp" />
     <ClCompile Include="..\..\Source\Core\ThreadPool.cpp" />
     <ClCompile Include="..\..\Source\OpenGL\OpenGLInstance.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="..\..\Headers\Core\MemoryManager.h" />
     <ClInclude Include="..\..\Headers\Core\RigidBodySystem.h" />
     <ClInclude Include="..\..\Headers\Core\SceneLoader.h" />
+    <ClInclude Include="..\..\Headers\Core\SceneTreeSystem.h" />
     <ClInclude Include="..\..\Headers\Core\StringTranslation.h" />
     <ClInclude Include="..\..\Headers\Core\SystemsHeader.h" />
     <ClInclude Include="..\..\Headers\Core\ThreadPool.h" />

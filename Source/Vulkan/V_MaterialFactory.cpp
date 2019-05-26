@@ -37,12 +37,12 @@ void createTextureView(v_material &material, texture_type textureType, configura
 }
 
 //Adds a texture to the passed material
-void V_MaterialFactory::loadTextureFromFile(std::string textureFile, v_material &material, texture_type textureType, configurationStructure &config) {
+void V_MaterialFactory::loadTextureFromFile(char * textureFile, v_material &material, texture_type textureType, configurationStructure &config) {
 	std::cout << "\t\tAdding texture at " << textureFile << std::endl;
 
 	//Read texture to array
 	int texWidth, texHeight, texChannels;
-	stbi_uc* pixels = stbi_load(textureFile.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	stbi_uc* pixels = stbi_load(textureFile, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 	VkDeviceSize imageSize = texWidth * texHeight * 4;
 	if (!pixels) {
 		throw std::runtime_error("failed to load texture image!");
@@ -79,27 +79,38 @@ void V_MaterialFactory::loadTextureFromFile(std::string textureFile, v_material 
 }
 
 //Loads a material from a file with calls to load texture or create texture
-void V_MaterialFactory::loadMaterialFromFile(std::string fileName, v_material & material, configurationStructure & config)
+void V_MaterialFactory::loadMaterialFromFile(char * fileName, v_material & material, configurationStructure & config)
 {
+	char texFile[512];
 	std::cout << "\tLoading Material from file: " << fileName << std::endl;
-	std::string line, key, value;
-	std::ifstream fileStream(fileName.c_str());
-	while (std::getline(fileStream, line)) {
-		key = getSubComponent(line);
-		value = getValue(line);
-		if (strcmp(key.c_str(), "TYPE") == 0) {
+	char buffer[256];
+	char keyString[128];
+	char value[128];
+	int valSize;
+	const char * nT = "\0";
+
+	FILE * fp;
+	fp = fopen(fileName, "r");
+	while (fscanf(fp, "%s", buffer) > 0) {
+		getSubComponent(buffer, keyString, 256);
+		valSize = getValue(buffer, value, 256);
+		if (strcmp(keyString, "TYPE") == 0) {
 			setMaterialType(material, value);
 		}
-		else if (strcmp(key.c_str(), "TEXTURE") == 0) {
+		else if (strcmp(keyString, "TEXTURE") == 0) {
 			texture_type tType = getTextureType(value);
-			std::getline(fileStream, line);
-			if (strcmp(getSubComponent(line).c_str(), "FILE_LOAD") == 0) {
-				std::string textureFile = config.gamePath;
-				textureFile.append(getValue(line));
-				loadTextureFromFile(textureFile, material, tType, config);
+			fscanf(fp, "%s", buffer);
+			valSize = getValue(buffer, value, 256);
+			getSubComponent(buffer, keyString, 256);
+			if (strcmp(keyString, "FILE_LOAD") == 0) {
+				memcpy(texFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+				memcpy(&value[valSize], nT, sizeof(char));
+				memcpy(&texFile[config.gamePath.length()], value, (valSize + 1) * sizeof(char));
+				loadTextureFromFile(texFile, material, tType, config);
 			}
 		}
 	}
+	fclose(fp);
 }
 
 V_MaterialFactory::V_MaterialFactory()

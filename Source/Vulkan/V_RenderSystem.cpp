@@ -4,6 +4,17 @@
 #include <limits>
 #include <thread>
 
+glm::vec4 clipSpace[8] = {
+	glm::vec4(-1, -1, -1, 1),
+	glm::vec4(-1, 1, -1, 1),
+	glm::vec4(1, -1, -1, 1),
+	glm::vec4(1, 1, -1, 1),
+	glm::vec4(-1, -1, 1, 1),
+	glm::vec4(-1, 1, 1, 1),
+	glm::vec4(1, -1, 1, 1),
+	glm::vec4(1, 1, 1, 1)
+};
+
 //Constructor sets information
 V_RenderSystem::V_RenderSystem()
 {
@@ -23,9 +34,7 @@ V_RenderSystem::V_RenderSystem()
 //Initializes the renderer by creating necessary objects
 void V_RenderSystem::initialize()
 {
-	lightsData.resize(config->cpu_info->coreCount);
 	createSubmitInfos();
-	createLightArray();
 }
 
 //Creates submit structures for use in submitting command buffers
@@ -64,20 +73,7 @@ void V_RenderSystem::createSubmitInfos()
 	}
 }
 
-//Creates an array large enough to hold all lights needed in a render
-void V_RenderSystem::createLightArray()
-{
-	int most_max_lights = 0;
-	graphicsPipelines = config->apiInfo.v_Instance->getGraphicsPipelines();
-	for (V_GraphicsPipeline* pipeline : *graphicsPipelines) {
-		if (pipeline->max_lights > most_max_lights) {
-			most_max_lights = pipeline->max_lights;
-		}
-	}
-	for (unsigned int i = 0; i < config->cpu_info->coreCount; i++) {
-		lightsData[i] = (LightObject*)malloc(sizeof(LightObject) * most_max_lights);
-	}
-}
+//TODO update light info in another system
 
 //When configuration has been changed, reset the swapchain if necessary
 void V_RenderSystem::onConfigurationChange()
@@ -88,20 +84,7 @@ void V_RenderSystem::onConfigurationChange()
 }
 
 //Adds an entity into the trees
-void V_RenderSystem::addEntity(int entityID)
-{
-	material_type entityPipelineType = getCManager<v_material>(*managers, V_MATERIAL)->getComponent(entityID).matType;
-	for (int i = 0; i < pipelineTypes->size(); i++) {
-		if (entityPipelineType == pipelineTypes->at(i)) {
-			renderTrees->at(i).push_back(entityID);
-			return;
-		}
-	}
-
-	pipelineTypes->push_back(entityPipelineType);
-	renderTrees->push_back(std::vector<int>());
-	renderTrees->at(renderTrees->size() - 1).push_back(entityID);
-}
+//TODO entities are all fed from scene
 
 //System on update call
 void V_RenderSystem::onUpdate()
@@ -113,10 +96,57 @@ void V_RenderSystem::onUpdate()
 
 	acquireImage();
 	updateCameraBuffers();
-	cullMeshes();
-	buildCommandBuffers();
+
+	//TODO cullNodes() --> create a list of visible scene_nodes
+	//TODO renderNodes() --> renders all scene_nodes of a pipeline, then renders all scene_nodes of the next pipeline, etc until all pipelines have been rendered
+	//	   TODO renderNode() [called in threadpool from renderNodes] somehow needs to know the thread in the pool that is trying to render
+	//		could just pass incremental id's < corecount for mostly random queue submission though no thread will actually be bound to a queue
+	//TODO renderUI() --> UI is not contained in the scene tree so it needs its own render function
+	//renderNode(scene); //TODO thread pool call
 	presentRender();
 	config->apiInfo.v_Instance->incrementFrame();	
+}
+
+//Renders a scene scene_node and its children
+void V_RenderSystem::renderNode(SceneNode * scene_node)
+{
+	int vis = isVisible(scene_node->bounds, &frus);
+	if (vis == 0) {
+		//Not visible
+		return;
+	}
+	else if (vis == 2) {
+		//Completely inside frustrum
+		//renderLeaf(scene_node->children[i])
+	}
+	else if (vis == 1) {
+		//Intersects
+		for (int i = 0; i < config->sceneChildren; i++) {
+			renderNode(&scene_node->children[i]); //TODO thread pool call
+		}
+	}
+
+	//Render it's command buffer
+	for (int i = 0; i < renderNodes->size(); i++) {
+		if (renderNodes->at(i)->getComponent(scene_node->id).hasCommandBuffer) {
+			VkCommandBuffer buf = renderNodes->at(i)->getComponent(scene_node->id).staticDrawCommands;
+			//TODO add the buffer to the correct command buffer list
+		}
+	}
+
+	//Render any dynamic objects
+	std::vector<std::vector<int>> visibleEntities = std::vector<std::vector<int>>();
+	visibleEntities.resize(pipelineTypes->size());
+	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
+		if (isVisible(bManager->getComponent(scene_node->dynamicEntities->at(i)), &frus)) {
+			//TODO visible entities at material type
+			visibleEntities[0].push_back(scene_node->dynamicEntities->at(i));
+		}
+	}
+	if (visibleEntities.size() > 0) {
+		//TODO create command buffers based on pipeline and store in the list
+		//commandBuffers->at(material_type)->push_back(generateBuffer(visibleEntities[i], pipelines[i], scene_node->id));
+	}
 }
 
 //Gets the image it will present
@@ -139,18 +169,13 @@ void V_RenderSystem::acquireImage()
 	}
 }
 
-//Culls meshes from the trees for rendering
-void V_RenderSystem::cullMeshes()
-{
-}
-
 //Updates the camera buffers for the current frame
 void V_RenderSystem::updateCameraBuffers()
 {
-	ViewPersp viewPersp = ViewPersp();
+	float screenRatio = swapchain->getExtent().width / (float)swapchain->getExtent().height;
 	glm::vec3 cameraPos = getCManager<transform>(*managers,TRANSFORM)->getComponent(activeCameraID).pos;
 	viewPersp.view = glm::lookAt(cameraPos, cameraPos + activeCamera->lookDirection, activeCamera->upDirection);
-	viewPersp.persp = glm::perspective(glm::radians((float) activeCamera->fov), swapchain->getExtent().width / (float)swapchain->getExtent().height, activeCamera->near, activeCamera->far);
+	viewPersp.persp = glm::perspective(glm::radians((float) activeCamera->fov), screenRatio, activeCamera->near, activeCamera->far);
 
 	void* data;
 	vkMapMemory(config->apiInfo.v_Instance->getPrimaryDevice()->getLogicalDevice(), 
@@ -162,23 +187,25 @@ void V_RenderSystem::updateCameraBuffers()
 	memcpy(data, &viewPersp, sizeof(viewPersp));
 	vkUnmapMemory(config->apiInfo.v_Instance->getPrimaryDevice()->getLogicalDevice(), 
 		config->apiInfo.v_Instance->getGraphicsPipeline(PBR)->lightViewBufferVRAMs[config->apiInfo.v_Instance->currentFrame]);
-}
 
-//Returns the index of which light is to be replaced in the light array
-int V_RenderSystem::replacedLightIndex(int lightCount, transform objectTrans, float currentLightDistance, int coreID) {
-	float maxLightInArray = 0.0f;
-	int maxLightIndex = -1;
-	for (int i = 0; i < lightCount; i++) {
-		float tempDistance = glm::length(glm::vec3(lightsData[coreID][i].position) - objectTrans.pos);
-		if (tempDistance > currentLightDistance && tempDistance > maxLightInArray) {
-			maxLightIndex = i;
-			maxLightInArray = tempDistance;
-		}
+	//Get the frustum normals
+	glm::mat4 vp = viewPersp.persp * viewPersp.view;
+	frus.axis[0] = activeCamera->lookDirection;
+	frus.axis[1] = glm::vec3(vp[0][3] + vp[0][0], vp[1][3] + vp[1][0], vp[2][3] + vp[2][0]);
+	frus.axis[2] = glm::vec3(vp[0][3] - vp[0][0], vp[1][3] - vp[1][0], vp[2][3] - vp[2][0]);
+	frus.axis[3] = glm::vec3(vp[0][3] + vp[0][1], vp[1][3] + vp[1][1], vp[2][3] + vp[2][1]);
+	frus.axis[4] = glm::vec3(vp[0][3] - vp[0][1], vp[1][3] - vp[1][1], vp[2][3] - vp[2][1]);
+
+	//Get the frustum vertices
+	glm::mat4 i_vp = glm::inverse(vp);
+	for (int i = 0; i < 8; i++) {
+		frus.points[i] = glm::vec3(i_vp * clipSpace[i]);
 	}
-	return maxLightIndex;
 }
 
 //Updates the light buffer with the closes lightCount lights
+//TODO light data is updated in scene scene_nodes and each scene_node has a descriptor for its buffer
+/*
 void V_RenderSystem::updateLightBuffers(int lightCount, transform objectTrans, int coreID)
 {
 	float maxDistance = std::numeric_limits<float>::infinity();
@@ -218,9 +245,11 @@ void V_RenderSystem::updateLightBuffers(int lightCount, transform objectTrans, i
 	memcpy(data, &lightsData[coreID], sizeof(LightObject) * lightCount);
 	vkUnmapMemory(config->apiInfo.v_Instance->getPrimaryDevice()->getLogicalDevice(),
 		config->apiInfo.v_Instance->getGraphicsPipeline(PBR)->lightViewBufferVRAMs[config->apiInfo.v_Instance->currentFrame]);
-}
+}*/
 
 //Builds and submits render command buffers
+//TODO build command buffers is done using specific entities from the scene_nodes
+/*
 void V_RenderSystem::buildCommandBuffers()
 {
 	int pipelineIndex = 0;
@@ -243,9 +272,11 @@ void V_RenderSystem::buildCommandBuffers()
 			//config->cpu_info->threads[i].join();
 		}
 	}	
-}
+}*/
 
 //Renders a subset of entities on a single core
+//TODO move logic to a renderEntities function that just uses entity ids and a pipeline
+/*
 void V_RenderSystem::renderEntities(int entitiesStart, int entityCount, int renderTreeIndex, V_GraphicsPipeline* pipeline, int coreID)
 {
 	if (entityCount > 0) {
@@ -294,6 +325,53 @@ void V_RenderSystem::renderEntities(int entitiesStart, int entityCount, int rend
 		submitCommandBuffer(thisBuffer, coreID);
 	}
 }
+*/
+
+VkCommandBuffer V_RenderSystem::generateBuffer(std::vector<int> entities, V_GraphicsPipeline* pipeline, int coreID, int scene_nodeID) {
+	int frameID = (int)config->apiInfo.v_Instance->currentFrame;
+	VkCommandBuffer thisBuffer = config->apiInfo.v_Instance->getGraphicsCommandPool(coreID)->commandBuffers[frameID*scene_nodeID];
+	vkResetCommandBuffer(thisBuffer, 0);
+	vkBeginCommandBuffer(thisBuffer, &beginInfo);
+
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = pipeline->getRenderPass();
+	renderPassInfo.framebuffer = pipeline->getFramebuffers()->at(frameID);
+	renderPassInfo.renderArea.offset = { 0,0 };
+	renderPassInfo.renderArea.extent = swapchain->getExtent();
+	renderPassInfo.clearValueCount = 2;
+	renderPassInfo.pClearValues = clearValues;
+
+	vkCmdBeginRenderPass(thisBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
+
+	for (int entity : entities) {
+		//TODO store managers not getCManager each time
+		VkBuffer vertexBuffers[] = { getCManager<v_mesh>(*managers,V_MESH)->getComponent(entity).vBuffer };
+		VkDeviceSize offsets[] = { 0 };
+
+		vkCmdBindVertexBuffers(thisBuffer, 0, 1, vertexBuffers, offsets);
+
+		vkCmdBindIndexBuffer(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entity).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+		//TODO buffer is updated in different system, this just needs to use the descriptor from the scene scene_node NOT the pipeline
+		//updateLightBuffers(pipeline->max_lights, getCManager<transform>(*managers, TRANSFORM)->getComponent(entity), coreID);
+
+		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1, &pipeline->lightViewDescriptorSets[frameID], 0, nullptr);
+		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 1, 1, &getCManager<v_material>(*managers, V_MATERIAL)->getComponentAddress(entity)->descriptorSet, 0, nullptr);
+
+		glm::mat4 transformPush = getTransformationMatrix(getCManager<transform>(*managers, TRANSFORM)->getComponent(entity));
+		vkCmdPushConstants(thisBuffer, pipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, static_cast<size_t>(sizeof(glm::mat4)), &transformPush);
+
+		vkCmdDrawIndexed(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entity).indicesCount, 1, 0, 0, 0); //Draw call
+	}
+
+	vkCmdEndRenderPass(thisBuffer);
+
+	vkEndCommandBuffer(thisBuffer);
+
+	return thisBuffer;
+}
 
 //Submits a command buffer to a graphics queue
 void V_RenderSystem::submitCommandBuffer(VkCommandBuffer &buffer, int coreID)
@@ -331,6 +409,11 @@ void V_RenderSystem::presentRender()
 	else if (res != VK_SUCCESS) {
 		throw std::runtime_error("Could not present image");
 	}
+}
+
+void V_RenderSystem::cleanup()
+{
+	delete renderNodes;
 }
 
 V_RenderSystem::~V_RenderSystem()
