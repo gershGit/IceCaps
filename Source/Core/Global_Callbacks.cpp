@@ -429,7 +429,7 @@ bool boundsIntersect(AABB & a, AABB & b)
 	return false;
 }
 //TODO frustum points calculation, frustum axis calculations
-int isVisible(AABB bounds, frustum * frus)
+bool isVisible(AABB bounds, frustum * frus)
 {
 	//Test frustrum axes
 	glm::vec2 objProj;
@@ -438,7 +438,7 @@ int isVisible(AABB bounds, frustum * frus)
 		objProj = project(bounds, frus->axis[i]);
 		frusProj = project(frus, frus->axis[i]);
 		if (!overlap(objProj, frusProj)) {
-			return 0;
+			return false;
 		}
 	}
 
@@ -447,11 +447,11 @@ int isVisible(AABB bounds, frustum * frus)
 		objProj = project(bounds, worldAxis[i]);
 		frusProj = project(frus, worldAxis[i]);
 		if (!overlap(objProj, frusProj)) {
-			return 0;
+			return false;
 		}
 	}
 
-	return 1;
+	return true;
 }
 
 AABB getLightBounds(LightObject l, float r) {
@@ -560,11 +560,24 @@ void printNodeEntities(SceneNode * scene_node, int tabs)
 	printf(" ....\n"); //6 dashes
 	printf("|%.4d|<", scene_node->id);
 	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
-		printf("%d,", scene_node->dynamicEntities->at(i));
+		printf("%d", scene_node->dynamicEntities->at(i));
+		if (i < scene_node->dynamicEntities->size()-1) {
+			printf(",");
+		}
 	}
 	printf("|");
 	for (int i = 0; i < scene_node->staticEntityCount; i++) {
-		printf("%d,", scene_node->staticEntities[i]);
+		printf("%d", scene_node->staticEntities[i]);
+		if (i < scene_node->staticEntityCount-1) {
+			printf(",");
+		}
+	}
+	printf("|");
+	for (int i = 0; i < scene_node->lightCount; i++) {
+		printf("%d", scene_node->lightIDs->at(i));
+		if (i < scene_node->lightIDs->size()-1) {
+			printf(",");
+		}
 	}
 	printf(">\n");
 	printf(" ''''\n");
@@ -580,11 +593,24 @@ void printBranchEntities(SceneNode* node, int tabs, bool last) {
 	}
 	printf("   -----|%.4d|<", node->id);
 	for (int i = 0; i < node->dynamicEntities->size(); i++) {
-		printf("%d,", node->dynamicEntities->at(i));
+		printf("%d", node->dynamicEntities->at(i));
+		if (i < node->dynamicEntities->size()-1) {
+			printf(",");
+		}
 	}
 	printf("|");
 	for (int i = 0; i < node->staticEntityCount; i++) {
-		printf("%d,", node->staticEntities[i]);
+		printf("%d", node->staticEntities[i]);
+		if (i < node->staticEntityCount-1) {
+			printf(",");
+		}
+	}
+	printf("|");
+	for (int i = 0; i < node->lightCount; i++) {
+		printf("%d", node->lightIDs->at(i));
+		if (i < node->lightCount-1) {
+			printf(",");
+		}
 	}
 	printf(">\n");
 	if (!last) {

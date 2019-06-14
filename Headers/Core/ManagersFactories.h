@@ -37,3 +37,4 @@ inline void managerCleanup(ArrayManager<CType>* manager) {
 
 void managerCleanup(MappedManager<v_material>* manager, V_Device* device);
 void managerCleanup(MappedManager<v_mesh>* manager, V_Device* device);
+void managerCleanup(MappedManager<v_camera>* manager, V_Device* device, int bufferCount);

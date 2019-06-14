@@ -254,7 +254,6 @@ V_Instance* vulkan_initialize(configurationStructure &config) {
 	instance->createTransferCommandPools();
 	instance->createSwapChain();
 	instance->createSampler();
-	instance->createCommandPools(config.cpu_info->coreCount);
 	instance->createSyncObjects();
 	return instance;
 }

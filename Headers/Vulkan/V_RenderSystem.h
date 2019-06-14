@@ -10,7 +10,7 @@ class V_RenderSystem : public EntitySystem
 private:
 	//References to necessary objects
 	V_Swapchain* swapchain;
-	camera* activeCamera;
+	v_camera* activeCamera;
 	int activeCameraID = 0;
 
 	//Vulkan objects used for every draw call
@@ -35,13 +35,15 @@ private:
 	//Graphics pipelines for this renderer to use
 	std::vector<V_GraphicsPipeline*> *graphicsPipelines;
 
-	SceneNode* scene;
+	V_Instance* mInstance;
+
 	frustum frus;
 	ViewPersp viewPersp = ViewPersp();
 	std::vector<std::vector<VkCommandBuffer>> buffersToSubmit;
 	ArrayManager<AABB>* bManager;
 	std::vector<NodeManager<VulkanSceneNode>*> * renderNodes;
 	std::vector<material_type> * pipelineTypes = new std::vector<material_type>();
+	std::vector<int> visibleNodes = std::vector<int>();
 
 public:
 	//Descriptor sets that reference camera and light entities
@@ -55,14 +57,17 @@ public:
 
 	//Per call update functions
 	void onUpdate();
-	void renderNode(SceneNode * scene_node);
+	void cullNodes();
+	void renderAllNodes();
+	void renderSinglePipeline(V_GraphicsPipeline* gPipeline, NodeManager<VulkanSceneNode>* nodeManager);
+	void renderEntities(V_GraphicsPipeline* gPipeline, std::vector<int> entityIDs, VulkanSceneNode* node);
 	void acquireImage();
 	void updateCameraBuffers();
 	VkCommandBuffer generateBuffer(std::vector<int> entities, V_GraphicsPipeline * pipeline, int coreID, int scene_nodeID);
 	void submitCommandBuffer(VkCommandBuffer &buffer, int coreID);
 	void presentRender();
 	
-	void setActiveCamera(int id, camera * cam) { activeCameraID = id; activeCamera = cam; }
+	void setActiveCamera(int id, v_camera * cam) { activeCameraID = id; activeCamera = cam; }
 	void setSwapchain(V_Swapchain* swapchain_in) { swapchain = swapchain_in; };
 	void setRenderNodes(std::vector<NodeManager<VulkanSceneNode>*> *renderNodes_in) { renderNodes = renderNodes_in; };
 

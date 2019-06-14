@@ -463,13 +463,13 @@ void V_Instance::createSampler()
 }
 
 //Creates command pools for each core
-void V_Instance::createCommandPools(unsigned int cores)
+void V_Instance::createCommandPools(unsigned int cores, int totalNodeCount)
 {
 	graphicsCommandPools.resize(cores);
 	for (unsigned int i = 0; i < cores; i++) {
 		graphicsCommandPools[i] = new V_CommandPool();
 		graphicsCommandPools[i]->createCommandPool(GRAPHICS, primaryDevice, vulkanSurface);
-		graphicsCommandPools[i]->allocateCommandBuffers(config->swapchainBuffering);
+		graphicsCommandPools[i]->allocateCommandBuffers(config->swapchainBuffering * totalNodeCount);
 	}
 	
 	computeCommandPools.resize(cores);

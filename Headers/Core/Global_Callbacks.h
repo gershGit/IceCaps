@@ -86,7 +86,7 @@ AABB getMaxBounds(AABB * a, AABB * b);
 AABB getBounds(collider &col, glm::vec3 pos);
 AABB getMeshBounds(AABB *bounds, glm::vec3 pos);
 bool boundsIntersect(AABB &a, AABB &b);
-int isVisible(AABB bounds, frustum * frus);
+bool isVisible(AABB bounds, frustum * frus);
 bool lightAffects(AABB bounds, LightObject lightObj, float range);
 
 //Functions for render scene_node information

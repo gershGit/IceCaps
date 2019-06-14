@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <C:\Users\Gersh\Documents\Visual Studio 2017\Libraries\glad\glad.h>
+#include <..\\..\\Libraries\glad\glad.h>
 
 static void* get_proc(const char *namez);
 

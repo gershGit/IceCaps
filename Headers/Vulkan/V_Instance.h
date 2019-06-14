@@ -90,8 +90,8 @@ public:
 	void attachDevices(unsigned int coreCount);
 	void createTransferCommandPools();
 	void createSwapChain();
-	void createCommandPools(unsigned int cores);
 	void createSampler();
+	void createCommandPools(unsigned int cores, int totalNodeCount);
 	void createSyncObjects();
 
 	//Lifetime functions

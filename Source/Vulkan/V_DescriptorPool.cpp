@@ -65,7 +65,7 @@ void V_DescriptorPool::configureNodeSets(NodeManager<VulkanSceneNode>* scene_nod
 			//Descriptors for cameras are the same throughout the pipeline
 			VkDescriptorBufferInfo lightBufferInfo = {};
 			lightBufferInfo.buffer = scene_node->lightBuffers[j];
-			lightBufferInfo.offset = sizeof(ViewPersp);
+			lightBufferInfo.offset = 0;
 			lightBufferInfo.range = sizeof(LightObject) * max_lights;
 
 			std::array<VkWriteDescriptorSet, 2> descriptorWrites = {};

@@ -14,6 +14,7 @@
 struct VulkanSceneNode {
 	material_type mType;
 	std::vector<int> dynamicEntities;
+	VkCommandBuffer* dynamicBuffers;
 
 	VkBuffer* lightBuffers;
 	VkDeviceMemory* lightBufferVRAM;

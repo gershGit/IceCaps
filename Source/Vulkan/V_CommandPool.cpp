@@ -59,6 +59,15 @@ void V_CommandPool::allocateCommandBuffers(int bufferCount)
 	}
 }
 
+VkCommandBuffer V_CommandPool::getNextCommandBuffer()
+{
+	bufferIterator++;
+	if (bufferIterator >= commandBuffers.size()) {
+		saturated = true;
+	}
+	return commandBuffers.at(bufferIterator - 1);
+}
+
 //Cleans up the buffers and pool
 void V_CommandPool::cleanup()
 {

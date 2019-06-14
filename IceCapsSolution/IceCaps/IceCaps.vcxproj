@@ -84,12 +84,12 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glad;$(ProjectDir)..\..\Headers;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\VulkanSDK\1.1.97.0\Include;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glm;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glad;$(ProjectDir)..\..\Headers;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\VulkanSDK\1.1.106.0\Include;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glm;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>glfw3.lib;vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\lib-vc2015;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\VulkanSDK\1.1.97.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\glfw-3.2.1.bin.WIN64\lib-vc2015;$(ProjectDir)..\..\..\..\Visual Studio 2017\Libraries\VulkanSDK\1.1.106.0\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -150,6 +150,8 @@
     <ClCompile Include="..\..\Source\Vulkan\V_Swapchain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\..\Visual Studio 2017\Libraries\glad\glad.h" />
+    <ClInclude Include="..\..\..\..\Visual Studio 2017\Libraries\glad\khrplatform.h" />
     <ClInclude Include="..\..\Headers\Core\AnimationFactory.h" />
     <ClInclude Include="..\..\Headers\Core\AnimationSystem.h" />
     <ClInclude Include="..\..\Headers\Core\CollisionSystem.h" />
