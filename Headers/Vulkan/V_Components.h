@@ -25,5 +25,10 @@ struct v_material {
 	std::vector<VkImage> textures;
 	std::vector<VkDeviceMemory> textureMemories;
 	std::vector<VkImageView> textureViews;
-	VkDescriptorSet descriptorSet;
+	VkDescriptorSet descriptorSet = NULL;
+};
+
+struct v_camera : camera {
+	VkDeviceMemory* camVRAM;
+	VkBuffer* camBuffers;
 };

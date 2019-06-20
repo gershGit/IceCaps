@@ -9,3 +9,5 @@
 #include "Core/CollisionSystem.h"
 #include "Core/AnimationSystem.h"
 #include "Core/InputSystem.h"
+#include "Core/SceneTreeSystem.h"
+#include "Core/BoundsSystem.h"

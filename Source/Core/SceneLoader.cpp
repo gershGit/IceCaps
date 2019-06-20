@@ -4,55 +4,219 @@
 #include "Core/ManagersFactories.h"
 #include "Core/SystemsHeader.h"
 #include "Core/StringTranslation.h"
+#include "Core/MemoryManager.h"
+#include "Vulkan/V_BufferHelper.h"
 #include <fstream>
+#include <numeric>
+#include <climits>
 
+char SceneLoader::buffer[BUF_SIZE];
+char SceneLoader::value[BUF_SIZE];
+char SceneLoader::keyString[BUF_SIZE];
+scene_key SceneLoader::key;
+char SceneLoader::nT[1];
 
 SceneLoader::SceneLoader()
 {
 }
 
-//Generates a vector from a string of floats separated by commas
-template <class Vector>
-Vector getVectorFromString(std::string value) {
-	int start = 0, length = 0;
-	int vectorIndex = 0;
-	Vector returnVector = Vector();
-	for (int i = 0; i < value.length(); i++) {
-		if (value[i] == ',') {
-			returnVector[vectorIndex] = strtof(value.substr(start, length).c_str(), nullptr);
-			vectorIndex++;
-			start = i + 1;
-			length = 0;
-		}
-		else {
-			length++;
-		}
-	}
-	returnVector[vectorIndex] = strtof(value.substr(start, length).c_str(), nullptr);
-	return returnVector;
-}
-
 //Builder Functions ---------------------------------------------------------------------------
 
-//Adds managers to hold components for various component types
-void addManagers(configurationStructure &config, std::vector<ComponentManager*> &managers, std::ifstream &fileStream) {
-	std::cout << "Adding Managers" << std::endl;
-	std::string line, value;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		if (getSceneKey(line) == END_STATEMENT) {
+//Moves the static entities into arrays as they do not need to be dynamic
+void collapseStaticEntities(SceneNode* scene_node, int childCount, std::vector<std::vector<int>*>* staticTemp) {
+	//TODO record static render buffers
+	scene_node->staticEntityCount = (int) staticTemp->at(scene_node->id)->size();
+	if (scene_node->staticEntityCount > 0) {
+		scene_node->staticEntities = (int*)malloc(sizeof(int) * scene_node->staticEntityCount);
+	}
+	for (int i = 0; i < scene_node->staticEntityCount; i++) {
+		scene_node->staticEntities[i] = staticTemp->at(scene_node->id)->at(i);
+	}
+	delete staticTemp->at(scene_node->id);
+}
+
+//Places an entity into the master scene tree
+bool SceneLoader::insertEntity(SceneNode* scene_node, int entityID, AABB * bounds, bool isDynamic, configurationStructure* config, 
+	int pipelineIndex, std::vector<NodeManager<VulkanSceneNode>*> * renderNodes, std::vector<std::vector<int>*>* staticTemp) {
+	if (isInside(&scene_node->bounds, bounds)) {
+		if (!scene_node->isLeaf) {
+			//Place inside children if possible
+			for (int i = 0; i < config->sceneChildren; i++) {
+				if (insertEntity(&scene_node->children[i], entityID, bounds, isDynamic, config, pipelineIndex, renderNodes, staticTemp)) {
+					return true;
+				}
+			}
+		}
+		//Place in static or dynamic entities based on type
+		if (isDynamic) {
+			scene_node->dynamicEntities->push_back(entityID);
+		}
+		else {
+			staticTemp->at(scene_node->id)->push_back(entityID);
+		}
+		if (pipelineIndex >= 0 && isDynamic) {
+			renderNodes->at(pipelineIndex)->getComponentAddress(scene_node->id)->dynamicEntities.push_back(entityID);
+		}
+		return true;
+	}
+	return false;
+}
+
+//Inserts a light into every node that is affected by the light
+bool SceneLoader::insertLight(SceneNode* scene_node, int entityID, LightObject light, float range, configurationStructure* config, int maxLights) {
+	if (lightAffects(scene_node->bounds, light, range)) {
+		if (!scene_node->isLeaf) {
+			//Place inside children if possible
+			for (int i = 0; i < config->sceneChildren; i++) {
+				insertLight(&scene_node->children[i], entityID, light, range, config, maxLights);
+			}
+		}	
+		scene_node->lightIDs->push_back(entityID);
+		if (scene_node->lightCount < maxLights) {
+			scene_node->lights[scene_node->lightCount] = light;
+			scene_node->lightCount++;
+		}
+		return true;
+	}
+	return false;
+}
+
+//Allocates the command buffers and light buffers to the vulkan scene
+void SceneLoader::allocateVulkanCommandObjects(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, configurationStructure * config) {
+	for (int i = 0; i < renderNodes->size(); i++) {
+		for (int j = 0; j < config->sceneNodesCount; j++) {
+			VulkanSceneNode nodeInfo;
+			nodeInfo.dynamicBuffers = (VkCommandBuffer*)malloc(sizeof(VkCommandBuffer) * config->swapchainBuffering);
+			for (int sc = 0; sc < config->swapchainBuffering; sc++) {
+				nodeInfo.dynamicBuffers[sc] = config->apiInfo.v_Instance->getGraphicsCommandPool(i)->getNextCommandBuffer();
+			}
+			renderNodes->at(i)->addComponent(j, nodeInfo);
+		}
+	}
+}
+void SceneLoader::allocateLightBuffers(SceneNode* scene_node, int bufferSize, int childCount) {
+	scene_node->lights = (LightObject*) malloc(sizeof(LightObject) * bufferSize);
+	scene_node->lightIDs = new std::vector<int>();
+	scene_node->lightCount = 0;
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < childCount; i++) {
+			allocateLightBuffers(&scene_node->children[i], bufferSize, childCount);
+		}
+	}
+}
+
+//Places all lights into the scene
+void SceneLoader::placeLightsInScene(SceneNode* scene, MappedManager<light>* lManager, ArrayManager<transform>* tManager, configurationStructure* config, int maxLights) {
+	std::vector<int> lightIDs = lManager->getEntities();
+	for (int id : lightIDs) {
+		insertLight(scene, id, toLightObject(lManager->getComponent(id), tManager->getComponent(id).pos), lManager->getComponent(id).range, config, maxLights);
+	}
+}
+
+//Recursively allocates children and sets some variables for them
+void SceneLoader::createChildren(SceneNode* scene_node, int currentDepth, int maxDepth, int childCount) {
+	scene_node->dynamicEntities = new std::vector<int>();
+	if (currentDepth == maxDepth) {
+		return;
+	}
+	if (currentDepth < maxDepth) {
+		scene_node->isLeaf = false;
+		scene_node->children = (SceneNode*)malloc(sizeof(SceneNode) * childCount);
+		for (int i = 0; i < childCount; i++) {
+			scene_node->children[i].bounds.size = glm::vec3(scene_node->bounds.size.x/2.0f);
+			if (childCount == 4) {
+				scene_node->children[i].bounds.size.y = std::numeric_limits<float>::max();
+			}
+			scene_node->children[i].isLeaf = true;
+		}
+		if (childCount == 4) {
+			// ---------
+			// | 3 | 4 |
+			//  -------
+			// | 1 | 2 |
+			// ---------
+			scene_node->children[0].id = scene_node->id * currentDepth + 1;
+			scene_node->children[1].id = scene_node->id * currentDepth + 2;
+			scene_node->children[2].id = scene_node->id * currentDepth + 3;
+			scene_node->children[3].id = scene_node->id * currentDepth + 4;
+			glm::vec3 offset = glm::vec3(scene_node->bounds.size.x/2.0f, 0, scene_node->bounds.size.z/2.0f);
+			scene_node->children[0].bounds.pos = scene_node->bounds.pos - offset;
+			scene_node->children[1].bounds.pos = scene_node->bounds.pos + glm::vec3(offset.x, 0, -offset.z);
+			scene_node->children[2].bounds.pos = scene_node->bounds.pos + glm::vec3(-offset.x, 0, offset.z);
+			scene_node->children[3].bounds.pos = scene_node->bounds.pos + offset;
+		}
+	}
+	printNode(scene_node, childCount);
+	for (int i = 0; i < childCount; i++) {
+		printNode(&scene_node->children[i], childCount);
+		createChildren(&scene_node->children[i], currentDepth + 1, maxDepth, childCount);
+	}
+}
+
+//Recursively creates bounds for all the scene_nodes based on size and position
+void SceneLoader::setBounds(SceneNode* scene_node, int childCount) {
+	scene_node->bounds.points[0] = scene_node->bounds.pos + glm::vec3(-scene_node->bounds.size.x, -scene_node->bounds.size.y, -scene_node->bounds.size.z);
+	scene_node->bounds.points[1] = scene_node->bounds.pos + glm::vec3(-scene_node->bounds.size.x, scene_node->bounds.size.y, -scene_node->bounds.size.z);
+	scene_node->bounds.points[2] = scene_node->bounds.pos + glm::vec3(scene_node->bounds.size.x, -scene_node->bounds.size.y, -scene_node->bounds.size.z);
+	scene_node->bounds.points[3] = scene_node->bounds.pos + glm::vec3(scene_node->bounds.size.x, scene_node->bounds.size.y, -scene_node->bounds.size.z);
+	scene_node->bounds.points[4] = scene_node->bounds.pos + glm::vec3(-scene_node->bounds.size.x, -scene_node->bounds.size.y, scene_node->bounds.size.z);
+	scene_node->bounds.points[5] = scene_node->bounds.pos + glm::vec3(-scene_node->bounds.size.x, scene_node->bounds.size.y, scene_node->bounds.size.z);
+	scene_node->bounds.points[6] = scene_node->bounds.pos + glm::vec3(scene_node->bounds.size.x, -scene_node->bounds.size.y, scene_node->bounds.size.z);
+	scene_node->bounds.points[7] = scene_node->bounds.pos + glm::vec3(scene_node->bounds.size.x, scene_node->bounds.size.y, scene_node->bounds.size.z);
+	if (!scene_node->isLeaf) {
+		for (int i = 0; i < childCount; i++) {			
+			setBounds(&scene_node->children[i], childCount);
+		}
+	}
+}
+
+//Builds the scene tree
+void SceneLoader::buildTree(configurationStructure &config, SceneNode * scene, FILE * fp) {
+	std::cout << "Creating scene tree" << std::endl;
+	int depth = 1;
+	while (fscanf(fp, "%s", buffer) > 0) {
+		getValue(buffer, value, BUF_SIZE);
+		key = getSceneKey(buffer, BUF_SIZE);
+		if (key == END_STATEMENT) {
 			break;
 		}
-		else if (getSceneKey(line) == ADD_MANAGER) {
-			if (getComponentType(value) == TRANSFORM) {
+		else if (key == SCENE_SIZE) {
+			scene->bounds.size = glm::vec3(strtof(value, nullptr) / 2.0f);
+			scene->bounds.pos = glm::vec3(0);
+		}
+		else if (key == TREE_DEPTH) {
+			depth = atoi(value);
+		}
+	}
+	if (config.sceneChildren == 4) {
+		scene->bounds.size.y = std::numeric_limits<float>::max();
+	}
+	setNodeCount(config, config.sceneChildren, depth);
+	createChildren(scene, 1, depth, config.sceneChildren);
+	setBounds(scene, config.sceneChildren);
+	printSceneAsArea(depth);
+}
+
+//Adds managers to hold components for various component types
+void SceneLoader::addManagers(configurationStructure &config, std::vector<ComponentManager*> &managers, FILE * fp) {
+	std::cout << "Adding Managers" << std::endl;
+	while (fscanf(fp, "%s", buffer) > 0) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		getValue(buffer, value, BUF_SIZE);
+		if (key == END_STATEMENT) {
+			break;
+		}
+		else if (key == ADD_MANAGER) {
+			component_type cType = getComponentType(value);
+			if (cType == TRANSFORM) {
 				std::cout << "\tAdding Transform Manager" << std::endl;
 				managers.push_back(new ArrayManager<transform>(TRANSFORM));
 			}
-			else if (getComponentType(value) == PREFAB_COMPONENT) {
+			else if (cType == PREFAB_COMPONENT) {
 				std::cout << "\tAdding Prefab Manager" << std::endl;
 				managers.push_back(new MappedManager<prefab>(PREFAB_COMPONENT));
 			}
-			else if (getComponentType(value) == MATERIAL_COMPONENT) {
+			else if (cType == MATERIAL_COMPONENT) {
 				std::cout << "\tAdding Material Manager" << std::endl;
 				if (config.api == Vulkan) {
 					managers.push_back(new MappedManager<v_material>(V_MATERIAL));
@@ -61,43 +225,52 @@ void addManagers(configurationStructure &config, std::vector<ComponentManager*> 
 					managers.push_back(new MappedManager<gl_material>(GL_MATERIAL));
 				}
 			}
-			else if (getComponentType(value) == MESH_COMPONENT) {
+			else if (cType == MESH_COMPONENT) {
 				std::cout << "\tAdding Mesh Manager" << std::endl;
 				if (config.api == Vulkan) {
 					managers.push_back(new MappedManager<v_mesh>(V_MESH));
 				}
 			}
-			else if (getComponentType(value) == CAMERA) {
+			else if (cType == CAMERA) {
 				std::cout << "\tAdding Camera Manager" << std::endl;
-				managers.push_back(new MappedManager<camera>(CAMERA));
+				if (config.api = Vulkan) {
+					managers.push_back(new MappedManager<v_camera>(V_CAMERA));
+				}
+				else {
+					managers.push_back(new MappedManager<camera>(CAMERA));
+				}
 			}
-			else if (getComponentType(value) == LIGHT_COMPONENT) {
+			else if (cType == LIGHT_COMPONENT) {
 				std::cout << "\tAdding Light Manager" << std::endl;
 				managers.push_back(new MappedManager<light>(LIGHT_COMPONENT));
 			}
-			else if (getComponentType(value) == RIGID_BODY) {
+			else if (cType == RIGID_BODY) {
 				std::cout << "\tAdding Rigid Body Manager" << std::endl;
 				managers.push_back(new MappedManager<rigid_body>(RIGID_BODY));
 			}
-			else if (getComponentType(value) == COLLIDER) {
+			else if (cType == COLLIDER) {
 				std::cout << "\tAdding Collider and Collision Manager" << std::endl;
 				managers.push_back(new MappedManager<collider>(COLLIDER));
 				managers.push_back(new VectorManager<collision>(COLLISION));
 			}
-			else if (getComponentType(value) == ANIMATION_COMPONENT) {
+			else if (cType == ANIMATION_COMPONENT) {
 				std::cout << "\tAdding Animation Manager" << std::endl;
 				managers.push_back(new MappedManager<animation>(ANIMATION_COMPONENT));
 			}
-			else if (getComponentType(value) == TAGS_COMPONENT) {
+			else if (cType == TAGS_COMPONENT) {
 				std::cout << "\tAdding Tags Manager" << std::endl;
 				managers.push_back(new ArrayManager<uint64_t>(TAGS_COMPONENT));
+			}
+			else if (cType == AABB_COMPONENT) {
+				std::cout << "\tAdding Bounds Manager" << std::endl;
+				managers.push_back(new ArrayManager<AABB>(AABB_COMPONENT));
 			}
 		}
 	}
 }
 
 //Fills a system with all necessary managers
-void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*> &managers) {
+void SceneLoader::fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*> &managers) {
 	for (component_type managerType : system->operatesOn) {
 		if (managerType == TRANSFORM) {
 			system->managers->push_back(getCManager<transform>(managers, TRANSFORM));
@@ -130,13 +303,16 @@ void fillSystemWithManagers(EntitySystem * system, std::vector<ComponentManager*
 		else if (managerType == TAGS_COMPONENT) {
 			system->managers->push_back(getCManager<uint64_t>(managers, TAGS_COMPONENT));
 		}
+		else if (managerType == AABB_COMPONENT) {
+			system->managers->push_back(getCManager<AABB>(managers, AABB_COMPONENT));
+		}
 	}
 }
 
 //Fills a systems entity list with all matching entities it runs on
-void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*> &managers, int entityCount) {
+void SceneLoader::fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*> &managers, int entityCount) {
 	if (system->systemType == RENDER_SYSTEM) {
-		MappedManager<camera>* cManager = dynamic_cast<MappedManager<camera>*>(getCManager<camera>(managers, CAMERA));
+		MappedManager<v_camera>* cManager = dynamic_cast<MappedManager<v_camera>*>(getCManager<v_camera>(managers, V_CAMERA));
 		V_RenderSystem* rSystem = dynamic_cast<V_RenderSystem*>(system);
 		rSystem->setActiveCamera(cManager->getFirst().first, cManager->getFirst().second);
 	}
@@ -213,16 +389,17 @@ void fillSystemWithEntities(EntitySystem * system, std::vector<ComponentManager*
 }
 
 //Adds systems and populates them with the necessary managers
-void addSystems(configurationStructure &config, std::vector<EntitySystem*> &systems, std::vector<ComponentManager*> &managers, std::ifstream &fileStream) {
+void SceneLoader::addSystems(configurationStructure &config, std::vector<EntitySystem*> &systems, std::vector<ComponentManager*> &managers, FILE * fp) {
 	std::cout << "Adding Systems" << std::endl;
-	std::string line, value;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		if (getSceneKey(line) == END_STATEMENT) {
+	while (fscanf(fp, "%s", buffer) > 0) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		getValue(buffer, value, BUF_SIZE);
+		if (key == END_STATEMENT) {
 			break;
 		}
-		else if (getSceneKey(line) == ADD_SYSTEM) {
-			if (getSystemType(value) == RENDER_SYSTEM) {
+		else if (key == ADD_SYSTEM) {
+			system_type type = getSystemType(value);
+			if (type == RENDER_SYSTEM) {
 				if (config.api == Vulkan) {
 					std::cout << "\tAdding render system" << std::endl;
 					V_RenderSystem* renderSystem = new V_RenderSystem();		
@@ -230,26 +407,40 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 					systems.push_back(renderSystem);
 				}
 			}
-			else if (getSystemType(value) == RIGID_BODY_SYSTEM) {
+			else if (type == RIGID_BODY_SYSTEM) {
 				std::cout << "\tAdding rigid body system" << std::endl;
 				RigidBodySystem* rigidBodySystem = new RigidBodySystem();
 				systems.push_back(rigidBodySystem);
 			}
-			else if (getSystemType(value) == COLLISION_SYSTEM) {
+			else if (type == COLLISION_SYSTEM) {
 				std::cout << "\tAdding collision system" << std::endl;
 				CollisionSystem* collisionSystem = new CollisionSystem();
 				systems.push_back(collisionSystem);
 			}
-			else if (getSystemType(value) == ANIMATION_SYSTEM) {
+			else if (type == ANIMATION_SYSTEM) {
 				std::cout << "\tAdding animation system" << std::endl;
 				AnimationSystem* animationSystem = new AnimationSystem();
 				systems.push_back(animationSystem);
 			}
-			else if (getSystemType(value) == INPUT_SYSTEM) {
+			else if (type == INPUT_SYSTEM) {
 				std::cout << "\tAdding input system" << std::endl;
 				InputSystem* inputSystem = new InputSystem();
 				inputSystem->setEntityComponents(managers, { {TAGS_COMPONENT} }, ICE_TAG_INPUT);
 				systems.push_back(inputSystem);
+			}
+			else if (type == SCENE_TREE_SYSTEM) {
+				std::cout << "\tAdding scene tree system" << std::endl;
+				SceneTreeSystem* treeSys = new SceneTreeSystem();
+				if (config.api == Vulkan) {
+					treeSys->usingVulkan = true;
+
+				}
+				systems.push_back(treeSys);
+			}
+			else if (type == BOUNDS_SYSTEM) {
+				std::cout << "\tAdding bounds system" << std::endl;
+				BoundsSystem* bSys = new BoundsSystem();
+				systems.push_back(bSys);
 			}
 		}
 	}
@@ -261,47 +452,46 @@ void addSystems(configurationStructure &config, std::vector<EntitySystem*> &syst
 }
 
 // with the correct buffers and descriptors for enough lights
-void addVulkanPipeline(V_Instance *instance, material_type mType, std::ifstream &fileStream) {
+void SceneLoader::addVulkanPipeline(configurationStructure &config, char * value, FILE * fp, std::vector<NodeManager<VulkanSceneNode>*> * renderNodes) {
 	int max_lights = 0;
-	std::string line, value;
-
-	while (std::getline(fileStream, line)) {
-		if (strcmp(getSubComponent(line).c_str(), "MAX_LIGHTS") == 0) {
-			max_lights = atoi(getValue(line).c_str());
+	material_type mType = stringToMaterialType(value);
+	while (fscanf(fp, "%s", buffer) > 0) {
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		getValue(buffer, value, BUF_SIZE);
+		if (strcmp(keyString, "MAX_LIGHTS") == 0) {
+			max_lights = atoi(value);
 		}
-		else if (strcmp(getSubComponent(line).c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
-	instance->addGraphicsPipeline(PBR, max_lights);
+	config.apiInfo.v_Instance->addGraphicsPipeline(mType, max_lights);
+	renderNodes->push_back(new NodeManager<VulkanSceneNode>(VULKAN_SCENE_NODE_COMPONENT, mType));
 }
 
 //Adds a pipeline pased on the type of shaders it will use
-void addPipeline(configurationStructure &config, std::string value, std::ifstream &fileStream) {
+void SceneLoader::addPipeline(configurationStructure &config, char * value, FILE * fp) {
 	material_type mType = stringToMaterialType(value);
-	if (config.apiInfo.vulkan) {
-		addVulkanPipeline(config.apiInfo.v_Instance, mType, fileStream);
-	}
 }
 
 //Creates a transform component from a filestream until reaching END keyword
-transform buildTransformComponent(std::ifstream &fileStream) {
+transform SceneLoader::buildTransformComponent(FILE * fp) {
 	transform retTransform = transform();
+	int valSize;
 	retTransform.scale = glm::vec3(1);
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "POSITION") == 0) {
-			retTransform.pos = getVectorFromString<glm::vec3>(value);
+	while (fscanf(fp, "%s", buffer) > 0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "POSITION") == 0) {
+			retTransform.pos = getVectorFromString<glm::vec3>(value, valSize);
 		}
-		else if (strcmp(subComponent.c_str(), "ROTATION") == 0) {
-			retTransform.rot = getVectorFromString<glm::vec3>(value);
+		else if (strcmp(keyString, "ROTATION") == 0) {
+			retTransform.rot = getVectorFromString<glm::vec3>(value, valSize);
 		}
-		else if (strcmp(subComponent.c_str(), "SCALE") == 0) {
-			retTransform.scale = getVectorFromString<glm::vec3>(value);
+		else if (strcmp(keyString, "SCALE") == 0) {
+			retTransform.scale = getVectorFromString<glm::vec3>(value, valSize);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
@@ -309,17 +499,20 @@ transform buildTransformComponent(std::ifstream &fileStream) {
 }
 
 //Creates a vulkan mesh component with the help of a V_MeshFactory
-v_mesh buildVulkanMeshComponent(std::ifstream &fileStream, configurationStructure &config) {
+v_mesh SceneLoader::buildVulkanMeshComponent(FILE * fp, configurationStructure &config, AABB * bounds) {
 	v_mesh retMesh = v_mesh();
-	std::string meshFile = config.gamePath;
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "FILE_LOAD") == 0) {
-			V_MeshFactory::loadFromFile(meshFile.append(value).c_str(), retMesh, config);
+	char meshFile[BUF_SIZE * 2];
+	int valSize;
+	memcpy(meshFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+	while (fscanf(fp, "%s", buffer) > 0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "FILE_LOAD") == 0) {
+			memcpy(&value[valSize], nT, sizeof(char));
+			memcpy(&meshFile[config.gamePath.length()], value, (valSize + 1) * sizeof(char));
+			V_MeshFactory::loadFromFile(meshFile, retMesh, config, bounds);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
@@ -327,17 +520,20 @@ v_mesh buildVulkanMeshComponent(std::ifstream &fileStream, configurationStructur
 }
 
 //Creates a vulkan material component with the help of a V_MaterialFactory
-v_material buildVulkanMaterialComponent(std::ifstream &fileStream, configurationStructure &config) {
+v_material SceneLoader::buildVulkanMaterialComponent(FILE * fp, configurationStructure &config) {
 	v_material retMaterial = v_material();
-	std::string meshFile = config.gamePath;
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "FILE_LOAD") == 0) {
-			V_MaterialFactory::loadMaterialFromFile(meshFile.append(value), retMaterial, config);
+	char matFile[BUF_SIZE * 2];
+	int valSize;
+	memcpy(matFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+	while (fscanf(fp, "%s", buffer) > 0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "FILE_LOAD") == 0) {
+			memcpy(&value[valSize], nT, sizeof(char));
+			memcpy(&matFile[config.gamePath.length()], value, (valSize+1) * sizeof(char));
+			V_MaterialFactory::loadMaterialFromFile(matFile, retMaterial, config);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
@@ -345,62 +541,78 @@ v_material buildVulkanMaterialComponent(std::ifstream &fileStream, configuration
 }
 
 //Creates a vulkan camera from the file stream and config information
-camera buildCamera(std::ifstream &fileStream, configurationStructure &config) {
+camera SceneLoader::buildCamera(FILE * fp, configurationStructure &config) {
 	camera retCamera = camera();
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "FOV") == 0) {
-			retCamera.fov = strtof(value.c_str(), nullptr);
+	int valSize;
+	while (fscanf(fp, "%s", buffer)>0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "FOV") == 0) {
+			retCamera.fov = strtof(value, nullptr);
 		}
-		else if (strcmp(subComponent.c_str(), "NEAR") == 0) {
-			retCamera.near = strtof(value.c_str(), nullptr);
+		else if (strcmp(keyString, "NEAR") == 0) {
+			retCamera.near = strtof(value, nullptr);
 		}
-		else if (strcmp(subComponent.c_str(), "FAR") == 0) {
-			retCamera.far = strtof(value.c_str(), nullptr);
+		else if (strcmp(keyString, "FAR") == 0) {
+			retCamera.far = strtof(value, nullptr);
 		}
-		else if (strcmp(subComponent.c_str(), "LOOK") == 0) {
-			retCamera.lookDirection = glm::normalize(getVectorFromString<glm::vec3>(value));
+		else if (strcmp(keyString, "LOOK") == 0) {
+			retCamera.lookDirection = glm::normalize(getVectorFromString<glm::vec3>(value, valSize));
 		}
-		else if (strcmp(subComponent.c_str(), "UP") == 0) {
-			retCamera.upDirection = glm::normalize(getVectorFromString<glm::vec3>(value));
+		else if (strcmp(keyString, "UP") == 0) {
+			retCamera.upDirection = glm::normalize(getVectorFromString<glm::vec3>(value, valSize));
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
+			break;
+		}
+	}
+	return retCamera;
+}
+v_camera SceneLoader::buildVulkanCamera(FILE * fp, configurationStructure &config) {
+	v_camera retCamera = v_camera();
+	int valSize;
+	while (fscanf(fp, "%s", buffer) > 0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "FOV") == 0) {
+			retCamera.fov = strtof(value, nullptr);
+		}
+		else if (strcmp(keyString, "NEAR") == 0) {
+			retCamera.near = strtof(value, nullptr);
+		}
+		else if (strcmp(keyString, "FAR") == 0) {
+			retCamera.far = strtof(value, nullptr);
+		}
+		else if (strcmp(keyString, "LOOK") == 0) {
+			retCamera.lookDirection = glm::normalize(getVectorFromString<glm::vec3>(value, valSize));
+		}
+		else if (strcmp(keyString, "UP") == 0) {
+			retCamera.upDirection = glm::normalize(getVectorFromString<glm::vec3>(value, valSize));
+		}
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
 	return retCamera;
 }
 
-//Translates a string to a light type
-light_type getLightTypeFromString(std::string inString) {
-	if (strcmp(inString.c_str(), "POINT") == 0) {
-		return POINT_LIGHT;
-	}
-	else if (strcmp(inString.c_str(), "DIRECTION") == 0) {
-		return DIRECTION_LIGHT;
-	}
-	else if (strcmp(inString.c_str(), "SPOT") == 0) {
-		return SPOT_LIGHT;
-	}
-	return POINT_LIGHT;
-}
-
 //Creates a light component from a file stream
-light buildLight(std::ifstream &fileStream, configurationStructure &config) {
+light SceneLoader::buildLight(FILE * fp, configurationStructure &config) {
 	light retLight = light();
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "LIGHT_TYPE") == 0) {
+	int valSize;
+	while (fscanf(fp, "%s", buffer)>0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "LIGHT_TYPE") == 0) {
 			retLight.lType = getLightTypeFromString(value);
 		}
-		else if (strcmp(subComponent.c_str(), "COLOR") == 0) {
-			retLight.color = getVectorFromString<glm::vec4>(value);
+		else if (strcmp(keyString, "COLOR") == 0) {
+			retLight.color = getVectorFromString<glm::vec4>(value, valSize);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "RANGE") == 0) {
+			retLight.range = strtof(value, nullptr);
+		}
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
@@ -408,26 +620,26 @@ light buildLight(std::ifstream &fileStream, configurationStructure &config) {
 }
 
 //Creates a rigid body component from a file stream
-rigid_body buildRigidBody(std::ifstream &fileStream, configurationStructure &config) {
+rigid_body SceneLoader::buildRigidBody(FILE * fp, configurationStructure &config) {
 	rigid_body retBody = rigid_body();
-	std::string line, value, subComponent;
+	int valSize;
 	retBody.lastVelocity = glm::vec3(0.0f, 0.0f, 0.0f);
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "MASS") == 0) {
-			retBody.mass = strtof(value.c_str(), nullptr);
+	while (fscanf(fp, "%s", buffer) > 0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "MASS") == 0) {
+			retBody.mass = strtof(value, nullptr);
 		}
-		else if (strcmp(subComponent.c_str(), "ELASTICITY") == 0) {
-			retBody.elasticity = strtof(value.c_str(), nullptr);
+		else if (strcmp(keyString, "ELASTICITY") == 0) {
+			retBody.elasticity = strtof(value, nullptr);
 		}
-		else if (strcmp(subComponent.c_str(), "START_VELOCITY") == 0) {
-			retBody.lastVelocity = getVectorFromString<glm::vec3>(value);
+		else if (strcmp(keyString, "START_VELOCITY") == 0) {
+			retBody.lastVelocity = getVectorFromString<glm::vec3>(value, valSize);
 		}
-		else if (strcmp(subComponent.c_str(), "STATIC") == 0) {
+		else if (strcmp(keyString, "STATIC") == 0) {
 			retBody.isStatic = getBool(value);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
@@ -435,19 +647,18 @@ rigid_body buildRigidBody(std::ifstream &fileStream, configurationStructure &con
 }
 
 //Creates a collider from a file stream
-collider buildCollider(std::ifstream &fileStream, configurationStructure &config) {
+collider SceneLoader::buildCollider(FILE * fp, configurationStructure &config) {
 	collider retCollider = collider();
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "TYPE") == 0) {
+	while (fscanf(fp, "%s", buffer)) {
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		getValue(buffer, value, BUF_SIZE);
+		if (strcmp(keyString, "TYPE") == 0) {
 			retCollider.type = getColliderType(value);
 		}
-		else if (strcmp(subComponent.c_str(), "RADIUS") == 0) {
-			retCollider.radius = strtof(value.c_str(), nullptr);
+		else if (strcmp(keyString, "RADIUS") == 0) {
+			retCollider.radius = strtof(value, nullptr);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (strcmp(keyString, "END") == 0) {
 			break;
 		}
 	}
@@ -455,17 +666,20 @@ collider buildCollider(std::ifstream &fileStream, configurationStructure &config
 }
 
 //Creates an animation using an animatoin factory
-animation buildAnimation(std::ifstream &fileStream, configurationStructure &config) {
+animation SceneLoader::buildAnimation(FILE * fp, configurationStructure &config) {
 	animation retAnim = animation();
-	std::string animFile = config.gamePath;
-	std::string line, value, subComponent;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		subComponent = getSubComponent(line);
-		if (strcmp(subComponent.c_str(), "FILE_LOAD") == 0) {
-			AnimationFactory::loadFromFile(animFile.append(value).c_str(), retAnim, config);
+	char animFile[BUF_SIZE*2];
+	memcpy(animFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+	int valueCount = 0;
+	while (fscanf(fp, "%s", buffer)) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		valueCount = getValue(buffer, value, BUF_SIZE);
+		if (key == FILE_LOAD_KEY) {
+			memcpy(&value[valueCount], nT, sizeof(char));
+			memcpy(&animFile[config.gamePath.length()], value, (valueCount+1) * sizeof(char));
+			AnimationFactory::loadFromFile(animFile, retAnim, config);
 		}
-		else if (strcmp(subComponent.c_str(), "END") == 0) {
+		else if (key == END_STATEMENT) {
 			break;
 		}
 	}
@@ -473,184 +687,331 @@ animation buildAnimation(std::ifstream &fileStream, configurationStructure &conf
 }
 
 //Loads in an entity under the vulkan api
-void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentManagers, std::ifstream &fileStream, configurationStructure &config) {
+void SceneLoader::loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentManagers, FILE * fp, configurationStructure &config, 
+	SceneNode* scene, std::vector<NodeManager<VulkanSceneNode>*> * renderNodes, std::vector<std::vector<int>*> * staticTemp) {
 	std::cout << "Adding entity: " << entityID << std::endl;
-	std::string line, value;
-	while (std::getline(fileStream, line)) {
-		value = getValue(line);
-		if (getSceneKey(line) == END_STATEMENT) {
+	bool isDynamic = false, inScene = false, renderable = false;
+	AABB bounds = AABB();
+	scene_key key;
+	while (fscanf(fp, "%s", buffer) > 0) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		getValue(buffer, value, BUF_SIZE);
+		if (key == END_STATEMENT) {
 			break;
 		}
-		else if (getSceneKey(line) == ADD_COMPONENT) {
-			if (getComponentType(value) == TRANSFORM) {
+		else if (key == ADD_COMPONENT) {
+			component_type cType = getComponentType(value);
+			if (cType == TRANSFORM) {
 				std::cout << "\tAdding Transform Component" << std::endl;
-				getCManager<transform>(componentManagers, TRANSFORM)->addComponent(entityID, buildTransformComponent(fileStream));
+				getCManager<transform>(componentManagers, TRANSFORM)->addComponent(entityID, buildTransformComponent(fp));
 			}
-			else if (getComponentType(value) == MESH_COMPONENT) {
-				getCManager<v_mesh>(componentManagers, V_MESH)->addComponent(entityID, buildVulkanMeshComponent(fileStream, config));
+			else if (cType == MESH_COMPONENT) {
+				getCManager<v_mesh>(componentManagers, V_MESH)->addComponent(entityID, buildVulkanMeshComponent(fp, config, &bounds));
+				inScene = true;
+				renderable = true;
 			}
-			else if (getComponentType(value) == MATERIAL_COMPONENT) {
-				getCManager<v_material>(componentManagers, V_MATERIAL)->addComponent(entityID, buildVulkanMaterialComponent(fileStream, config));
+			else if (cType == MATERIAL_COMPONENT) {
+				getCManager<v_material>(componentManagers, V_MATERIAL)->addComponent(entityID, buildVulkanMaterialComponent(fp, config));
 			}
-			else if (getComponentType(value) == PREFAB_COMPONENT) {
+			else if (cType == PREFAB_COMPONENT) {
 				std::cout << "\tAdding Prefab Component" << std::endl;
 				prefab tempPrefab = prefab();
-				std::getline(fileStream, line);
-				tempPrefab.baseEntity = atoi(getValue(line).c_str());
+				fscanf(fp, "%s", buffer);
+				getValue(buffer, value, BUF_SIZE);
+				tempPrefab.baseEntity = atoi(value);
 				getCManager<prefab>(componentManagers, PREFAB_COMPONENT)->addComponent(entityID, tempPrefab);
 			}
-			else if (getComponentType(value) == CAMERA) {
+			else if (cType == CAMERA) {
 				std::cout << "\tAdding Camera Component" << std::endl;
-				getCManager<camera>(componentManagers, CAMERA)->addComponent(entityID, buildCamera(fileStream, config));
+				getCManager<v_camera>(componentManagers, V_CAMERA)->addComponent(entityID, buildVulkanCamera(fp, config));
 			}
-			else if (getComponentType(value) == LIGHT_COMPONENT) {
+			else if (cType == LIGHT_COMPONENT) {
 				std::cout << "\tAdding Light Component" << std::endl;
-				getCManager<light>(componentManagers, LIGHT_COMPONENT)->addComponent(entityID, buildLight(fileStream, config));
+				getCManager<light>(componentManagers, LIGHT_COMPONENT)->addComponent(entityID, buildLight(fp, config));
+				inScene = true;
 			}
-			else if (getComponentType(value) == RIGID_BODY) {
+			else if (cType == RIGID_BODY) {
 				std::cout << "\tAdding Rigid Body Component" << std::endl;
-				rigid_body tempRigid = buildRigidBody(fileStream, config);
+				rigid_body tempRigid = buildRigidBody(fp, config);
 				tempRigid.lastPosition = getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos;
 				tempRigid.lastRotation = getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).rot;
 				getCManager<rigid_body>(componentManagers, RIGID_BODY)->addComponent(entityID, tempRigid);
 			}
-			else if (getComponentType(value) == COLLIDER) {
+			else if (cType == COLLIDER) {
 				std::cout << "\tAdding Collider Component" << std::endl;
-				getCManager<collider>(componentManagers, COLLIDER)->addComponent(entityID, buildCollider(fileStream, config));
+				getCManager<collider>(componentManagers, COLLIDER)->addComponent(entityID, buildCollider(fp, config));
+				inScene = true;
 			}
-			else if (getComponentType(value) == ANIMATION_COMPONENT) {
+			else if (cType == ANIMATION_COMPONENT) {
 				std::cout << "\tAdding Animation Component" << std::endl;
-				getCManager<animation>(componentManagers, ANIMATION_COMPONENT)->addComponent(entityID, buildAnimation(fileStream, config));
+				getCManager<animation>(componentManagers, ANIMATION_COMPONENT)->addComponent(entityID, buildAnimation(fp, config));
 			}
 		}
-		else if (getSceneKey(line) == ADD_TAG) {
-			if (strcmp(value.c_str(), "ICE_TAG_INPUT") == 0) {
+		else if (key == ADD_TAG) {
+			if (strcmp(value, "ICE_TAG_INPUT") == 0) {
 				std::cout << "\tAdding input tag" << std::endl;
 				uint64_t new_tag = addTag<uint64_t>(getCManager<uint64_t>(componentManagers, TAGS_COMPONENT)->getComponent(entityID), ICE_TAG_INPUT);
 				getCManager<uint64_t>(componentManagers, TAGS_COMPONENT)->setComponent(entityID, new_tag);
 			}
 		}
+		else if (key == IS_DYNAMIC) {
+			isDynamic = getBool(value);
+		}
+	}
+
+	if (getCManager<collider>(componentManagers, COLLIDER)->hasEntity(entityID)) {
+		collider col = getCManager<collider>(componentManagers, COLLIDER)->getComponent(entityID);
+		AABB colBounds = getBounds(col, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos);
+		AABB meshBounds = getMeshBounds(&bounds, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos);
+		getCManager<AABB>(componentManagers, AABB_COMPONENT)->setComponent(entityID, getMaxBounds(&meshBounds, &colBounds));
+	}
+	if (inScene) {
+		int pipelineIndex = -2;
+		if (renderable) {
+			material_type mType = getCManager<v_material>(componentManagers, V_MATERIAL)->getComponent(entityID).matType;
+			pipelineIndex = getPipelineIndex(renderNodes, mType);
+			if (pipelineIndex == -1) {
+				std::cout << "ERROR LOADING SCENE. CORRUPT FILE!" << std::endl;
+			}
+		}
+		insertEntity(scene, entityID, getCManager<AABB>(componentManagers, AABB_COMPONENT)->getComponentAddress(entityID), isDynamic, &config, 0, renderNodes, staticTemp);
 	}
 }
 
 //Determines which entity loading function to use and passes through variables
-void loadEntity(int entityID, configurationStructure &config, std::vector<ComponentManager*>& componentManagers, std::ifstream &fileStream) {
+void SceneLoader::loadEntity(int entityID, configurationStructure &config, std::vector<ComponentManager*>& componentManagers, FILE * fp, SceneNode* scene) {
 	if (config.api == Vulkan) {
-		loadVulkanEntity(entityID, componentManagers, fileStream, config);
+		//loadVulkanEntity(entityID, componentManagers, fp, config, scene, renderNodes);
 	}
 }
 
 //Builder functions for descriptor sets
-void buildVulkanDescriptors(std::vector<ComponentManager*>& componentManagers, configurationStructure &config) {
+void SceneLoader::buildVulkanDescriptors(std::vector<ComponentManager*>& componentManagers, configurationStructure &config, std::vector<NodeManager<VulkanSceneNode>*> * renderNodes) {
 	//Each pipeline has a descriptor set for the viewpersp+lights descriptor set and all the buffers for cameras and lights (buffers for cameras can be updated by currently rendered cam info)
 	//Transform matrices are handled as push constants
 	//Texture descriptor sets are stored with the relevant material
 
-	//1 buffer for camera and 1 for lights (PER FRAME)
-	int camLightDescCount = 2 * config.swapchainBuffering;
+	//Number of total scene scene_nodes that could have a descriptor
+	//Some pipelines may use a different number of lights than others so they will need their own descriptos
+	int renderNodeCount = config.sceneNodesCount * (int) renderNodes->size();
 
-	//Only need as many descriptors as are textures as they can be rebound each draw call
+	//One light descriptor per frame per scene_node (per pipeline)
+	int lightDescriptorsCount = config.swapchainBuffering * renderNodeCount;
+
+	//One camera descriptor per frame per camera
+	int camDescriptors = config.swapchainBuffering * getCManager<v_camera>(componentManagers, V_CAMERA)->getSize();
+
+	//One descriptor for each of the images used for textures
 	int imageBuffersNeeded = countImages(dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(componentManagers, V_MATERIAL)));
 
-	//1 set per buffering (set includes viewPersp descriptor and lights descriptor) + 1 set per material
-	int setsNeeded = getCManager<v_material>(componentManagers, V_MATERIAL)->getSize() + config.swapchainBuffering;
+	//1 set per material + 1 set per renderNode for each frame in flight
+	int setsNeeded = getCManager<v_material>(componentManagers, V_MATERIAL)->getSize() + lightDescriptorsCount;
 
 	//Call to create a descriptor pool large enough for viewpersp descriptors, light descriptors, and image descriptors
-	config.apiInfo.v_Instance->createStaticDescriptorPool(camLightDescCount, imageBuffersNeeded, setsNeeded);
+	//Allow the scene to double in size by allocating twice the number of descriptors at initialization. Further growth requires new pools
+	config.apiInfo.v_Instance->createStaticDescriptorPool((camDescriptors + lightDescriptorsCount)*2, imageBuffersNeeded*2, setsNeeded*2);
 
-	//Allocates descriptor sets within cameras, the set holds the 
-	config.apiInfo.v_Instance->getStaticDescriptorPool()->allocateSets(config.apiInfo.v_Instance->getPipelineDescriptorSetLayout(PBR, LIGHT_CAM_SET),
-		*config.apiInfo.v_Instance->getGraphicsPipeline(PBR)->getDescriptorSets(),
-		config.swapchainBuffering);
+	//Loop over each render map and allocate the set for each scene_node
+	for (int i = 0; i < renderNodes->size(); i++) {
+		config.apiInfo.v_Instance->getStaticDescriptorPool()->allocateSetsInMap(
+		config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->getDescriptorSetLayout(LIGHT_CAM_SET),
+			renderNodes->at(i),
+			config.swapchainBuffering
+			);
+	}
+
+	//Allocate camera buffers
+	CManager<v_camera>* camManager = getCManager<v_camera>(componentManagers, V_CAMERA);
+	std::vector<int> camIDs = camManager->getEntities();
+	VkDeviceSize camBufSize = sizeof(ViewPersp);
+	for (int i = 0; i < camIDs.size(); i++) {
+		v_camera* cam = camManager->getComponentAddress(camIDs.at(i));
+		cam->camBuffers = (VkBuffer*)malloc(sizeof(VkBuffer) * config.swapchainBuffering);
+		cam->camVRAM = (VkDeviceMemory*)malloc(sizeof(VkBuffer) * config.swapchainBuffering);
+		for (int j = 0; j < config.swapchainBuffering; j++) {
+			//Creates a host visible buffer for updating			
+			V_BufferHelper::createBuffer(config.apiInfo.v_Instance->getPrimaryDevice(), camBufSize,
+				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+				cam->camBuffers[j], cam->camVRAM[j]);
+		}
+	}
+
+	//Allocate the buffers for the scene_nodes
+	for (int i = 0; i < renderNodes->size(); i++) {
+		VkDeviceSize lightsBufferSize = sizeof(LightObject) * config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->max_lights;
+		for (int j = 0; j < renderNodes->at(i)->getEntities().size(); j++) {
+			VulkanSceneNode* scene_node = renderNodes->at(i)->getComponentAddress(renderNodes->at(i)->getEntities().at(j));
+			scene_node->lightBuffers = (VkBuffer*)malloc(sizeof(VkBuffer) * config.swapchainBuffering);
+			scene_node->lightBufferVRAM = (VkDeviceMemory*)malloc(sizeof(VkBuffer) * config.swapchainBuffering);
+			scene_node->lightIDs = (int*)malloc(sizeof(int) * config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->max_lights);
+			scene_node->lightMax = config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->max_lights;
+			for (int k = 0; k < config.swapchainBuffering; k++) {
+				//Creates a host visible buffer for updating			
+				V_BufferHelper::createBuffer(config.apiInfo.v_Instance->getPrimaryDevice(), lightsBufferSize,
+					VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+					scene_node->lightBuffers[k], scene_node->lightBufferVRAM[k]);
+			}
+		}
+	}
+
+	//Create camera descriptor infos to pass so we don't need extra descriptors per camera
+	v_camera* cam = camManager->getComponentAddress(camIDs.at(0));
+	VkDescriptorBufferInfo* camDescInfos = (VkDescriptorBufferInfo*)malloc(sizeof(VkDescriptorBufferInfo) * config.swapchainBuffering);
+	for (int i = 0; i < config.swapchainBuffering; i++) {
+		VkDescriptorBufferInfo camInfo = {};
+		camInfo.buffer = cam->camBuffers[i];
+		camInfo.offset = 0;
+		camInfo.range = sizeof(ViewPersp);
+		camDescInfos[i] = camInfo;
+	}
 
 	//Configures the pipelines descriptor sets to use the pipelines buffers split into 2 bindings
-	config.apiInfo.v_Instance->getStaticDescriptorPool()->configureVulkanPipelineDescriptorSets(config.apiInfo.v_Instance->getGraphicsPipeline(PBR));
+	for (int i = 0; i < renderNodes->size(); i++) {
+		config.apiInfo.v_Instance->getStaticDescriptorPool()->configureNodeSets(
+			renderNodes->at(i),
+			camDescInfos,
+			config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->max_lights,
+			config.swapchainBuffering
+		);
+	}
+	free(camDescInfos);
 
 	//Creates and configures descriptor sets for each material
-	//TODO descriptor sets are not being initialized
 	MappedManager<v_material>* matManager = dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(componentManagers, V_MATERIAL));
 	for (int i = 0; i < matManager->getEntities().size(); i++){
-		config.apiInfo.v_Instance->getStaticDescriptorPool()->allocateTextureSet(
-			config.apiInfo.v_Instance->getPipelineDescriptorSetLayout(PBR, MATERIAL_SET),
-			*matManager->getComponentAddress(matManager->getEntities().at(0)));
+		v_material* mat = matManager->getComponentAddress(matManager->getEntities().at(i));
+		config.apiInfo.v_Instance->getStaticDescriptorPool()->allocateTextureSet(config.apiInfo.v_Instance->getPipelineDescriptorSetLayout(mat->matType, MATERIAL_SET), mat);
 
-		config.apiInfo.v_Instance->getStaticDescriptorPool()->configureTextureSet(
-			*matManager->getComponentAddress(matManager->getEntities().at(0)),
-			config.apiInfo.v_Instance->textureSampler);
+		config.apiInfo.v_Instance->getStaticDescriptorPool()->configureTextureSet(mat, config.apiInfo.v_Instance->textureSampler);
 	}
 	std::cout << "Finished configuring descriptor sets" << std::endl;
 }
-void buildDescriptors(std::vector<ComponentManager*>& componentManagers, configurationStructure &config) {
+void SceneLoader::buildDescriptors(std::vector<ComponentManager*>& componentManagers, configurationStructure &config) {
 	if (config.apiInfo.vulkan) {
-		buildVulkanDescriptors(componentManagers, config);
+		//buildVulkanDescriptors(componentManagers, config);
 	}
 }
 
 //Loads a scene into the component managers and builds necessary resources
-void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std::vector<ComponentManager*>& componentManagers, std::vector<EntitySystem*> &systems)
+void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std::vector<ComponentManager*>& componentManagers, std::vector<EntitySystem*> &systems, SceneNode* scene)
 {
 	//Retrieve the scene file
-	std::string gameFile = config.gamePath;
-	gameFile.append(config.appName);
-	gameFile.append(".gf");
-	std::ifstream infile(gameFile.c_str());
-	std::string line, value;
+	int valueSize = 0;
+	char gameString[512];
+	nT[0] = '\0';
+
+	memcpy(gameString, config.gamePath.c_str(), config.gamePath.length() * sizeof(char));
+	memcpy(&gameString[config.gamePath.length()], config.appName.c_str(), config.appName.length() * sizeof(char));
+	memcpy(&gameString[config.gamePath.length() + config.appName.length()], ".gf", 3 * sizeof(char));
+	memcpy(&gameString[config.gamePath.length() + config.appName.length() + 3], nT, sizeof(char));
+
+	FILE *gameFile;
 	int lineIndex = -1;
-	while (std::getline(infile, line)) {
-		if (sceneIndex == lineIndex) {
-			value = getValue(line);
-			break;
+	gameFile = fopen(gameString, "r");
+	while (fscanf(gameFile, "%s", buffer) == 1) {
+		if (sceneIndex = lineIndex) {
+			valueSize = getValue(buffer, value, BUF_SIZE);
+			lineIndex++;
 		}
-		lineIndex++;
+	}
+	fclose(gameFile);
+
+	std::vector<NodeManager<VulkanSceneNode>*> * renderNodes = new std::vector<NodeManager<VulkanSceneNode>*>();
+	std::vector<std::vector<int>*>* staticTemp = new std::vector<std::vector<int>*>();
+	if (config.api != Vulkan) {
+		delete renderNodes;
 	}
 
 	config.saveInfo.levelIndex = sceneIndex;
 
-	std::string sceneFile = config.gamePath;
-	sceneFile.append(value);
+	memcpy(&gameString[config.gamePath.length()], value, valueSize * sizeof(char));
+	gameFile = fopen(gameString, "r");
 
-	scene_key key;
-	std::ifstream sceneIn(sceneFile.c_str());
 	int entityCount = 0;
-
-	while (std::getline(sceneIn, line)) {
-		key = getSceneKey(line);
-		value = getValue(line);
+	while (fscanf(gameFile, "%s", buffer) == 1) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		valueSize = getValue(buffer, value, BUF_SIZE);
 		if (key == SCENE_NAME) {
-			config.saveInfo.levelName = value;
+			config.saveInfo.levelName = std::string(value);
 		}
 		else if (key == MANAGERS) {
-			addManagers(config, componentManagers, sceneIn);
+			addManagers(config, componentManagers, gameFile);
 		}
 		else if (key == SYSTEMS) {
-			addSystems(config, systems, componentManagers, sceneIn);
+			addSystems(config, systems, componentManagers, gameFile);
+		}
+		else if (key == SCENE_STRUCTURE) {
+			scene->id = 0;
+			config.sceneChildren = getChildCount(value);
+			buildTree(config, scene, gameFile);
+			for (int i = 0; i < config.sceneNodesCount; i++) {
+				staticTemp->push_back(new std::vector<int>());
+			}
+			if (config.api == Vulkan) {
+				int renderNodeCount = config.sceneNodesCount * (int)renderNodes->size();
+				config.apiInfo.v_Instance->createCommandPools(config.cpu_info->coreCount, renderNodeCount);
+				allocateVulkanCommandObjects(renderNodes, &config);
+			}
 		}
 		else if (key == ADD_PIPELINE) {
-			addPipeline(config, value, sceneIn);
+			if (config.api == Vulkan) {
+				addVulkanPipeline(config, value, gameFile, renderNodes);
+			}
+			else {
+				addPipeline(config, value, gameFile);
+			}
 		}
 		else if (key == ENTITY_COUNT) {
-			dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(componentManagers,TRANSFORM))->setSize(atoi(value.c_str()));
-			dynamic_cast<ArrayManager<uint64_t>*>(getCManager<uint64_t>(componentManagers, TAGS_COMPONENT))->setSize(atoi(value.c_str()));
+			dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(componentManagers, TRANSFORM))->setSize(atoi(value));
+			dynamic_cast<ArrayManager<uint64_t>*>(getCManager<uint64_t>(componentManagers, TAGS_COMPONENT))->setSize(atoi(value));
+			dynamic_cast<ArrayManager<AABB>*>(getCManager<AABB>(componentManagers, AABB_COMPONENT))->setSize(atoi(value));
 		}
 		else if (key == ENTITY) {
-			loadEntity(atoi(value.c_str()), config, componentManagers, sceneIn);
+			if (config.api == Vulkan) {
+				loadVulkanEntity(atoi(value), componentManagers, gameFile, config, scene, renderNodes, staticTemp);
+			}
 			entityCount++;
 		}
 		else if (key == END_ENTITIES) {
 			break;
 		}
 	}
+	fclose(gameFile);
 
-	buildDescriptors(componentManagers, config);
+	if (config.api == Vulkan) {
+		buildVulkanDescriptors(componentManagers, config, renderNodes);
+	}
 	for (EntitySystem* system : systems) {
 		fillSystemWithEntities(system, componentManagers, entityCount);
+		if (system->usesScene) {
+			system->setScene(scene);
+		}
+		if (system->systemType == RENDER_SYSTEM) {
+			dynamic_cast<V_RenderSystem*>(system)->setRenderNodes(renderNodes);
+		}
+		if (system->systemType == SCENE_TREE_SYSTEM) {
+			dynamic_cast<SceneTreeSystem*>(system)->setRenderNodes(renderNodes);
+		}
+	}
+
+	collapseStaticEntities(scene, config.sceneChildren, staticTemp);
+	delete staticTemp;
+
+	allocateLightBuffers(scene, getMaxLights(config.apiInfo.v_Instance->getGraphicsPipelines()), config.sceneChildren);
+	placeLightsInScene(scene, dynamic_cast<MappedManager<light>*>(getCManager<light>(componentManagers, LIGHT_COMPONENT)), 
+		dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(componentManagers, TRANSFORM)), &config, 
+		getMaxLights(config.apiInfo.v_Instance->getGraphicsPipelines()));
+
+	printSceneTreeWithEntities(scene, config.sceneChildren, 0, 1);
+	if (locateEntity(scene, 0, config.sceneChildren) == false) {
+		std::cout << "Couldn't find entity 0!" << std::endl;
 	}
 
 	std::cout << "Finished loading all entites in scene" << std::endl;
 }
 
 //Frees loaded memory
-void SceneLoader::unloadScene(configurationStructure &config, std::vector<ComponentManager*>& managers)
+void SceneLoader::unloadScene(configurationStructure &config, std::vector<ComponentManager*>& managers, std::vector<EntitySystem*> &systems)
 {
 	std::cout << "Unloading Scene" << std::endl;
 	managerCleanup(dynamic_cast<ArrayManager<transform>*>( getCManager<transform>(managers,TRANSFORM) ));
@@ -659,10 +1020,23 @@ void SceneLoader::unloadScene(configurationStructure &config, std::vector<Compon
 		managerCleanup(dynamic_cast<MappedManager<v_mesh>*>( getCManager<v_mesh>(managers,V_MESH)), config.apiInfo.v_Instance->getPrimaryDevice());
 		std::cout << "\tCleaning vulkan materials" << std::endl;
 		managerCleanup(dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(managers, V_MATERIAL)), config.apiInfo.v_Instance->getPrimaryDevice());
+		std::cout << "\tCleaning vulkan cameras" << std::endl;
+		managerCleanup(dynamic_cast<MappedManager<v_camera>*>(getCManager<v_camera>(managers, V_CAMERA)), config.apiInfo.v_Instance->getPrimaryDevice(), config.swapchainBuffering);
 		std::cout << "\tCleaning vulkan graphics pipelines" << std::endl;
 		for (V_GraphicsPipeline* pipeline : *config.apiInfo.v_Instance->getGraphicsPipelines()) {
 			pipeline->cleanup();
 		}
+	}
+
+	//Delete the actual managers
+	for (ComponentManager* man : managers) {
+		delete man;
+	}
+
+	//Delete the actual systems
+	for (EntitySystem* sys : systems) {
+		sys->cleanup();
+		delete sys;
 	}
 }
 

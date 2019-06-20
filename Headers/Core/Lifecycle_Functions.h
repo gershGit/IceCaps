@@ -53,16 +53,20 @@ void loadConfiguration(configurationStructure &config) {
 	}
 	config.cpu_info->threads.resize(config.cpu_info->coreCount);
 
-	std::vector<config_key> keys = std::vector<config_key>();
-	std::vector<std::string> values = std::vector<std::string>();
+	const char * configFile = "../../Configuration/icecaps.config";
 
-	std::ifstream infile("../../Configuration/icecaps.config");
-	std::string line, value;
+	char buffer[256];
+	char value[128];
+	int valSize;
 	config_key key;
-	while (std::getline(infile, line))
+
+	FILE * fp;
+	fp = fopen(configFile, "r");
+	
+	while (fscanf(fp, "%s", buffer) > 0)
 	{
-		key = getConfigKey(line);
-		value = getValue(line);
+		key = getConfigKey(buffer, 256);
+		valSize = getValue(buffer, value, 256);
 		if (key == PREFERRED_API) {
 			config.api = getAPI(value);
 		}
@@ -79,19 +83,19 @@ void loadConfiguration(configurationStructure &config) {
 			getRefreshRate(value, config);
 		}
 		else if (key == RESOLUTION) {
-			getResolution(value, config);
+			getResolution(value, config, valSize);
 		}
 		else if (key == APP_NAME) {
 			config.appName = value;
 		}
 		else if (key == APP_VERSION) {
-			getAppVersion(value, config);
+			getAppVersion(value, config, valSize);
 		}
 		else if (key == MULTI_GPU) {
 			config.multiGPU = getBool(value);
 		}
 		else if (key == GPU_SELECTED) {
-			config.gpuSelected = atoi(value.c_str());
+			config.gpuSelected = atoi(value);
 		}
 		else if (key == COMPUTE_REQUIRED) {
 			config.computeRequired = getBool(value);
@@ -109,7 +113,7 @@ void loadConfiguration(configurationStructure &config) {
 			setPresentMode(value, config);
 		}
 		else if (key == SWAPCHAIN_BUFFERING) {
-			config.swapchainBuffering = atoi(value.c_str());
+			config.swapchainBuffering = atoi(value);
 			if (config.swapchainBuffering < 1) {
 				config.swapchainBuffering = 1;
 			}
@@ -121,10 +125,10 @@ void loadConfiguration(configurationStructure &config) {
 			config.gamePath = value;
 		}
 		else if (key == ANTI_ALIASING) {
-			if (strcmp(value.c_str(), "MULTI_SAMPLING")) {
+			if (strcmp(value, "MULTI_SAMPLING")) {
 				config.antiAliasing = MULTI_SAMPLING;
 			}
-			else if (strcmp(value.c_str(), "SUPER_SAMPLING")) {
+			else if (strcmp(value, "SUPER_SAMPLING")) {
 				config.antiAliasing = SUPER_SAMPLING;
 			}
 			else {
@@ -132,12 +136,13 @@ void loadConfiguration(configurationStructure &config) {
 			}
 		}
 		else if (key == ANTI_ALIASING_RES) {
-			config.anti_aliasing_resolution = atoi(value.c_str());
+			config.anti_aliasing_resolution = atoi(value);
 		} 
 		else if (key == ANISOTROPY_RES) {
-			config.anisotropy = atoi(value.c_str());
+			config.anisotropy = atoi(value);
 		}
 	}
+	fclose(fp);
 }
 //-----------------------------------------------------------------------------------------
 
@@ -195,7 +200,7 @@ GLFWwindow* opengl_initializeWindow() {
 }
 
 //The main engine loop for an application using vulkan
-void vulkan_mainloop(configurationStructure &config, std::vector<EntitySystem*> &systems) {
+void vulkan_mainloop(configurationStructure &config, std::vector<EntitySystem*> &systems, SceneNode* scene) {
 	GameTimer::Start();
 	for (EntitySystem * system : systems) {
 		system->start();
@@ -249,7 +254,6 @@ V_Instance* vulkan_initialize(configurationStructure &config) {
 	instance->createTransferCommandPools();
 	instance->createSwapChain();
 	instance->createSampler();
-	instance->createCommandPools(config.cpu_info->coreCount);
 	instance->createSyncObjects();
 	return instance;
 }
@@ -312,9 +316,9 @@ GLFWwindow* initializeWindow(configurationStructure &config) {
 	}
 	return nullptr;
 }
-void mainLoop(configurationStructure &config, std::vector<EntitySystem*> &systems) {
+void mainLoop(configurationStructure &config, std::vector<EntitySystem*> &systems, SceneNode* scene) {
 	if (config.api == Vulkan) {
-		vulkan_mainloop(config, systems);
+		vulkan_mainloop(config, systems, scene);
 	}
 	else if (config.api == openGL) {
 		opengl_mainloop(config.window);

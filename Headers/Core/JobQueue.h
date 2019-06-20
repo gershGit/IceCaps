@@ -25,7 +25,7 @@ public:
 	}
 	void push(Job job) {
 		std::unique_lock<std::mutex> lock(queue_mutex);
-		queue.push(std::move(job)); //TODO just job?
+		queue.push(std::move(job));
 	}
 	bool isEmpty() {
 		std::unique_lock<std::mutex> lock(queue_mutex);

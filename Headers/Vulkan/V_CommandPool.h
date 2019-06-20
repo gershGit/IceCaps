@@ -27,6 +27,8 @@ private:
 public:
 	//A vector containing all the command buffers of this pool
 	std::vector<VkCommandBuffer> commandBuffers;
+	int bufferIterator = 0;
+	bool saturated = false;
 
 	V_CommandPool();
 
@@ -38,6 +40,7 @@ public:
 	VkCommandPool getCommandPool() { return commandPool; };
 	std::vector<VkCommandBuffer>* getCommandBuffers() { return &commandBuffers; };
 	VkCommandBuffer getCommandBufferAt(int index) { return commandBuffers.at(index); };
+	VkCommandBuffer getNextCommandBuffer();
 	pool_type getPoolType() { return poolType; };
 	V_Device* getDevice() { return device; };
 

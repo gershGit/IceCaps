@@ -50,3 +50,12 @@ void managerCleanup(MappedManager<v_mesh>* manager, V_Device * device) {
 		vkFreeMemory(device->getLogicalDevice(), mesh.second.vBufferVRAM, nullptr);
 	}
 }
+
+void managerCleanup(MappedManager<v_camera>* manager, V_Device* device, int bufferCount) {
+	for (std::pair<int, v_camera> cam : manager->componentMap) {
+		for (int i = 0; i < bufferCount; i++) {
+			vkDestroyBuffer(device->getLogicalDevice(), cam.second.camBuffers[i], nullptr);
+			vkFreeMemory(device->getLogicalDevice(), cam.second.camVRAM[i], nullptr);
+		}
+	}
+}

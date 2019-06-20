@@ -31,11 +31,14 @@
     <Filter Include="Source Files\Vulkan">
       <UniqueIdentifier>{58b83645-491d-4dd2-8c9e-36765c6c8d92}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\OpenGL">
+      <UniqueIdentifier>{1053b70a-a630-4c23-b7b3-c577120494b8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\ThirdParty">
       <UniqueIdentifier>{bbfdd1f6-1637-4a57-bb00-7f41b29e0d7c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\OpenGL">
-      <UniqueIdentifier>{1053b70a-a630-4c23-b7b3-c577120494b8}</UniqueIdentifier>
+    <Filter Include="Source Files\Shaders">
+      <UniqueIdentifier>{faaf4b36-f21e-4bc6-993b-c388273db910}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -115,6 +118,12 @@
       <Filter>Source Files\Core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Core\ManagersFactories.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Core\SceneTreeSystem.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\Core\BoundsSystem.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -219,6 +228,18 @@
       <Filter>Header Files\Core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\ThreadPool.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\SceneTreeSystem.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Visual Studio 2017\Libraries\glad\glad.h">
+      <Filter>Header Files\ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Visual Studio 2017\Libraries\glad\khrplatform.h">
+      <Filter>Header Files\ThirdParty</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\BoundsSystem.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

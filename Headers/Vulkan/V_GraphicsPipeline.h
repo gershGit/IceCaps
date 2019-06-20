@@ -6,8 +6,9 @@
 
 #pragma once
 #include "Vulkan/V_Pipeline.h"
-#include "Vulkan/V_Swapchain.h"
 #include "Vulkan/Vulkan_Headers.h"
+
+class V_Swapchain;
 
 class V_GraphicsPipeline :
 	public V_Pipeline

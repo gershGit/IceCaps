@@ -2,75 +2,61 @@
 #include "Core/StringTranslation.h"
 #include <fstream>
 
-template <class Vector>
-Vector getDeltaVector(std::string value) {
-	int start = 0, length = 0;
-	int vectorIndex = 0;
-	Vector returnVector = Vector();
-	for (int i = 0; i < value.length(); i++) {
-		if (value[i] == ',') {
-			returnVector[vectorIndex] = strtof(value.substr(start, length).c_str(), nullptr);
-			vectorIndex++;
-			start = i + 1;
-			length = 0;
-		}
-		else {
-			length++;
-		}
-	}
-	returnVector[vectorIndex] = strtof(value.substr(start, length).c_str(), nullptr);
-	return returnVector;
-}
-
 //Loads an animation from a file into an animation reference
-void AnimationFactory::loadFromFile(std::string fileIn, animation &anim, configurationStructure & config)
+void AnimationFactory::loadFromFile(char * fileName, animation &anim, configurationStructure & config)
 {
-	std::cout << "\tLoading Animation from file: " << fileIn << std::endl;
+	std::cout << "\tLoading Animation from file: " << fileName << std::endl;
 	anim.animationWeight = 1.0f;
 	anim.state = ANIMATION_PAUSED;
 	anim.repeat = false;
 
-	std::string line, key, value;
-	std::ifstream fileStream(fileIn.c_str());
-	while (std::getline(fileStream, line)) {
-		key = getSubComponent(line);
-		value = getValue(line);
-		if (strcmp(key.c_str(), "NAME") == 0) {
+	FILE * animFile;
+	char buffer[256];
+	char keyString[128];
+	char value[128];
+	int valSize;
+	animFile = fopen(fileName, "r");
+
+	while (fscanf(animFile, "%s", buffer) > 0) {
+		getSubComponent(buffer, keyString, 256);
+		getValue(buffer, value, 256);
+		if (strcmp(keyString, "NAME") == 0) {
 			anim.name = value;
 		}
-		else if (strcmp(key.c_str(), "FRAME_COUNT") == 0) {
-			anim.frameCount = atoi(value.c_str());
+		else if (strcmp(keyString, "FRAME_COUNT") == 0) {
+			anim.frameCount = atoi(value);
 			anim.frames = (key_frame*)malloc(sizeof(key_frame) * anim.frameCount);
 		}
-		else if (strcmp(key.c_str(), "LENGTH") == 0) {
-			anim.length = strtod(value.c_str(), nullptr);
+		else if (strcmp(keyString, "LENGTH") == 0) {
+			anim.length = strtod(value, nullptr);
 		}
-		else if (strcmp(key.c_str(), "FRAME") == 0) {
-			int index = atoi(value.c_str());
+		else if (strcmp(keyString, "FRAME") == 0) {
+			int index = atoi(value);
 			anim.frames[index].index = index;
 			anim.frames[index].deltaPosition = glm::vec3(0);
 			anim.frames[index].deltaRotation = glm::vec3(0);
 			anim.frames[index].deltaScale = glm::vec3(0);
 
-			while (std::getline(fileStream, line)) {
-				key = getSubComponent(line);
-				value = getValue(line);
-				if (strcmp(key.c_str(), "T") == 0) {
-					anim.frames[index].t = strtod(value.c_str(), nullptr);
+			while (fscanf(animFile, "%s", buffer) > 0) {
+				getSubComponent(buffer, keyString, 256);
+				valSize = getValue(buffer, value, 256);
+				if (strcmp(keyString, "T") == 0) {
+					anim.frames[index].t = strtod(value, nullptr);
 				}
-				else if (strcmp(key.c_str(), "D_POS") == 0) {
-					anim.frames[index].deltaPosition = getDeltaVector<glm::vec3>(value);
+				else if (strcmp(keyString, "D_POS") == 0) {
+					anim.frames[index].deltaPosition = getVectorFromString<glm::vec3>(value, valSize);
 				}
-				else if (strcmp(key.c_str(), "D_ROT") == 0) {
-					anim.frames[index].deltaRotation = getDeltaVector<glm::vec3>(value);
+				else if (strcmp(keyString, "D_ROT") == 0) {
+					anim.frames[index].deltaRotation = getVectorFromString<glm::vec3>(value, valSize);
 				}
-				else if (strcmp(key.c_str(), "D_SCA") == 0) {
-					anim.frames[index].deltaScale = getDeltaVector<glm::vec3>(value);
+				else if (strcmp(keyString, "D_SCA") == 0) {
+					anim.frames[index].deltaScale = getVectorFromString<glm::vec3>(value, valSize);
 				}
-				else if (strcmp(key.c_str(), "END")==0) {
+				else if (strcmp(keyString, "END")==0) {
 					break;
 				}
 			}
 		}
 	}
+	fclose(animFile);
 }

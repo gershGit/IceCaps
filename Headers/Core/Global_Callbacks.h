@@ -4,9 +4,12 @@
 */
 
 #pragma once
+#include "Core/EntityComponents.h"
 #include "Vulkan/Vulkan_Headers.h"
+#include "Core/ManagersFactories.h"
 #include <optional>
 
+class V_GraphicsPipeline;
 
 //Structure that holds the indices for various queue families
 struct QueueFamilyIndices
@@ -73,3 +76,31 @@ void printQueueFamilies(std::vector<VkQueueFamilyProperties> queueFamiles, VkPhy
 int getMaxUsableSampleCount(VkPhysicalDevice physicalDevice);
 VkSampleCountFlagBits getMaxUsableSampleCountFlags(VkPhysicalDevice physicalDevice);
 VkSampleCountFlagBits intToSampleFlagBits(int bits);
+
+
+//Functions for AABB
+void initializeABBB(AABB * bounds);
+bool isInside(AABB * area, AABB * object);
+bool isInside2D(AABB* area, AABB* object);
+AABB getMaxBounds(AABB * a, AABB * b);
+
+AABB getBounds(collider &col, glm::vec3 pos);
+AABB getMeshBounds(AABB *bounds, glm::vec3 pos);
+bool boundsIntersect(AABB &a, AABB &b);
+bool isVisible(AABB bounds, frustum * frus);
+bool lightAffects(AABB bounds, LightObject lightObj, float range);
+
+//Functions for render scene_node information
+int getPipelineIndex(std::vector<NodeManager<VulkanSceneNode>*> * renderNodes, material_type mType);
+int countRenderNodeDescriptors(std::vector<NodeManager<VulkanSceneNode>*> * renderNodes);
+void printNode(SceneNode* scene_node, int childCount);
+void printSceneTree(SceneNode * scene_node, int childCount, int depth, int maxDepth);
+void printSceneTreeWithEntities(SceneNode * scene_node, int childCount, int depth, int maxDepth);
+void printSceneAsArea(int depth);
+bool locateEntity(SceneNode* scene_node, int entityID, int childCount);
+SceneNode* getParentNode(SceneNode* scene_node, int nodeID, int childCount);
+int getMaxLights(std::vector<V_GraphicsPipeline*>* pipelines);
+LightObject toLightObject(light light_in, glm::vec3 pos_in);
+
+//Widely usable functions
+int findInt(int arrayIn[], int value, int arraySize);

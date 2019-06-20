@@ -2,7 +2,7 @@
 #include "Core/ManagersFactories.h"
 #include "Core/SceneLoader.h"
 #include "Core/Global_Callbacks.h"
-#include <thread>
+#include "Core/ThreadPool.h"
 
 using namespace std;
 
@@ -23,25 +23,25 @@ int main() {
 	//List of all needed component managers
 	std::vector<ComponentManager*> managers = std::vector<ComponentManager*>();
 	std::vector<EntitySystem*> systems = std::vector<EntitySystem*>();
+	SceneNode* scene = new SceneNode(); //Freed during unloading of scene
 
 	//Loads a scene into managers and systems
-	SceneLoader::loadScene(-1, config, managers, systems);
+	SceneLoader::loadScene(-1, config, managers, systems, scene);
 
 	//Run the game
-	mainLoop(config, systems);
+	mainLoop(config, systems, scene);
 
 	//Stop all extra threads
-	for (unsigned int i = 0; i < config.cpu_info->coreCount; i++) {
-		if (config.cpu_info->threads[i].joinable()) {
-			config.cpu_info->threads[i].join();
-		}
-	}
+	ThreadPool::cleanup();
 
 	//Unload the current scene
-	SceneLoader::unloadScene(config, managers);
+	SceneLoader::unloadScene(config, managers, systems);
 
 	//Clean up resources
 	cleanup(config);
+
+	//Free memory allocated for config
+	delete config.cpu_info;
 
 	//Exit gracefully
 	return 0;

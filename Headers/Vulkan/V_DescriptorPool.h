@@ -25,13 +25,15 @@ public:
 	
 	void initialize(int uniformBuffers, int imageBuffers, int drawableCount);
 
+	void allocateSetsInMap(VkDescriptorSetLayout layout, NodeManager<VulkanSceneNode>* scene_nodeMap, int setsCount);
+
 	//Allocation functions to carve sets out of the pool
-	void allocateSets(VkDescriptorSetLayout layout, std::vector<VkDescriptorSet> &descriptorSets, int setsCount);
-	void allocateTextureSet(VkDescriptorSetLayout layout, v_material & material);
 
 	//Configures information about sets
-	void configureVulkanPipelineDescriptorSets(V_GraphicsPipeline* pipeline);
-	void configureTextureSet(v_material & material, VkSampler & sampler);
+	void configureNodeSets(NodeManager<VulkanSceneNode>* scene_nodeMap, VkDescriptorBufferInfo * viewPerspInfos, int max_lights, int frames);
+	void allocateTextureSet(VkDescriptorSetLayout layout, v_material * material);
+
+	void configureTextureSet(v_material * material, VkSampler & sampler);
 
 	//Getters and setters
 	void setConfig(configurationStructure * config_in) { config = config_in; };

@@ -59,7 +59,7 @@ void V_MeshFactory::buildIndexBuffer(v_mesh & mesh, std::vector<uint16_t>& indic
 }
 
 //Uses a filename to load a mesh
-void V_MeshFactory::loadFromFile(const char * fileName, v_mesh & mesh, configurationStructure &config)
+void V_MeshFactory::loadFromFile(const char * fileName, v_mesh & mesh, configurationStructure &config, AABB * bounds)
 {
 	//Output information
 	std::cout << "\tLoading model at " << fileName << std::endl;
@@ -74,6 +74,9 @@ void V_MeshFactory::loadFromFile(const char * fileName, v_mesh & mesh, configura
 	}
 
 	//Temporary variables for lines of the ice
+	float min = INFINITY, max = -INFINITY;
+	float radius = -INFINITY;
+
 	vertex tempVertex = vertex();
 	unsigned int i1, i2, i3;
 
@@ -97,6 +100,9 @@ void V_MeshFactory::loadFromFile(const char * fileName, v_mesh & mesh, configura
 					&tempVertex.uv.x, &tempVertex.uv.y);
 				
 				vertices.push_back(tempVertex);
+				if (glm::length(tempVertex.position) > radius) {
+					radius = glm::length(tempVertex.position);
+				}
 			}
 			else if (strcmp(lineHeader, "i") == 0) {
 				//Store vertex normal information into the vertex vector
@@ -112,6 +118,7 @@ void V_MeshFactory::loadFromFile(const char * fileName, v_mesh & mesh, configura
 	//Build the vulkan objects stored in the mesh
 	buildVertexBuffer(mesh, vertices, config.apiInfo.v_Instance->getTransferCommandPool(), config.apiInfo.v_Instance->getPrimaryDevice());
 	buildIndexBuffer(mesh, indices, config.apiInfo.v_Instance->getTransferCommandPool(), config.apiInfo.v_Instance->getPrimaryDevice());
+	bounds->size = glm::vec3(radius);
 }
 
 V_MeshFactory::V_MeshFactory()

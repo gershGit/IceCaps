@@ -34,7 +34,8 @@ enum config_key { NO_KEY_VALUE, PREFERRED_API, DEFAULT_API, WINDOW_MODE, MONITOR
 					GAME_PATH};
 enum dimension { WIDTH, HEIGHT };
 enum anti_aliasing_type {SUPER_SAMPLING, MULTI_SAMPLING, NO_ANTI_ALIASING};
-enum scene_key { SCENE_NAME, MANAGERS, SYSTEMS, ADD_MANAGER, ADD_SYSTEM, ADD_PIPELINE, ENTITY_COUNT, ENTITY, ADD_COMPONENT, ADD_TAG, NO_SCENE_KEY, END_STATEMENT, END_ENTITIES };
+enum scene_key { SCENE_NAME, MANAGERS, SYSTEMS, ADD_MANAGER, ADD_SYSTEM, ADD_PIPELINE, ENTITY_COUNT, ENTITY, ADD_COMPONENT, ADD_TAG, IS_DYNAMIC, NO_SCENE_KEY,
+	SCENE_SIZE, TREE_DEPTH, SCENE_STRUCTURE, END_STATEMENT, END_ENTITIES, FILE_LOAD_KEY };
 enum materialSubComponents { MAT_TYPE, TEXTURE, END };
 enum material_type { PBR };
 enum texture_type { DIFFUSE, METALLIC_SPEC, NORMAL, ROUGHNESS, AO, NO_TEXTURE_TYPE = -1 };
@@ -87,6 +88,7 @@ struct save_info {
 //Structure to hold the configuration of the app, reloaded on each startup and saved on close
 struct configurationStructure {
 	platform_code platform;
+	int sceneChildren = 4;
 	bool changed = false;
 	bool debugOn;
 	API_used api;
@@ -116,6 +118,7 @@ struct configurationStructure {
 	anti_aliasing_type antiAliasing;
 	int anti_aliasing_resolution;
 	int anisotropy;
+	int sceneNodesCount;
 };
 
 //SubComponents
@@ -146,6 +149,32 @@ struct ViewPersp {
 };
 
 struct LightObject {
-	glm::vec4 position;
-	glm::vec4 color;
+	glm::vec4 position = glm::vec4(0);
+	glm::vec4 color = glm::vec4(0);
+};
+
+struct AABB {
+	glm::vec3 size;
+	glm::vec3 pos;
+	glm::vec3 points[8];
+};
+
+struct SceneNode {
+	int id;
+	AABB bounds;
+
+	bool isLeaf;
+	SceneNode* children;
+	int staticEntityCount;
+	int* staticEntities;
+	std::vector<int> * dynamicEntities;
+
+	std::vector<int>* lightIDs;
+	int lightCount;
+	LightObject* lights;
+};
+
+struct frustum {
+	glm::vec3 points[8];
+	glm::vec3 axis[5];
 };
