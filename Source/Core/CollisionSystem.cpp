@@ -1,6 +1,7 @@
 #include "Core/CollisionSystem.h"
 #include "Core/GameTimer.h"
 
+//Checks to see if two entities collide in any fashion
 collision CollisionSystem::checkCollision(int entityOne, int entityTwo) {
 	collision collisionInfo = collision();
 	collisionInfo.collision = false;
@@ -30,6 +31,7 @@ collision CollisionSystem::checkCollision(int entityOne, int entityTwo) {
 	return collisionInfo;
 }
 
+//Moves and adds physics to the objects involved in a collision
 void CollisionSystem::applyCollisionPhysics(int entityID, int oneOrTwo, collision cInfo, collider thisCollider) {
 	transform * t = tManager->getComponentAddress(entityID);
 	rigid_body * rBody = rManager->getComponentAddress(entityID);
@@ -54,6 +56,7 @@ void CollisionSystem::applyCollisionPhysics(int entityID, int oneOrTwo, collisio
 	rBody->lastVelocity = glm::reflect(rBody->lastVelocity, cNormal) * rBody->elasticity * linearPortion;
 }
 
+//Determines what entities should be physically affected by a collision
 void CollisionSystem::manageCollisionPhysics(int entityOneID, int entityTwoID, collision collisionInfo, MappedManager<rigid_body>* rManager, ArrayManager<transform>* tManager) {
 	rigid_body* rBodyOne = nullptr;
 	rigid_body* rBodyTwo = nullptr;
@@ -78,6 +81,7 @@ void CollisionSystem::manageCollisionPhysics(int entityOneID, int entityTwoID, c
 	}
 }
 
+//Moves the collisions from last frame to an old list
 void CollisionSystem::setLastCollisions(std::vector<collision> *lastCollisionsIn) {
 	lastFrameCollisions->clear();
 	for (collision c : *lastCollisionsIn) {
@@ -87,6 +91,7 @@ void CollisionSystem::setLastCollisions(std::vector<collision> *lastCollisionsIn
 	}
 }
 
+//Pushes a collision into the collision manager
 void CollisionSystem::addCollision(collision &detectedCol, VectorManager<collision>* manager) {
 	detectedCol.state = COLLISION_ENTER;
 	for (int i = 0; i < lastFrameCollisions->size(); i++) {
@@ -99,6 +104,7 @@ void CollisionSystem::addCollision(collision &detectedCol, VectorManager<collisi
 	manager->addComponent(0, detectedCol);
 }
 
+//Adds exiting from all collisions to this frames found collisions
 void CollisionSystem::addExitCollisions(VectorManager<collision>* manager) {
 	for (collision c : *lastFrameCollisions) {
 		c.state = COLLISION_EXIT;
@@ -106,6 +112,7 @@ void CollisionSystem::addExitCollisions(VectorManager<collision>* manager) {
 	}
 }
 
+//Searches for any collisions with a nodes entities
 void CollisionSystem::searchNodeForCollisions(SceneNode * scene_node)
 {
 	//Check for collisions between dynamic objects and objects within its bounds
@@ -125,6 +132,7 @@ void CollisionSystem::searchNodeForCollisions(SceneNode * scene_node)
 	}
 }
 
+//Checks if the parent node has any collisions with the given node
 void CollisionSystem::checkForCollisionsInParent(int entity, SceneNode * scene_node) {
 	//Only need to check against static objects as parent dynamic objects will already have been checked
 	for (int i = 0; i < scene_node->staticEntityCount; i++) {
@@ -138,10 +146,10 @@ void CollisionSystem::checkForCollisionsInParent(int entity, SceneNode * scene_n
 	}
 }
 
+//Checks for collisions within a node
 void CollisionSystem::checkForCollisions(int entity, SceneNode * scene_node)
 {
 	//Checks to see if the entity collides with scene_node as a whole
-	//TODO optimize for less reference passing
 	collider col = cManager->getComponent(entity);
 	glm::vec3 pos = tManager->getComponent(entity).pos;
 	AABB bounds = getBounds(col, pos);
@@ -181,6 +189,7 @@ void CollisionSystem::checkForCollisions(int entity, SceneNode * scene_node)
 	}
 }
 
+//Initialize by setting the proper managers
 void CollisionSystem::initialize()
 {
 	cManager = dynamic_cast<MappedManager<collider>*>(getCManager<collider>(*managers, COLLIDER));
@@ -190,10 +199,11 @@ void CollisionSystem::initialize()
 	delete managers;
 }
 
+//On update this system handles collisions
 void CollisionSystem::onUpdate()
 {
 	setLastCollisions(clManager->getComponents());
-	clManager->getComponents()->clear(); //TODO optimize by using custom stack instead of vector?
+	clManager->getComponents()->clear();
 	searchNodeForCollisions(scene); //TODO thread pool call
 	addExitCollisions(clManager);
 	for (collision cInfo : *clManager->getComponents()) {
@@ -201,6 +211,7 @@ void CollisionSystem::onUpdate()
 	}
 }
 
+//User defined function for what should happen when two objects collide
 void CollisionSystem::manageCollision(collision cInfo) {
 	if (cInfo.state == COLLISION_ENTER) {
 		std::cout << "Entering collision between " << cInfo.entityA << " and " << cInfo.entityB << std::endl;

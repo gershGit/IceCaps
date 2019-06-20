@@ -123,6 +123,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\Source\Core\AnimationFactory.cpp" />
     <ClCompile Include="..\..\Source\Core\AnimationSystem.cpp" />
+    <ClCompile Include="..\..\Source\Core\BoundsSystem.cpp" />
     <ClCompile Include="..\..\Source\Core\CollisionSystem.cpp" />
     <ClCompile Include="..\..\Source\Core\GameTimer.cpp" />
     <ClCompile Include="..\..\Source\Core\Global_Callbacks.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="..\..\..\..\Visual Studio 2017\Libraries\glad\khrplatform.h" />
     <ClInclude Include="..\..\Headers\Core\AnimationFactory.h" />
     <ClInclude Include="..\..\Headers\Core\AnimationSystem.h" />
+    <ClInclude Include="..\..\Headers\Core\BoundsSystem.h" />
     <ClInclude Include="..\..\Headers\Core\CollisionSystem.h" />
     <ClInclude Include="..\..\Headers\Core\ComponentManager.h" />
     <ClInclude Include="..\..\Headers\Core\EntityComponents.h" />

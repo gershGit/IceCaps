@@ -80,8 +80,6 @@ void V_RenderSystem::createSubmitInfos()
 	}
 }
 
-//TODO update light info in another system
-
 //When configuration has been changed, reset the swapchain if necessary
 void V_RenderSystem::onConfigurationChange()
 {
@@ -89,9 +87,6 @@ void V_RenderSystem::onConfigurationChange()
 		swapchainKHR = config->apiInfo.v_Instance->getSwapchain()->getSwapchain();
 	}
 }
-
-//Adds an entity into the trees
-//TODO entities are all fed from scene
 
 //System on update call
 void V_RenderSystem::onUpdate()
@@ -154,9 +149,7 @@ void V_RenderSystem::renderSinglePipeline(V_GraphicsPipeline* gPipeline, NodeMan
 //Renders a list of entities
 void V_RenderSystem::renderEntities(V_GraphicsPipeline* gPipeline, std::vector<int> entityIDs, VulkanSceneNode* node) {
 	int coreID = 0; //TODO make this per core
-	int frameID = config->apiInfo.v_Instance->currentFrame;
-
-	//TODO update node light buffer for current camera position
+	int frameID = (int) config->apiInfo.v_Instance->currentFrame;
 
 	VkCommandBuffer thisBuffer = node->dynamicBuffers[frameID];
 	vkResetCommandBuffer(thisBuffer, 0);
@@ -197,33 +190,6 @@ void V_RenderSystem::renderEntities(V_GraphicsPipeline* gPipeline, std::vector<i
 
 	submitCommandBuffer(thisBuffer, coreID);
 }
-
-//Renders a scene scene_node and its children
-/*
-void V_RenderSystem::renderNode(SceneNode * scene_node)
-{
-	//Render it's command buffer
-	for (int i = 0; i < renderNodes->size(); i++) {
-		if (renderNodes->at(i)->getComponent(scene_node->id).hasCommandBuffer) {
-			VkCommandBuffer buf = renderNodes->at(i)->getComponent(scene_node->id).staticDrawCommands;
-			//TODO add the buffer to the correct command buffer list
-		}
-	}
-
-	//Render any dynamic objects
-	std::vector<std::vector<int>> visibleEntities = std::vector<std::vector<int>>();
-	visibleEntities.resize(pipelineTypes->size());
-	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
-		if (isVisible(bManager->getComponent(scene_node->dynamicEntities->at(i)), &frus)) {
-			//TODO visible entities at material type
-			visibleEntities[0].push_back(scene_node->dynamicEntities->at(i));
-		}
-	}
-	if (visibleEntities.size() > 0) {
-		//TODO create command buffers based on pipeline and store in the list
-		//commandBuffers->at(material_type)->push_back(generateBuffer(visibleEntities[i], pipelines[i], scene_node->id));
-	}
-}*/
 
 //Gets the image it will present
 void V_RenderSystem::acquireImage()
@@ -299,16 +265,12 @@ VkCommandBuffer V_RenderSystem::generateBuffer(std::vector<int> entities, V_Grap
 	vkCmdBindPipeline(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
 
 	for (int entity : entities) {
-		//TODO store managers not getCManager each time
 		VkBuffer vertexBuffers[] = { getCManager<v_mesh>(*managers,V_MESH)->getComponent(entity).vBuffer };
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(thisBuffer, 0, 1, vertexBuffers, offsets);
 
 		vkCmdBindIndexBuffer(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entity).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-		//TODO buffer is updated in different system, this just needs to use the descriptor from the scene scene_node NOT the pipeline
-		//updateLightBuffers(pipeline->max_lights, getCManager<transform>(*managers, TRANSFORM)->getComponent(entity), coreID);
 
 		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1, &pipeline->lightViewDescriptorSets[frameID], 0, nullptr);
 		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 1, 1, &getCManager<v_material>(*managers, V_MATERIAL)->getComponentAddress(entity)->descriptorSet, 0, nullptr);

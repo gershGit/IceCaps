@@ -54,9 +54,11 @@ public:
 template<typename CType>
 class NodeManager : public CManager<CType> {
 public:
-	material_type pipelineType;
 	std::map<int, CType> componentMap;
+	material_type pipelineType;
+public:
 	NodeManager(component_type type_in, material_type mType) { this->componentType = type_in; this->pipelineType = mType; };
+	~NodeManager() {};
 	int getSize() { return (int)componentMap.size(); };
 	bool hasEntity(int entityID) { return (componentMap.count(entityID) > 0); };
 	CType getComponent(int entityID) { return componentMap.at(entityID); };
@@ -71,7 +73,6 @@ public:
 		return vec;
 	}
 	std::pair<int, CType*> getFirst() { return std::pair<int, CType*>(componentMap.begin()->first, &componentMap.begin()->second); }
-	~NodeManager() {};
 };
 
 template <typename CType>

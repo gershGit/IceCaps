@@ -21,8 +21,8 @@ SceneLoader::SceneLoader()
 }
 
 //Builder Functions ---------------------------------------------------------------------------
-//TODO build initial light buffers
 
+//Moves the static entities into arrays as they do not need to be dynamic
 void collapseStaticEntities(SceneNode* scene_node, int childCount, std::vector<std::vector<int>*>* staticTemp) {
 	//TODO record static render buffers
 	scene_node->staticEntityCount = (int) staticTemp->at(scene_node->id)->size();
@@ -55,20 +55,14 @@ bool SceneLoader::insertEntity(SceneNode* scene_node, int entityID, AABB * bound
 			staticTemp->at(scene_node->id)->push_back(entityID);
 		}
 		if (pipelineIndex >= 0 && isDynamic) {
-			if (!renderNodes->at(pipelineIndex)->hasEntity(scene_node->id)) {
-				renderNodes->at(pipelineIndex)->addComponent(scene_node->id, VulkanSceneNode());
-			}
 			renderNodes->at(pipelineIndex)->getComponentAddress(scene_node->id)->dynamicEntities.push_back(entityID);
-			renderNodes->at(pipelineIndex)->getComponentAddress(scene_node->id)->dynamicBuffers = (VkCommandBuffer*)malloc(sizeof(VkCommandBuffer) * config->swapchainBuffering);
-			for (int i = 0; i < config->swapchainBuffering; i++) {
-				renderNodes->at(pipelineIndex)->getComponentAddress(scene_node->id)->dynamicBuffers[i] = config->apiInfo.v_Instance->getGraphicsCommandPool(pipelineIndex)->getNextCommandBuffer();
-			}
 		}
 		return true;
 	}
 	return false;
 }
 
+//Inserts a light into every node that is affected by the light
 bool SceneLoader::insertLight(SceneNode* scene_node, int entityID, LightObject light, float range, configurationStructure* config, int maxLights) {
 	if (lightAffects(scene_node->bounds, light, range)) {
 		if (!scene_node->isLeaf) {
@@ -87,6 +81,19 @@ bool SceneLoader::insertLight(SceneNode* scene_node, int entityID, LightObject l
 	return false;
 }
 
+//Allocates the command buffers and light buffers to the vulkan scene
+void SceneLoader::allocateVulkanCommandObjects(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, configurationStructure * config) {
+	for (int i = 0; i < renderNodes->size(); i++) {
+		for (int j = 0; j < config->sceneNodesCount; j++) {
+			VulkanSceneNode nodeInfo;
+			nodeInfo.dynamicBuffers = (VkCommandBuffer*)malloc(sizeof(VkCommandBuffer) * config->swapchainBuffering);
+			for (int sc = 0; sc < config->swapchainBuffering; sc++) {
+				nodeInfo.dynamicBuffers[sc] = config->apiInfo.v_Instance->getGraphicsCommandPool(i)->getNextCommandBuffer();
+			}
+			renderNodes->at(i)->addComponent(j, nodeInfo);
+		}
+	}
+}
 void SceneLoader::allocateLightBuffers(SceneNode* scene_node, int bufferSize, int childCount) {
 	scene_node->lights = (LightObject*) malloc(sizeof(LightObject) * bufferSize);
 	scene_node->lightIDs = new std::vector<int>();
@@ -98,6 +105,7 @@ void SceneLoader::allocateLightBuffers(SceneNode* scene_node, int bufferSize, in
 	}
 }
 
+//Places all lights into the scene
 void SceneLoader::placeLightsInScene(SceneNode* scene, MappedManager<light>* lManager, ArrayManager<transform>* tManager, configurationStructure* config, int maxLights) {
 	std::vector<int> lightIDs = lManager->getEntities();
 	for (int id : lightIDs) {
@@ -122,6 +130,11 @@ void SceneLoader::createChildren(SceneNode* scene_node, int currentDepth, int ma
 			scene_node->children[i].isLeaf = true;
 		}
 		if (childCount == 4) {
+			// ---------
+			// | 3 | 4 |
+			//  -------
+			// | 1 | 2 |
+			// ---------
 			scene_node->children[0].id = scene_node->id * currentDepth + 1;
 			scene_node->children[1].id = scene_node->id * currentDepth + 2;
 			scene_node->children[2].id = scene_node->id * currentDepth + 3;
@@ -181,6 +194,7 @@ void SceneLoader::buildTree(configurationStructure &config, SceneNode * scene, F
 	setNodeCount(config, config.sceneChildren, depth);
 	createChildren(scene, 1, depth, config.sceneChildren);
 	setBounds(scene, config.sceneChildren);
+	printSceneAsArea(depth);
 }
 
 //Adds managers to hold components for various component types
@@ -288,6 +302,9 @@ void SceneLoader::fillSystemWithManagers(EntitySystem * system, std::vector<Comp
 		}
 		else if (managerType == TAGS_COMPONENT) {
 			system->managers->push_back(getCManager<uint64_t>(managers, TAGS_COMPONENT));
+		}
+		else if (managerType == AABB_COMPONENT) {
+			system->managers->push_back(getCManager<AABB>(managers, AABB_COMPONENT));
 		}
 	}
 }
@@ -410,6 +427,20 @@ void SceneLoader::addSystems(configurationStructure &config, std::vector<EntityS
 				InputSystem* inputSystem = new InputSystem();
 				inputSystem->setEntityComponents(managers, { {TAGS_COMPONENT} }, ICE_TAG_INPUT);
 				systems.push_back(inputSystem);
+			}
+			else if (type == SCENE_TREE_SYSTEM) {
+				std::cout << "\tAdding scene tree system" << std::endl;
+				SceneTreeSystem* treeSys = new SceneTreeSystem();
+				if (config.api == Vulkan) {
+					treeSys->usingVulkan = true;
+
+				}
+				systems.push_back(treeSys);
+			}
+			else if (type == BOUNDS_SYSTEM) {
+				std::cout << "\tAdding bounds system" << std::endl;
+				BoundsSystem* bSys = new BoundsSystem();
+				systems.push_back(bSys);
 			}
 		}
 	}
@@ -732,7 +763,7 @@ void SceneLoader::loadVulkanEntity(int entityID, std::vector<ComponentManager*>&
 		collider col = getCManager<collider>(componentManagers, COLLIDER)->getComponent(entityID);
 		AABB colBounds = getBounds(col, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos);
 		AABB meshBounds = getMeshBounds(&bounds, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos);
-		getCManager<AABB>(componentManagers, AABB_COMPONENT)->setComponent(entityID, getMaxBounds(&bounds, &colBounds));
+		getCManager<AABB>(componentManagers, AABB_COMPONENT)->setComponent(entityID, getMaxBounds(&meshBounds, &colBounds));
 	}
 	if (inScene) {
 		int pipelineIndex = -2;
@@ -777,7 +808,8 @@ void SceneLoader::buildVulkanDescriptors(std::vector<ComponentManager*>& compone
 	int setsNeeded = getCManager<v_material>(componentManagers, V_MATERIAL)->getSize() + lightDescriptorsCount;
 
 	//Call to create a descriptor pool large enough for viewpersp descriptors, light descriptors, and image descriptors
-	config.apiInfo.v_Instance->createStaticDescriptorPool(camDescriptors + lightDescriptorsCount, imageBuffersNeeded, setsNeeded);
+	//Allow the scene to double in size by allocating twice the number of descriptors at initialization. Further growth requires new pools
+	config.apiInfo.v_Instance->createStaticDescriptorPool((camDescriptors + lightDescriptorsCount)*2, imageBuffersNeeded*2, setsNeeded*2);
 
 	//Loop over each render map and allocate the set for each scene_node
 	for (int i = 0; i < renderNodes->size(); i++) {
@@ -811,24 +843,13 @@ void SceneLoader::buildVulkanDescriptors(std::vector<ComponentManager*>& compone
 			VulkanSceneNode* scene_node = renderNodes->at(i)->getComponentAddress(renderNodes->at(i)->getEntities().at(j));
 			scene_node->lightBuffers = (VkBuffer*)malloc(sizeof(VkBuffer) * config.swapchainBuffering);
 			scene_node->lightBufferVRAM = (VkDeviceMemory*)malloc(sizeof(VkBuffer) * config.swapchainBuffering);
+			scene_node->lightIDs = (int*)malloc(sizeof(int) * config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->max_lights);
+			scene_node->lightMax = config.apiInfo.v_Instance->getGraphicsPipelines()->at(i)->max_lights;
 			for (int k = 0; k < config.swapchainBuffering; k++) {
 				//Creates a host visible buffer for updating			
 				V_BufferHelper::createBuffer(config.apiInfo.v_Instance->getPrimaryDevice(), lightsBufferSize,
 					VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 					scene_node->lightBuffers[k], scene_node->lightBufferVRAM[k]);
-
-				LightObject tempLights[3];
-				tempLights[0].color = glm::vec4(0.25, 0.35, 0.45, 0.55);
-				tempLights[0].position = glm::vec4(0.25, 0.35, 0.45, 0.55);
-				tempLights[1].color = glm::vec4(0.55, 0.45, 0.35, 0.25);
-				tempLights[1].position = glm::vec4(0.55, 0.45, 0.35, 0.25);
-				tempLights[2].color = glm::vec4(0.25, 0.35, 0.45, 0.55);
-				tempLights[2].position = glm::vec4(0.25, 0.35, 0.45, 0.55);
-
-				void* data;
-				vkMapMemory(config.apiInfo.v_Instance->getPrimaryDevice()->getLogicalDevice(), scene_node->lightBufferVRAM[k], 0, lightsBufferSize, 0, &data);
-				memcpy(data, &tempLights, lightsBufferSize);
-				vkUnmapMemory(config.apiInfo.v_Instance->getPrimaryDevice()->getLogicalDevice(), scene_node->lightBufferVRAM[k]);
 			}
 		}
 	}
@@ -929,6 +950,7 @@ void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std
 			if (config.api == Vulkan) {
 				int renderNodeCount = config.sceneNodesCount * (int)renderNodes->size();
 				config.apiInfo.v_Instance->createCommandPools(config.cpu_info->coreCount, renderNodeCount);
+				allocateVulkanCommandObjects(renderNodes, &config);
 			}
 		}
 		else if (key == ADD_PIPELINE) {
@@ -957,7 +979,6 @@ void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std
 	fclose(gameFile);
 
 	if (config.api == Vulkan) {
-		//allocateVulkanBuffers(componentManagers, config, renderNodes); //TODO IMPORTANT allocate command buffers from command pools for each render node
 		buildVulkanDescriptors(componentManagers, config, renderNodes);
 	}
 	for (EntitySystem* system : systems) {
@@ -967,6 +988,9 @@ void SceneLoader::loadScene(int sceneIndex, configurationStructure & config, std
 		}
 		if (system->systemType == RENDER_SYSTEM) {
 			dynamic_cast<V_RenderSystem*>(system)->setRenderNodes(renderNodes);
+		}
+		if (system->systemType == SCENE_TREE_SYSTEM) {
+			dynamic_cast<SceneTreeSystem*>(system)->setRenderNodes(renderNodes);
 		}
 	}
 

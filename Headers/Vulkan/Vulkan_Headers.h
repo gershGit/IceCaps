@@ -16,6 +16,9 @@ struct VulkanSceneNode {
 	std::vector<int> dynamicEntities;
 	VkCommandBuffer* dynamicBuffers;
 
+	int lightMax;
+	int lightCountCurrent = 0;
+	int* lightIDs = nullptr;
 	VkBuffer* lightBuffers;
 	VkDeviceMemory* lightBufferVRAM;
 	VkDescriptorSet* camLightDescSets;

@@ -23,6 +23,7 @@ public:
 
 	static bool insertEntity(SceneNode * scene_node, int entityID, AABB * bounds, bool isDynamic, configurationStructure * config, int pipelineIndex, std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, std::vector<std::vector<int>*>* staticTemp);
 	static bool insertLight(SceneNode* scene_node, int entityID, LightObject light, float range, configurationStructure* config, int maxLights);
+	static void allocateVulkanCommandObjects(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, configurationStructure* config);
 	static void allocateLightBuffers(SceneNode* scene_node, int bufferSize, int childCount);
 	static void placeLightsInScene(SceneNode* scene, MappedManager<light>* lManager, ArrayManager<transform>* tManager, configurationStructure* config, int maxLights);
 	static void createChildren(SceneNode * scene_node, int currentDepth, int maxDepth, int childCount);

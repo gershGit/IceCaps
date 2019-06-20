@@ -272,6 +272,7 @@ glm::vec3 worldAxis[3] = {
 	glm::vec3(0,1,0),
 	glm::vec3(0,0,1)
 };
+//Projects an AABB onto a 3D or 2D line
 glm::vec2 project(AABB bounds, glm::vec3 axis) {
 	float min = glm::dot(bounds.points[0], axis);
 	float max = min;
@@ -302,13 +303,16 @@ glm::vec2 project(frustum * frus, glm::vec3 axis) {
 	}
 	return glm::vec2(min, max);
 }
+//Checks if two lines overlap in any way
 bool overlap(glm::vec2 a, glm::vec2 b) {
 	return (a.y >= b.x && b.y >= a.x);
 }
+//Checks if one line is completely within the other
 bool fullOverlap(glm::vec2 outer, glm::vec2 inner) {
 	return outer.x <= inner.x && outer.y >= inner.y;
 }
 
+//Sets an AABB to all 0 sizes
 void initializeABBB(AABB * bounds)
 {
 	bounds->size = glm::vec3(0);
@@ -332,16 +336,24 @@ void initializeABBB(AABB * bounds)
 	bounds->points[7] = glm::vec3(INFINITY, INFINITY, INFINITY);
 }
 
-//Compares two bounding boxes to see if an area completely encloses an object
+//Compares two axis aligned bounding boxes to see if an area completely encloses an object
 bool isInside(AABB * area, AABB * object)
 {
 	if (fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))
-		&& fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))
-		&& fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))) {
+		&& fullOverlap(glm::vec2(area->points[0].y, area->points[7].y), glm::vec2(object->points[0].y, object->points[7].y))
+		&& fullOverlap(glm::vec2(area->points[0].z, area->points[7].z), glm::vec2(object->points[0].z, object->points[7].z))) {
 		return true;
 	}
 	return false;
 }
+bool isInside2D(AABB* area, AABB* object) {
+	if (fullOverlap(glm::vec2(area->points[0].x, area->points[7].x), glm::vec2(object->points[0].x, object->points[7].x))
+		&& fullOverlap(glm::vec2(area->points[0].z, area->points[7].z), glm::vec2(object->points[0].x, object->points[7].z))) {
+		return true;
+	}
+	return false;
+}
+//Min and max functions
 float getMin(AABB*a, AABB*b, int axis) {
 	float min = INFINITY;
 	for (int i = 0; i < 8; i++) {
@@ -366,6 +378,7 @@ float getMax(AABB*a, AABB*b, int axis) {
 	}
 	return max;
 }
+//Gets the maximum union of two bounds
 AABB getMaxBounds(AABB * a, AABB * b)
 {
 	float minX= getMin(a, b, 0);
@@ -383,8 +396,12 @@ AABB getMaxBounds(AABB * a, AABB * b)
 	newBounds.points[5] = glm::vec3(minX, maxY, maxZ);
 	newBounds.points[6] = glm::vec3(maxX, minY, maxZ);
 	newBounds.points[7] = glm::vec3(maxX, maxY, maxZ);
+	newBounds.size.x = (newBounds.points[7].x - newBounds.points[0].x) / 2.0f;
+	newBounds.size.y = (newBounds.points[7].y - newBounds.points[0].y) / 2.0f;
+	newBounds.size.z = (newBounds.points[7].z - newBounds.points[0].z) / 2.0f;
 	return newBounds;
 }
+//Gets maximum bounds from collider data
 AABB getBounds(collider & col, glm::vec3 pos)
 {
 	AABB bounds = AABB();
@@ -404,6 +421,7 @@ AABB getBounds(collider & col, glm::vec3 pos)
 	}
 	return bounds;
 }
+//Gets the maximum bounds based on mesh data
 AABB getMeshBounds(AABB * bounds_in, glm::vec3 pos)
 {
 	AABB bounds = AABB();
@@ -419,6 +437,7 @@ AABB getMeshBounds(AABB * bounds_in, glm::vec3 pos)
 	bounds.points[7] = pos + glm::vec3(bounds.size.x, bounds.size.y, bounds.size.z);
 	return bounds;
 }
+//Determins if two AABBs are touching
 bool boundsIntersect(AABB & a, AABB & b)
 {
 	if (overlap(project(a, worldAxis[0]), project(b, worldAxis[0]))
@@ -428,7 +447,7 @@ bool boundsIntersect(AABB & a, AABB & b)
 	}
 	return false;
 }
-//TODO frustum points calculation, frustum axis calculations
+//Determines if a frustum intersects an AABB
 bool isVisible(AABB bounds, frustum * frus)
 {
 	//Test frustrum axes
@@ -454,6 +473,7 @@ bool isVisible(AABB bounds, frustum * frus)
 	return true;
 }
 
+//Determines the bounds of a light based on its position and range
 AABB getLightBounds(LightObject l, float r) {
 	AABB bounds = AABB();
 	bounds.pos = l.position;
@@ -470,6 +490,7 @@ AABB getLightBounds(LightObject l, float r) {
 	bounds.points[7] = bounds.pos + glm::vec3(r, r, r);
 	return bounds;
 }
+//Checks if a light affects the area 
 bool lightAffects(AABB bounds, LightObject lightObj, float range)
 {
 	AABB lightBounds = getLightBounds(lightObj, range);
@@ -479,6 +500,7 @@ bool lightAffects(AABB bounds, LightObject lightObj, float range)
 	return false;
 }
 
+//Returns the index of the pipeline that uses the passed type of material
 int getPipelineIndex(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, material_type mType)
 {
 	for (int i = 0; i < renderNodes->size(); i++) {
@@ -489,6 +511,7 @@ int getPipelineIndex(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, ma
 	return -1;
 }
 
+//Counts all the descriptors that will be needed from a vulkan scene
 int countRenderNodeDescriptors(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes)
 {
 	int count = 0;
@@ -498,6 +521,7 @@ int countRenderNodeDescriptors(std::vector<NodeManager<VulkanSceneNode>*>* rende
 	return count;
 }
 
+//Various ways of printing the scene to the console
 void printNode(SceneNode * scene_node, int childCount)
 {
 	printf("--------------------\n"); //20 dashes
@@ -523,16 +547,13 @@ void printNode(SceneNode * scene_node, int childCount)
 	}
 	printf("--------------------\n");
 }
-
 void printNodeSimple(SceneNode * scene_node, int tabs)
 {
 	printf(" ....\n"); //6 dashes
 	printf("|%.4d|\n", scene_node->id);
 	printf(" ''''\n");
 }
-
 void printSimpleBranch(SceneNode* node, int tabs, bool last) {
-	//TODO print | for all depths higher up in the tree so they stay unbroken
 	for (int i = 0; i < tabs-1; i++) {
 		printf("\t");
 	}
@@ -554,7 +575,6 @@ void printSimpleBranch(SceneNode* node, int tabs, bool last) {
 		printf(" ''''\n");
 	}
 }
-
 void printNodeEntities(SceneNode * scene_node, int tabs)
 {
 	printf(" ....\n"); //6 dashes
@@ -582,7 +602,6 @@ void printNodeEntities(SceneNode * scene_node, int tabs)
 	printf(">\n");
 	printf(" ''''\n");
 }
-
 void printBranchEntities(SceneNode* node, int tabs, bool last) {
 	for (int i = 0; i < tabs - 1; i++) {
 		printf("\t");
@@ -626,7 +645,6 @@ void printBranchEntities(SceneNode* node, int tabs, bool last) {
 		printf(" ''''\n");
 	}
 }
-
 void printSceneTree(SceneNode * scene_node, int childCount, int depth, int maxDepth)
 {
 	if (depth != 0) {
@@ -646,7 +664,6 @@ void printSceneTree(SceneNode * scene_node, int childCount, int depth, int maxDe
 		}
 	}
 }
-
 void printSceneTreeWithEntities(SceneNode * scene_node, int childCount, int depth, int maxDepth)
 {
 	if (depth != 0) {
@@ -666,7 +683,40 @@ void printSceneTreeWithEntities(SceneNode * scene_node, int childCount, int dept
 		}
 	}
 }
+void printSceneAsArea(int depth) {
+	// ---------
+	// | 3 | 4 |
+	//  -------
+	// | 1 | 2 |
+	// ---------
+	if (depth > 0) {
+		printf("---------\n");
+		printf("|       |\n");
+		printf("|   0   |\n");
+		printf("|       |\n");
+		printf("---------\n");
+	}
+	if (depth > 1) {
+		printf("---------\n");
+		printf("| 3 | 4 |\n");
+		printf(" -------\n");
+		printf("| 1 | 2 |\n");
+		printf("---------\n");
+	}
+	if (depth > 2) {
+		printf("-------------\n");
+		printf("|15|16|19|20|\n");
+		printf(" -----------\n");
+		printf("|13|14|17|18|\n");
+		printf(" -----------\n");
+		printf("|07|08|11|12|\n");
+		printf(" -----------\n");
+		printf("|05|06|09|10|\n");
+		printf("-------------\n");
+	}
+}
 
+//Finds an entities position in the scene tree
 bool locateEntity(SceneNode * scene_node, int entityID, int childCount)
 {
 	for (int e : *scene_node->dynamicEntities) {
@@ -685,6 +735,7 @@ bool locateEntity(SceneNode * scene_node, int entityID, int childCount)
 	return false;
 }
 
+//Finds the node who's child was the calling node
 SceneNode* getParentNode(SceneNode * scene_node, int nodeID, int childCount)
 {
 	if (scene_node->isLeaf) {
@@ -705,6 +756,7 @@ SceneNode* getParentNode(SceneNode * scene_node, int nodeID, int childCount)
 	return nullptr;
 }
 
+//Finds the absolute maximum number of lights any pipeline can handle
 int getMaxLights(std::vector<V_GraphicsPipeline*>* pipelines)
 {
 	int max = 0;
@@ -716,10 +768,21 @@ int getMaxLights(std::vector<V_GraphicsPipeline*>* pipelines)
 	return max;
 }
 
+//converts a light and it's position into a light object
 LightObject toLightObject(light light_in, glm::vec3 pos_in)
 {
 	LightObject retObject = LightObject();
 	retObject.position = glm::vec4(pos_in, 1.0);
 	retObject.color = light_in.color;
 	return retObject;
+}
+
+//Find an integers index in an array
+int findInt(int arrayIn[], int value, int arraySize) {
+	for (int i = 0; i < arraySize; i++) {
+		if (arrayIn[i] == value) {
+			return i;
+		}
+	}
+	return -1;
 }

@@ -960,6 +960,12 @@ system_type getSystemType(char * value)
 	else if (strcmp(value, "INPUT") == 0) {
 		return INPUT_SYSTEM;
 	}
+	else if (strcmp(value, "SCENE_TREE") == 0) {
+		return SCENE_TREE_SYSTEM;
+	}
+	else if (strcmp(value, "BOUNDS") == 0) {
+		return BOUNDS_SYSTEM;
+	}
 	return NO_SYSTEM_TYPE;
 }
 
