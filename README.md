@@ -1,2 +1,2 @@
 # IceCaps
-(Version 0.1a)
+(Version 0.1b)
