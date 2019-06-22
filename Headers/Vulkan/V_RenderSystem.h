@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/EntitySystem.h"
+#include "Core/ThreadPool.h"
 #include "Vulkan/V_Components.h"
 #include "Core/ManagersFactories.h"
 #include "Vulkan/V_GraphicsPipeline.h"
@@ -43,6 +44,8 @@ private:
 	ArrayManager<AABB>* bManager;
 	std::vector<NodeManager<VulkanSceneNode>*> * renderNodes;
 	std::vector<material_type> * pipelineTypes = new std::vector<material_type>();
+
+	std::mutex cullMutex;
 	std::vector<int> visibleNodes = std::vector<int>();
 
 public:
@@ -57,10 +60,12 @@ public:
 
 	//Per call update functions
 	void onUpdate();
+	void doSomething(int& someInt);
+	void cullNode(std::vector<int>& visible, SceneNode& node, frustum& frus, configurationStructure& config);
 	void cullNodes();
 	void renderAllNodes();
 	void renderSinglePipeline(V_GraphicsPipeline* gPipeline, NodeManager<VulkanSceneNode>* nodeManager);
-	void renderEntities(V_GraphicsPipeline* gPipeline, std::vector<int> entityIDs, VulkanSceneNode* node);
+	void renderEntities(V_GraphicsPipeline& gPipeline, std::vector<int> entityIDs, VulkanSceneNode& node);
 	void acquireImage();
 	void updateCameraBuffers();
 	VkCommandBuffer generateBuffer(std::vector<int> entities, V_GraphicsPipeline * pipeline, int coreID, int scene_nodeID);

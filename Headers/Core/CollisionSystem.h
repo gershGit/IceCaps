@@ -12,6 +12,8 @@ private:
 	MappedManager<rigid_body>* rManager = nullptr;
 	VectorManager<collision>* clManager = nullptr;
 	MappedManager<collider>* cManager = nullptr;
+
+	std::mutex listMutex;
 public:
 	CollisionSystem() { operatesOn = { COLLIDER, TRANSFORM, RIGID_BODY }; entityListRequiredComponents = { {TRANSFORM, COLLIDER} }; usesScene = true; systemType = COLLISION_SYSTEM; };
 	~CollisionSystem() {};
@@ -28,9 +30,9 @@ public:
 
 	void addExitCollisions(VectorManager<collision> * manager);
 
-	void searchNodeForCollisions(SceneNode* scene_node);
+	void searchNodeForCollisions(SceneNode& scene_node);
 	void checkForCollisionsInParent(int entity, SceneNode * scene_node);
-	void checkForCollisions(int entity, SceneNode* scene_node);
+	void checkForCollisions(int entity, SceneNode& scene_node);
 
 	void initialize();
 	void onUpdate();

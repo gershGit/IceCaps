@@ -1,5 +1,6 @@
 #include "Core/CollisionSystem.h"
 #include "Core/GameTimer.h"
+#include "Core/ThreadPool.h"
 
 //Checks to see if two entities collide in any fashion
 collision CollisionSystem::checkCollision(int entityOne, int entityTwo) {
@@ -113,21 +114,22 @@ void CollisionSystem::addExitCollisions(VectorManager<collision>* manager) {
 }
 
 //Searches for any collisions with a nodes entities
-void CollisionSystem::searchNodeForCollisions(SceneNode * scene_node)
+void CollisionSystem::searchNodeForCollisions(SceneNode& scene_node)
 {
 	//Check for collisions between dynamic objects and objects within its bounds
-	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
-		checkForCollisions(scene_node->dynamicEntities->at(i), scene_node); //TODO thread pool call?
-		SceneNode* parent = getParentNode(scene, scene_node->id, config->sceneChildren);
+	for (int i = 0; i < scene_node.dynamicEntities->size(); i++) {
+		checkForCollisions(scene_node.dynamicEntities->at(i), scene_node);
+		SceneNode* parent = getParentNode(scene, scene_node.id, config->sceneChildren);
 		if (parent != nullptr) {
-			checkForCollisionsInParent(scene_node->dynamicEntities->at(i), parent); //TODO thread pool call?
+			checkForCollisionsInParent(scene_node.dynamicEntities->at(i), parent);
 		} 
 	}
 
 	//Search all subscene_nodes for collisions
-	if (!scene_node->isLeaf) {
+	if (!scene_node.isLeaf) {
 		for (int i = 0; i < config->sceneChildren; i++) {
-			searchNodeForCollisions(&scene_node->children[i]); //TODO thread pool call
+			auto searchFuncChild = std::bind(&CollisionSystem::searchNodeForCollisions, this, std::ref(scene_node.children[i]));
+			ThreadPool::submitJob(searchFuncChild);
 		}
 	}
 }
@@ -138,7 +140,9 @@ void CollisionSystem::checkForCollisionsInParent(int entity, SceneNode * scene_n
 	for (int i = 0; i < scene_node->staticEntityCount; i++) {
 		collision possibleCollision = checkCollision(entity, scene_node->staticEntities[i]);
 		if (possibleCollision.collision) {
+			listMutex.lock();
 			addCollision(possibleCollision, clManager);
+			listMutex.unlock();
 			if (possibleCollision.state == COLLISION_ENTER) {
 				manageCollisionPhysics(entity, scene_node->staticEntities[i], possibleCollision, rManager, tManager);
 			}
@@ -147,44 +151,45 @@ void CollisionSystem::checkForCollisionsInParent(int entity, SceneNode * scene_n
 }
 
 //Checks for collisions within a node
-void CollisionSystem::checkForCollisions(int entity, SceneNode * scene_node)
+void CollisionSystem::checkForCollisions(int entity, SceneNode & scene_node)
 {
 	//Checks to see if the entity collides with scene_node as a whole
 	collider col = cManager->getComponent(entity);
 	glm::vec3 pos = tManager->getComponent(entity).pos;
 	AABB bounds = getBounds(col, pos);
-	if (!boundsIntersect(scene_node->bounds, bounds)) {
+	if (!boundsIntersect(scene_node.bounds, bounds)) {
 		return;
 	}
 
 	//Check for collisions between the entity and static objects in the scene_node
-	for (int i = 0; i < scene_node->staticEntityCount; i++) {
-		collision possibleCollision = checkCollision(entity, scene_node->staticEntities[i]);
+	for (int i = 0; i < scene_node.staticEntityCount; i++) {
+		collision possibleCollision = checkCollision(entity, scene_node.staticEntities[i]);
 		if (possibleCollision.collision) {
 			addCollision(possibleCollision, clManager);
 			if (possibleCollision.state == COLLISION_ENTER) {
-				manageCollisionPhysics(entity, scene_node->staticEntities[i], possibleCollision, rManager, tManager);
+				manageCollisionPhysics(entity, scene_node.staticEntities[i], possibleCollision, rManager, tManager);
 			}
 		}
 	}
 
 	//Check for collisions between the entity and dynamic objects in the scene_node
-	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
-		if (scene_node->dynamicEntities->at(i) != entity) {
-			collision possibleCollision = checkCollision(entity, scene_node->dynamicEntities->at(i));
+	for (int i = 0; i < scene_node.dynamicEntities->size(); i++) {
+		if (scene_node.dynamicEntities->at(i) != entity) {
+			collision possibleCollision = checkCollision(entity, scene_node.dynamicEntities->at(i));
 			if (possibleCollision.collision) {
 				addCollision(possibleCollision, clManager);
 				if (possibleCollision.state == COLLISION_ENTER) {
-					manageCollisionPhysics(entity, scene_node->dynamicEntities->at(i), possibleCollision, rManager, tManager);
+					manageCollisionPhysics(entity, scene_node.dynamicEntities->at(i), possibleCollision, rManager, tManager);
 				}
 			}
 		}
 	}
 
 	//Check if the entity collides with any objects in subscene_nodes
-	if (!scene_node->isLeaf) {
+	if (!scene_node.isLeaf) {
 		for (int i = 0; i < config->sceneChildren; i++) {
-			checkForCollisions(entity, &scene_node->children[i]); //TODO thread pool call
+			auto checkFunc = std::bind(&CollisionSystem::checkForCollisions, this, entity, std::ref(scene_node.children[i]));
+			ThreadPool::submitJob(checkFunc);
 		}
 	}
 }
@@ -204,11 +209,15 @@ void CollisionSystem::onUpdate()
 {
 	setLastCollisions(clManager->getComponents());
 	clManager->getComponents()->clear();
-	searchNodeForCollisions(scene); //TODO thread pool call
+	auto searchFunc = std::bind(&CollisionSystem::searchNodeForCollisions, this, std::ref(*scene));
+	ThreadPool::submitJob(searchFunc);
+	ThreadPool::workToComplete();
 	addExitCollisions(clManager);
 	for (collision cInfo : *clManager->getComponents()) {
-		manageCollision(cInfo); //TODO thread pool call
+		auto mFunc = std::bind(&CollisionSystem::manageCollision, this, cInfo);
+		ThreadPool::submitJob(mFunc);
 	}
+	ThreadPool::workToComplete();
 }
 
 //User defined function for what should happen when two objects collide

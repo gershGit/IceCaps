@@ -36,8 +36,8 @@ public:
 	void rebuildLightBuffer(VulkanSceneNode* node);
 	void removeLightInVulkan(int oldID, int lightID);
 	void addLightInVulkan(int newID, int lightID);
-	void moveObjects(SceneNode* scene_node);
-	void moveLights(SceneNode* scene_node, int lightID);
+	void moveObjects(SceneNode& scene_node);
+	void moveLights(SceneNode& scene_node, int lightID);
 
 	//Setter function for the render nodes to access the vulkan scene
 	void setRenderNodes(std::vector<NodeManager<VulkanSceneNode>*>* renderNodes_in) { renderNodes = renderNodes_in; };

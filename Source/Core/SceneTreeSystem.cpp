@@ -2,6 +2,7 @@
 #include "Core/ManagersFactories.h"
 #include "Core/StringTranslation.h"
 #include "Core/Global_Callbacks.h"
+#include "Core/ThreadPool.h"
 
 #define NO_LIGHT -1
 
@@ -35,15 +36,18 @@ void SceneTreeSystem::start()
 void SceneTreeSystem::onUpdate()
 {
 	//Move all flagged objects
-	moveObjects(scene);
+	moveObjects(*scene);
 
 	//Check to see if any lights have been moved
 	std::vector<int> lights = lightsManager->getEntities();
 	for (int i = 0; i < lights.size(); i++) {
 		if (hasTag(entityTags->getComponent(lights.at(i)), static_cast<uint64_t>(ICE_TAG_MOVED))) {
-			moveLights(scene, lights.at(i));
+			auto lightFunc = std::bind(&SceneTreeSystem::moveLights, this, std::ref(*scene), lights.at(i));
+			ThreadPool::submitJob(lightFunc);
 		}
 	}
+
+	ThreadPool::workToComplete();
 }
 
 //Attempt to place an entity into a ndoe
@@ -165,7 +169,7 @@ void SceneTreeSystem::addLightInVulkan(int newID, int lightID) {
 		if (n->lightCountCurrent < n->lightMax) {
 			for (int i = n->lightMax - 1; i >= 0; i--) {
 				if (n->lightIDs[i] == NO_LIGHT) { //The position is open in the array
-					n->lightIDs[i] == lightID;
+					n->lightIDs[i] = lightID;
 					n->lightCountCurrent++;
 					rebuildLightBuffer(n);
 				}
@@ -175,24 +179,24 @@ void SceneTreeSystem::addLightInVulkan(int newID, int lightID) {
 }
 
 //Go through all objects flagged as moved and see if they need to be in a new node
-void SceneTreeSystem::moveObjects(SceneNode* scene_node)
+void SceneTreeSystem::moveObjects(SceneNode& scene_node)
 {
 	//Loop through all movable entities in the node
-	for (int i = 0; i < scene_node->dynamicEntities->size(); i++) {
-		int eID = scene_node->dynamicEntities->at(i);
+	for (int i = 0; i < scene_node.dynamicEntities->size(); i++) {
+		int eID = scene_node.dynamicEntities->at(i);
 		uint64_t currentTag = entityTags->getComponent(eID);
 		//Check if the object has moved, if not move on
 		if (hasTag(currentTag, static_cast<uint64_t>(ICE_TAG_MOVED))) {
 			//If the object is still inside this node then check if it can be pushed into a child node
-			if (isInside(&scene_node->bounds, 
+			if (isInside(&scene_node.bounds, 
 				boundsManager->getComponentAddress(eID)) ) {
-				if (!scene_node->isLeaf) {
+				if (!scene_node.isLeaf) {
 					for (int j = 0; j < config->sceneChildren; j++) {
-						if (attemptPlace(&scene_node->children[j], eID)) {
+						if (attemptPlace(&scene_node.children[j], eID)) {
 							//If the object is succesfully placed into a child it can be removed from the parent
-							scene_node->dynamicEntities->erase(scene_node->dynamicEntities->begin() + i);
+							scene_node.dynamicEntities->erase(scene_node.dynamicEntities->begin() + i);
 							if (usingVulkan) {
-								moveInVulkanScene(scene_node->id, scene_node->children[j].id, eID);
+								moveInVulkanScene(scene_node.id, scene_node.children[j].id, eID);
 							}
 							break;
 						}
@@ -203,55 +207,57 @@ void SceneTreeSystem::moveObjects(SceneNode* scene_node)
 				break;
 			}
 			//If the object is no longer in the same node, see which parent node it should now be in
-			int foundNodeId = attemptPlaceParent(getParentNode(scene, scene_node->id, config->sceneChildren), scene_node->dynamicEntities->at(i));
+			int foundNodeId = attemptPlaceParent(getParentNode(scene, scene_node.id, config->sceneChildren), scene_node.dynamicEntities->at(i));
 			entityTags->setComponent(eID, removeTag(currentTag, static_cast<uint64_t>(ICE_TAG_MOVED)));
-			scene_node->dynamicEntities->erase(scene_node->dynamicEntities->begin() + i);
+			scene_node.dynamicEntities->erase(scene_node.dynamicEntities->begin() + i);
 			if (usingVulkan && foundNodeId != -1) {
-				moveInVulkanScene(scene_node->id, foundNodeId, eID);
+				moveInVulkanScene(scene_node.id, foundNodeId, eID);
 			}
 		}
 	}
 	//Recursively call the function to move all objects in nodes children as well
-	if (!scene_node->isLeaf) {
+	if (!scene_node.isLeaf) {
 		for (int i = 0; i < config->sceneChildren; i++) {
-			moveObjects(&scene_node->children[i]); //TODO thread pool call
+			auto moveFunc = std::bind(&SceneTreeSystem::moveObjects, this, std::ref(scene_node.children[i]));
+			ThreadPool::submitJob(moveFunc);
 		}
 	}
 }
 
 //Go through all lights flagged as moved and see which nodes they now affect
-void SceneTreeSystem::moveLights(SceneNode* scene_node, int lightID)
+void SceneTreeSystem::moveLights(SceneNode& scene_node, int lightID)
 {
 	light mLight = lightsManager->getComponent(lightID);
 	LightObject tempLight;
 	tempLight.position = glm::vec4(tManager->getComponent(lightID).pos, 1.0f);
 	bool lightFound = false;
-	for (int i = 0; i < scene_node->lightCount; i++) {	
+	for (int i = 0; i < scene_node.lightCount; i++) {	
 		//If the light already affects this node then we don't need to worry about removal or addition
-		if (scene_node->lightIDs->at(i) == lightID && lightAffects(scene_node->bounds, tempLight, mLight.range)) {
+		if (scene_node.lightIDs->at(i) == lightID && lightAffects(scene_node.bounds, tempLight, mLight.range)) {
 			lightFound = true;
 			break;
 		}
-		else if (scene_node->lightIDs->at(i) == lightID) {
-			scene_node->lightIDs->erase(scene_node->lightIDs->begin() + i);
+		else if (scene_node.lightIDs->at(i) == lightID) {
+			scene_node.lightIDs->erase(scene_node.lightIDs->begin() + i);
 			if (usingVulkan) {
-				removeLightInVulkan(scene_node->id, lightID);
+				removeLightInVulkan(scene_node.id, lightID);
 			}
 			break;
 		}
 	}
 	//If the light wasn't currently in the node but now is then it needs to be added
-	if (!lightFound && lightAffects(scene_node->bounds, tempLight, mLight.range)) {
-		scene_node->lightIDs->push_back(lightID);
+	if (!lightFound && lightAffects(scene_node.bounds, tempLight, mLight.range)) {
+		scene_node.lightIDs->push_back(lightID);
 
 		if (usingVulkan) {
-			addLightInVulkan(scene_node->id, lightID);
+			addLightInVulkan(scene_node.id, lightID);
 		}
 	}
 	//Recursively call the function on children for granularity on nodes
-	if (!scene_node->isLeaf) {
+	if (!scene_node.isLeaf) {
 		for (int i = 0; i < config->sceneChildren; i++) {
-			moveLights(&scene_node->children[i], lightID);
+			auto mLightsF = std::bind(&SceneTreeSystem::moveLights, this, std::ref(scene_node.children[i]), lightID);
+			ThreadPool::submitJob(mLightsF);
 		}
 	}
 }

@@ -22,6 +22,8 @@ SceneLoader::SceneLoader()
 
 //Builder Functions ---------------------------------------------------------------------------
 
+//TODO separate descriptor pool for scene nodes and for material descriptors
+
 //Moves the static entities into arrays as they do not need to be dynamic
 void collapseStaticEntities(SceneNode* scene_node, int childCount, std::vector<std::vector<int>*>* staticTemp) {
 	//TODO record static render buffers

@@ -98,21 +98,28 @@ void V_RenderSystem::onUpdate()
 	updateCameraBuffers();
 
 	cullNodes(); //create a list of visible scene_nodes
-	renderAllNodes();  //renders all scene_nodes of a pipeline, then renders all scene_nodes of the next pipeline, etc until all pipelines have been rendered
-	//	   TODO renderNode() [called in threadpool from renderNodes] somehow needs to know the thread in the pool that is trying to render
-	//		could just pass incremental id's < corecount for mostly random queue submission though no thread will actually be bound to a queue
+	renderAllNodes();
 	//TODO renderUI() --> UI is not contained in the scene tree so it needs its own render function
 	presentRender();
 	config->apiInfo.v_Instance->incrementFrame();	
 }
 
+void V_RenderSystem::doSomething(int& someInt) {
+	someInt += 1;
+	std::cout << "Int is " << someInt << std::endl;
+	return;
+}
+
 //Determines if a node is visible or not
-void cullNode(std::vector<int> &visible, SceneNode *node, frustum *frus, configurationStructure * config) {
-	if (isVisible(node->bounds, frus)) {
-		visible.push_back(node->id); //TODO make threadsafe 
-		if (!node->isLeaf) {
-			for (int i = 0; i < config->sceneChildren; i++) {
-				cullNode(visible , &node->children[i], frus, config); //TODO make thread pool call
+void V_RenderSystem::cullNode(std::vector<int> &visible, SceneNode &node, frustum &frus, configurationStructure &config) {
+	if (isVisible(node.bounds, &frus)) {
+		cullMutex.lock();
+		visible.push_back(node.id);
+		cullMutex.unlock();
+		if (!node.isLeaf) {
+			for (int i = 0; i < config.sceneChildren; i++) {
+				auto cullNodeFunc = std::bind(&V_RenderSystem::cullNode, this, std::ref(visible), std::ref(node.children[i]), std::ref(frus), std::ref(config));
+				ThreadPool::submitJob(cullNodeFunc);
 			}
 		}
 	}
@@ -121,7 +128,8 @@ void cullNode(std::vector<int> &visible, SceneNode *node, frustum *frus, configu
 //Find the nodes that are visible
 void V_RenderSystem::cullNodes() {
 	visibleNodes.clear();
-	cullNode(visibleNodes, scene, &frus, config);
+	cullNode(visibleNodes, *scene, frus, *config);
+	ThreadPool::workToComplete();
 }
 
 //Renders all the visible nodes in order by pipeline
@@ -129,6 +137,7 @@ void V_RenderSystem::renderAllNodes() {
 	for (int i = 0; i < graphicsPipelines->size(); i++) {
 		renderSinglePipeline(graphicsPipelines->at(i), renderNodes->at(i));
 	}
+	ThreadPool::workToComplete();
 }
 
 //Renders a pipeline scene node
@@ -137,7 +146,8 @@ void V_RenderSystem::renderSinglePipeline(V_GraphicsPipeline* gPipeline, NodeMan
 		if (nodeManager->hasEntity(visibleNodes.at(i))) {
 			VulkanSceneNode* tempNode = nodeManager->getComponentAddress(visibleNodes.at(i));
 			if (tempNode->dynamicEntities.size() > 0) {
-				renderEntities(gPipeline, tempNode->dynamicEntities, tempNode);
+				auto renderFunc = std::bind(&V_RenderSystem::renderEntities, this, std::ref(*gPipeline), tempNode->dynamicEntities, std::ref(*tempNode));
+				ThreadPool::submitJob(renderFunc);
 			}
 			if (tempNode->hasCommandBuffer) {
 				submitCommandBuffer(tempNode->staticDrawCommands, 0); //TODO figure out how to do this per core
@@ -147,25 +157,25 @@ void V_RenderSystem::renderSinglePipeline(V_GraphicsPipeline* gPipeline, NodeMan
 }
 
 //Renders a list of entities
-void V_RenderSystem::renderEntities(V_GraphicsPipeline* gPipeline, std::vector<int> entityIDs, VulkanSceneNode* node) {
+void V_RenderSystem::renderEntities(V_GraphicsPipeline& gPipeline, std::vector<int> entityIDs, VulkanSceneNode& node) {
 	int coreID = 0; //TODO make this per core
 	int frameID = (int) config->apiInfo.v_Instance->currentFrame;
 
-	VkCommandBuffer thisBuffer = node->dynamicBuffers[frameID];
+	VkCommandBuffer thisBuffer = node.dynamicBuffers[frameID];
 	vkResetCommandBuffer(thisBuffer, 0);
 	vkBeginCommandBuffer(thisBuffer, &beginInfo);
 
 	VkRenderPassBeginInfo renderPassInfo = {};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = gPipeline->getRenderPass();
-	renderPassInfo.framebuffer = gPipeline->getFramebuffers()->at(frameID);
+	renderPassInfo.renderPass = gPipeline.getRenderPass();
+	renderPassInfo.framebuffer = gPipeline.getFramebuffers()->at(frameID);
 	renderPassInfo.renderArea.offset = { 0,0 };
 	renderPassInfo.renderArea.extent = swapchain->getExtent();
 	renderPassInfo.clearValueCount = 2;
 	renderPassInfo.pClearValues = clearValues;
 
 	vkCmdBeginRenderPass(thisBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-	vkCmdBindPipeline(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline->getPipeline());
+	vkCmdBindPipeline(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipeline());
 
 	for (int i=0; i < entityIDs.size(); i++) {
 		VkBuffer vertexBuffers[] = { getCManager<v_mesh>(*managers,V_MESH)->getComponent(entityIDs.at(i)).vBuffer };
@@ -175,11 +185,11 @@ void V_RenderSystem::renderEntities(V_GraphicsPipeline* gPipeline, std::vector<i
 
 		vkCmdBindIndexBuffer(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entityIDs.at(i)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline->getPipelineLayout(), 0, 1, &node->camLightDescSets[frameID], 0, nullptr);
-		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline->getPipelineLayout(), 1, 1, &getCManager<v_material>(*managers, V_MATERIAL)->getComponentAddress(entityIDs.at(i))->descriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 0, 1, &node.camLightDescSets[frameID], 0, nullptr);
+		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 1, 1, &getCManager<v_material>(*managers, V_MATERIAL)->getComponentAddress(entityIDs.at(i))->descriptorSet, 0, nullptr);
 
 		glm::mat4 transformPush = getTransformationMatrix(getCManager<transform>(*managers, TRANSFORM)->getComponent(entityIDs.at(i)));
-		vkCmdPushConstants(thisBuffer, gPipeline->getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, static_cast<size_t>(sizeof(glm::mat4)), &transformPush);
+		vkCmdPushConstants(thisBuffer, gPipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, static_cast<size_t>(sizeof(glm::mat4)), &transformPush);
 
 		vkCmdDrawIndexed(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entityIDs.at(i)).indicesCount, 1, 0, 0, 0); //Draw call
 	}
