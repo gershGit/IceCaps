@@ -14,12 +14,12 @@ enum component_type {TRANSFORM, PARENT, AABB_COMPONENT,
 						GL_MESH, GL_MATERIAL,
 						V_DESCRIPTOR, DX12_DESCRIPTOR,
 						LIGHT_COMPONENT,
-						ANIMATION_COMPONENT,
+						ANIMATION_COMPONENT, ARMATURE_COMPONENT,
 						TAGS_COMPONENT,
 						COLLISION, NO_TYPE};
 enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, ANIMATION_SYSTEM, 
 	INPUT_SYSTEM, CLIENT_NET_SYSTEM, SERVER_NET_SYSTEM, PEER_NET_SYSTEM, SCENE_TREE_SYSTEM, 
-	BOUNDS_SYSTEM, NO_SYSTEM_TYPE = -1};
+	BOUNDS_SYSTEM, ARMATURE_SYSTEM, NO_SYSTEM_TYPE = -1};
 enum collision_state {COLLISION_ENTER, COLLISION_CONTINUE, COLLISION_EXIT};
 enum anim_state {ANIMATION_PLAYING, ANIMATION_PAUSED, ANIMATION_OVER};
 
@@ -45,7 +45,10 @@ struct transform {
 
 struct bone {
 	transform mTransformation;
+	transform localBindTransform;
+	transform inverseBindTransform;
 	bone* parent;
+	bone* children;
 };
 
 struct parentEntity {

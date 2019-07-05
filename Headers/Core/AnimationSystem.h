@@ -8,7 +8,7 @@
 
 class AnimationSystem : public EntitySystem {
 public:
-	AnimationSystem() { operatesOn = { TRANSFORM, ANIMATION_COMPONENT }; entityListRequiredComponents = { {TRANSFORM, ANIMATION_COMPONENT} }; systemType = ANIMATION_SYSTEM; };
+	AnimationSystem() { operatesOn = { TRANSFORM, ANIMATION_COMPONENT, ARMATURE_COMPONENT }; entityListRequiredComponents = { {TRANSFORM, ANIMATION_COMPONENT}, {TRANSFORM, ANIMATION_COMPONENT, ARMATURE_COMPONENT} }; systemType = ANIMATION_SYSTEM; };
 	~AnimationSystem() {};
 	void start();
 

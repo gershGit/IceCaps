@@ -126,6 +126,9 @@
     <ClCompile Include="..\..\Source\Core\BoundsSystem.cpp">
       <Filter>Source Files\Core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\Core\ArmatureSystem.cpp">
+      <Filter>Source Files\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Headers\Core\Lifecycle_Functions.h">
@@ -240,6 +243,9 @@
       <Filter>Header Files\ThirdParty</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Headers\Core\BoundsSystem.h">
+      <Filter>Header Files\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Headers\Core\ArmatureSystem.h">
       <Filter>Header Files\Core</Filter>
     </ClInclude>
   </ItemGroup>

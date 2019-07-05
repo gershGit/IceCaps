@@ -295,6 +295,15 @@ void V_GraphicsPipeline::initialize(material_type mType)
 		createRenderPass();
 		createFrameBuffers();
 	}
+	else if (mType == PBR_CHAR) {
+		vertexShader = "../../Source/Shaders/char_pbr.vert.spv";
+		fragmentShader = "../../Source/Shaders/char_pbr.frag.spv";
+		descriptorSetLayouts.resize(2);
+		createDescriptorSetLayout(mType);
+		createBindingDescription(PBR_CHAR);
+		createRenderPass();
+		createFrameBuffers();
+	}
 
 	initialize(vertexShader, fragmentShader);
 }
@@ -317,13 +326,28 @@ void V_GraphicsPipeline::createDescriptorSetLayout(material_type m_type)
 	lightsBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	lightsBinding.pImmutableSamplers = nullptr;
 
-	VkDescriptorSetLayoutBinding cameraSceneBindings[2];
+	VkDescriptorSetLayoutBinding* cameraSceneBindings;
+	if (m_type == PBR) {
+		cameraSceneBindings = (VkDescriptorSetLayoutBinding*)malloc(sizeof(VkDescriptorSetLayoutBinding) * 2);
+	} else if (m_type == PBR_CHAR) {
+		cameraSceneBindings = (VkDescriptorSetLayoutBinding*)malloc(sizeof(VkDescriptorSetLayoutBinding) * 3);
+	}
 	cameraSceneBindings[0] = viewPerspBinding;
 	cameraSceneBindings[1] = lightsBinding;
 
+	if (m_type == PBR_CHAR) {
+		VkDescriptorSetLayoutBinding bonesBinding = {};
+		bonesBinding.binding = 2;
+		bonesBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		bonesBinding.descriptorCount = 1;
+		bonesBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		bonesBinding.pImmutableSamplers = nullptr;
+		cameraSceneBindings[2] = bonesBinding;
+	}
+
 	VkDescriptorSetLayoutBinding samplerLayoutBinding = {};
 	samplerLayoutBinding.binding = 0;
-	if (m_type == PBR) {
+	if (m_type == PBR || m_type == PBR_CHAR) {
 		samplerLayoutBinding.descriptorCount = 5;
 	}
 	else {
@@ -335,9 +359,16 @@ void V_GraphicsPipeline::createDescriptorSetLayout(material_type m_type)
 
 	//One set for uniform buffers to be updated every frame
 	VkDescriptorSetLayoutCreateInfo cameraSceneInfo = {};
-	cameraSceneInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-	cameraSceneInfo.bindingCount = 2;
-	cameraSceneInfo.pBindings = cameraSceneBindings;
+	if (m_type == PBR) {
+		cameraSceneInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		cameraSceneInfo.bindingCount = 2;
+		cameraSceneInfo.pBindings = cameraSceneBindings;
+	}
+	else if (m_type == PBR_CHAR) {
+		cameraSceneInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		cameraSceneInfo.bindingCount = 3;
+		cameraSceneInfo.pBindings = cameraSceneBindings;
+	}
 	VkResult res = vkCreateDescriptorSetLayout(device->getLogicalDevice(), &cameraSceneInfo, nullptr, &descriptorSetLayouts.at(0));
 	if (res != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor set layout!");
@@ -380,6 +411,42 @@ void V_GraphicsPipeline::createBindingDescription(material_type m_type)
 		attributeDescriptions[3].location = 3;
 		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
 		attributeDescriptions[3].offset = offsetof(vertex, uv);
+	}
+	else if (m_type == PBR_CHAR) {
+		bindingDescription.binding = 0;
+		bindingDescription.stride = sizeof(skinned_vertex);
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		attributeDescriptions.resize(6);
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(skinned_vertex, mVertex.position);
+
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(skinned_vertex, mVertex.normal);
+
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(skinned_vertex, mVertex.tangent);
+
+		attributeDescriptions[3].binding = 0;
+		attributeDescriptions[3].location = 3;
+		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[3].offset = offsetof(skinned_vertex, mVertex.uv);
+
+		attributeDescriptions[4].binding = 0;
+		attributeDescriptions[4].location = 4;
+		attributeDescriptions[4].format = VK_FORMAT_R32G32_SINT;
+		attributeDescriptions[4].offset = offsetof(skinned_vertex, bone_id);
+
+		attributeDescriptions[5].binding = 0;
+		attributeDescriptions[5].location = 5;
+		attributeDescriptions[5].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[5].offset = offsetof(skinned_vertex, bone_weight);
 	}
 }
 

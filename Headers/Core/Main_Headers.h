@@ -39,7 +39,7 @@ enum anti_aliasing_type {SUPER_SAMPLING, MULTI_SAMPLING, NO_ANTI_ALIASING};
 enum scene_key { SCENE_NAME, MANAGERS, SYSTEMS, ADD_MANAGER, ADD_SYSTEM, ADD_PIPELINE, ENTITY_COUNT, ENTITY, ADD_COMPONENT, ADD_TAG, IS_DYNAMIC, NO_SCENE_KEY,
 	SCENE_SIZE, TREE_DEPTH, SCENE_STRUCTURE, END_STATEMENT, END_ENTITIES, FILE_LOAD_KEY };
 enum materialSubComponents { MAT_TYPE, TEXTURE, END };
-enum material_type { PBR };
+enum material_type { PBR, PBR_CHAR };
 enum texture_type { DIFFUSE, METALLIC_SPEC, NORMAL, ROUGHNESS, AO, NO_TEXTURE_TYPE = -1 };
 enum collider_type { SPHERE_COLLIDER, AABB_COLLIDER, BOX_COLLIDER, CAPSULE_COLLIDER, MESH_COLLIDER, NO_COLLIDER_TYPE = -1 };
 enum light_type { POINT_LIGHT, DIRECTION_LIGHT, SPOT_LIGHT };
@@ -140,8 +140,8 @@ struct ui_rectangle {
 //Special vertex structure containing bone information
 struct skinned_vertex {
 	vertex mVertex;
-	std::vector<unsigned int> bones;
-	std::vector<float> weights;
+	int bone_id[4];
+	float bone_weight[4];
 };
 
 struct ViewPersp {
