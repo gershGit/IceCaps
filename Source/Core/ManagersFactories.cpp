@@ -19,15 +19,6 @@ void cleanup(MappedManager<v_material>* manager)
 
 }
 
-glm::mat4 getTransformationMatrix(transform transform_component)
-{
-	glm::mat4 scaleMat = glm::scale(glm::mat4(1), transform_component.scale);
-	glm::mat4 rotMat = glm::toMat4(glm::quat(transform_component.rot));
-	glm::mat4 transMat = glm::translate(glm::mat4(1), transform_component.pos);
-
-	return transMat * rotMat * scaleMat;
-}
-
 void managerCleanup(MappedManager<v_material>* manager, V_Device * device) {
 	for (std::pair<int, v_material> material : manager->componentMap) {
 		for (VkImageView view : material.second.textureViews) {

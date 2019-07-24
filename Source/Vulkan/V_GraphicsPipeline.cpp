@@ -326,7 +326,7 @@ void V_GraphicsPipeline::createDescriptorSetLayout(material_type m_type)
 	lightsBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 	lightsBinding.pImmutableSamplers = nullptr;
 
-	VkDescriptorSetLayoutBinding* cameraSceneBindings;
+	VkDescriptorSetLayoutBinding* cameraSceneBindings = nullptr;
 	if (m_type == PBR) {
 		cameraSceneBindings = (VkDescriptorSetLayoutBinding*)malloc(sizeof(VkDescriptorSetLayoutBinding) * 2);
 	} else if (m_type == PBR_CHAR) {

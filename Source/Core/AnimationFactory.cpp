@@ -33,9 +33,9 @@ void AnimationFactory::loadFromFile(char * fileName, animation &anim, configurat
 		else if (strcmp(keyString, "FRAME") == 0) {
 			int index = atoi(value);
 			anim.frames[index].index = index;
-			anim.frames[index].deltaPosition = glm::vec3(0);
-			anim.frames[index].deltaRotation = glm::vec3(0);
-			anim.frames[index].deltaScale = glm::vec3(0);
+			anim.frames[index].snap.deltaPosition = glm::vec3(0);
+			anim.frames[index].snap.deltaRotation = glm::vec3(0);
+			anim.frames[index].snap.deltaScale = glm::vec3(0);
 
 			while (fscanf(animFile, "%s", buffer) > 0) {
 				getSubComponent(buffer, keyString, 256);
@@ -44,13 +44,13 @@ void AnimationFactory::loadFromFile(char * fileName, animation &anim, configurat
 					anim.frames[index].t = strtod(value, nullptr);
 				}
 				else if (strcmp(keyString, "D_POS") == 0) {
-					anim.frames[index].deltaPosition = getVectorFromString<glm::vec3>(value, valSize);
+					anim.frames[index].snap.deltaPosition = getVectorFromString<glm::vec3>(value, valSize);
 				}
 				else if (strcmp(keyString, "D_ROT") == 0) {
-					anim.frames[index].deltaRotation = getVectorFromString<glm::vec3>(value, valSize);
+					anim.frames[index].snap.deltaRotation = getVectorFromString<glm::vec3>(value, valSize);
 				}
 				else if (strcmp(keyString, "D_SCA") == 0) {
-					anim.frames[index].deltaScale = getVectorFromString<glm::vec3>(value, valSize);
+					anim.frames[index].snap.deltaScale = getVectorFromString<glm::vec3>(value, valSize);
 				}
 				else if (strcmp(keyString, "END")==0) {
 					break;

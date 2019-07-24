@@ -21,8 +21,8 @@ V_RenderSystem::V_RenderSystem()
 	usesScene = true;
 
 	systemType = RENDER_SYSTEM;
-	operatesOn = { TRANSFORM, V_MESH, V_MATERIAL, CAMERA, LIGHT_COMPONENT, PREFAB_COMPONENT };
-	entityListRequiredComponents = { {V_MESH, V_MATERIAL} };
+	operatesOn = { TRANSFORM, V_MESH, V_MATERIAL, V_CAMERA, LIGHT_COMPONENT, PREFAB_COMPONENT, V_SKINNED_MESH };
+	entityListRequiredComponents = { {V_MESH, V_MATERIAL}, {V_SKINNED_MESH, V_MATERIAL} };
 
 	beginInfo = {};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -42,6 +42,10 @@ void V_RenderSystem::initialize()
 	for (int i = 0; i < mInstance->getGraphicsPipelines()->size(); i++) {
 		graphicsPipelines->push_back(mInstance->getGraphicsPipelines()->at(i));
 	}
+	skinManager = dynamic_cast<MappedManager<vk_skinned_mesh>*>(getCManager<vk_skinned_mesh>(*managers, V_SKINNED_MESH));
+	meshManager = dynamic_cast<MappedManager<v_mesh>*>(getCManager<v_mesh>(*managers, V_MESH));
+	matManager = dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(*managers, V_MATERIAL));
+	tManager = dynamic_cast<ArrayManager<transform>*>(getCManager<transform>(*managers, TRANSFORM));
 }
 
 //Creates submit structures for use in submitting command buffers
@@ -55,6 +59,7 @@ void V_RenderSystem::createSubmitInfos()
 	imageIndices.resize(config->swapchainBuffering);
 	swapchainKHR = { config->apiInfo.v_Instance->getSwapchain()->getSwapchain() };
 	for (int i = 0; i < config->swapchainBuffering; i++) {
+		//TODO figure out how to signal using fences and semaphores properly
 		waitStages = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		waitSemaphores[i] = { config->apiInfo.v_Instance->imageAvailableSemaphores[i] };	
 		signalSemaphores[i] = { config->apiInfo.v_Instance->renderFinishedSemaphores[i] };
@@ -98,16 +103,11 @@ void V_RenderSystem::onUpdate()
 	updateCameraBuffers();
 
 	cullNodes(); //create a list of visible scene_nodes
-	renderAllNodes();
+	renderSingleThread();
+	//renderAllNodes();
 	//TODO renderUI() --> UI is not contained in the scene tree so it needs its own render function
 	presentRender();
 	config->apiInfo.v_Instance->incrementFrame();	
-}
-
-void V_RenderSystem::doSomething(int& someInt) {
-	someInt += 1;
-	std::cout << "Int is " << someInt << std::endl;
-	return;
 }
 
 //Determines if a node is visible or not
@@ -130,6 +130,73 @@ void V_RenderSystem::cullNodes() {
 	visibleNodes.clear();
 	cullNode(visibleNodes, *scene, frus, *config);
 	ThreadPool::workToComplete();
+}
+
+//Uses a single thread for command buffer generation ensuring a working renderer as the multi-thread version is revised
+void V_RenderSystem::renderSingleThread() {
+	V_GraphicsPipeline gPipeline = *graphicsPipelines->at(0);
+
+	int frameID = (int)config->apiInfo.v_Instance->currentFrame;
+	VkCommandBuffer thisBuffer = renderNodes->at(0)->getComponent(0).dynamicBuffers[frameID];
+	vkResetCommandBuffer(thisBuffer, 0);
+	vkBeginCommandBuffer(thisBuffer, &beginInfo);
+	VkRenderPassBeginInfo renderPassInfo = {};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = gPipeline.getRenderPass();
+	renderPassInfo.framebuffer = gPipeline.getFramebuffers()->at(frameID);
+	renderPassInfo.renderArea.offset = { 0,0 };
+	renderPassInfo.renderArea.extent = swapchain->getExtent();
+	renderPassInfo.clearValueCount = 2;
+	renderPassInfo.pClearValues = clearValues;
+	vkCmdBeginRenderPass(thisBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBindPipeline(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipeline());
+
+	for (int i = 0; i < 1; i++) {
+		for (int j = 0; j < visibleNodes.size(); j++) {
+			if (renderNodes->at(i)->hasEntity(visibleNodes.at(j))) {
+				VulkanSceneNode* tempNode = renderNodes->at(i)->getComponentAddress(visibleNodes.at(j));
+				std::vector<int> entityIDs = tempNode->dynamicEntities;
+				if (tempNode->dynamicEntities.size() > 0) {
+					for (int k = 0; k < entityIDs.size(); k++) {
+						//If it is a cpu based skinned mesh then get the proper mesh info from the skinned mesh manager
+						VkBuffer vertexBuffers[1];
+						if (skinManager->hasEntity(entityIDs.at(k))) {
+							vertexBuffers[0] = { skinManager->getComponent(entityIDs.at(k)).vBuffer };
+						}
+						else {
+							vertexBuffers[0] = { meshManager->getComponent(entityIDs.at(k)).vBuffer };
+						}
+						VkDeviceSize offsets[] = { 0 };
+
+						vkCmdBindVertexBuffers(thisBuffer, 0, 1, vertexBuffers, offsets);
+
+						if (skinManager->hasEntity(entityIDs.at(k))) {
+							vkCmdBindIndexBuffer(thisBuffer, skinManager->getComponent(entityIDs.at(k)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+						}
+						else {
+							vkCmdBindIndexBuffer(thisBuffer, meshManager->getComponent(entityIDs.at(k)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+						}
+
+						vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 0, 1, &tempNode->camLightDescSets[frameID], 0, nullptr);
+						vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 1, 1, &matManager->getComponentAddress(entityIDs.at(k))->descriptorSet, 0, nullptr);
+
+						glm::mat4 transformPush = getTransformationMatrix(tManager->getComponent(entityIDs.at(k)));
+						vkCmdPushConstants(thisBuffer, gPipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, static_cast<size_t>(sizeof(glm::mat4)), &transformPush);
+
+						if (skinManager->hasEntity(entityIDs.at(k))) {
+							vkCmdDrawIndexed(thisBuffer, skinManager->getComponent(entityIDs.at(k)).indicesCount, 1, 0, 0, 0);
+						}
+						else {
+							vkCmdDrawIndexed(thisBuffer, meshManager->getComponent(entityIDs.at(k)).indicesCount, 1, 0, 0, 0); //Draw call
+						}
+					}
+				}
+			}
+		}
+	}
+	vkCmdEndRenderPass(thisBuffer);
+	vkEndCommandBuffer(thisBuffer);
+	submitCommandBuffer(thisBuffer, 0);
 }
 
 //Renders all the visible nodes in order by pipeline
@@ -178,20 +245,37 @@ void V_RenderSystem::renderEntities(V_GraphicsPipeline& gPipeline, std::vector<i
 	vkCmdBindPipeline(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipeline());
 
 	for (int i=0; i < entityIDs.size(); i++) {
-		VkBuffer vertexBuffers[] = { getCManager<v_mesh>(*managers,V_MESH)->getComponent(entityIDs.at(i)).vBuffer };
+		//If it is a cpu based skinned mesh then get the proper mesh info from the skinned mesh manager
+		VkBuffer vertexBuffers[1];
+		if (skinManager->hasEntity(entityIDs.at(i))) {
+			vertexBuffers[0] = { skinManager->getComponent(entityIDs.at(i)).vBuffer };
+		}
+		else {
+			vertexBuffers[0] = { meshManager->getComponent(entityIDs.at(i)).vBuffer };
+		}
 		VkDeviceSize offsets[] = { 0 };
 
 		vkCmdBindVertexBuffers(thisBuffer, 0, 1, vertexBuffers, offsets);
 
-		vkCmdBindIndexBuffer(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entityIDs.at(i)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		if (skinManager->hasEntity(entityIDs.at(i))) {
+			vkCmdBindIndexBuffer(thisBuffer, skinManager->getComponent(entityIDs.at(i)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		}
+		else {
+			vkCmdBindIndexBuffer(thisBuffer, meshManager->getComponent(entityIDs.at(i)).indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		}
 
 		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 0, 1, &node.camLightDescSets[frameID], 0, nullptr);
-		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 1, 1, &getCManager<v_material>(*managers, V_MATERIAL)->getComponentAddress(entityIDs.at(i))->descriptorSet, 0, nullptr);
+		vkCmdBindDescriptorSets(thisBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, gPipeline.getPipelineLayout(), 1, 1, &matManager->getComponentAddress(entityIDs.at(i))->descriptorSet, 0, nullptr);
 
-		glm::mat4 transformPush = getTransformationMatrix(getCManager<transform>(*managers, TRANSFORM)->getComponent(entityIDs.at(i)));
+		glm::mat4 transformPush = getTransformationMatrix(tManager->getComponent(entityIDs.at(i)));
 		vkCmdPushConstants(thisBuffer, gPipeline.getPipelineLayout(), VK_SHADER_STAGE_VERTEX_BIT, 0, static_cast<size_t>(sizeof(glm::mat4)), &transformPush);
 
-		vkCmdDrawIndexed(thisBuffer, getCManager<v_mesh>(*managers, V_MESH)->getComponent(entityIDs.at(i)).indicesCount, 1, 0, 0, 0); //Draw call
+		if (skinManager->hasEntity(entityIDs.at(i))) {
+			vkCmdDrawIndexed(thisBuffer, skinManager->getComponent(entityIDs.at(i)).indicesCount, 1, 0, 0, 0);
+		}
+		else {
+			vkCmdDrawIndexed(thisBuffer, meshManager->getComponent(entityIDs.at(i)).indicesCount, 1, 0, 0, 0); //Draw call
+		}
 	}
 
 	vkCmdEndRenderPass(thisBuffer);
@@ -206,9 +290,10 @@ void V_RenderSystem::acquireImage()
 {
 	V_Instance* instance = config->apiInfo.v_Instance;
 	//Acquires the next image using a semaphore and stores the index into imageIndex
+	//TODO signal imageAvailableSemaphore if necessessary instead of VK_NULL_HANDLE, or use a fence so it can be a 1 time CPU check
 	VkResult result = vkAcquireNextImageKHR(instance->getPrimaryDevice()->getLogicalDevice(),
 		instance->getSwapchain()->getSwapchain(), std::numeric_limits<uint64_t>::max(),
-		instance->imageAvailableSemaphores[instance->currentFrame], VK_NULL_HANDLE, &imageIndices[instance->currentFrame]);
+		mInstance->imageAvailableSemaphores[mInstance->currentFrame], VK_NULL_HANDLE, &imageIndices[instance->currentFrame]);
 
 	//Check if the swawpchain needs to be rebuilt
 	if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -301,6 +386,8 @@ VkCommandBuffer V_RenderSystem::generateBuffer(std::vector<int> entities, V_Grap
 //Submits a command buffer to a graphics queue
 void V_RenderSystem::submitCommandBuffer(VkCommandBuffer &buffer, int coreID)
 {
+	//TODO fences should only worry about the image at the end
+	//TODO Rebuild submit infos per frame? 
 	submitInfos[config->apiInfo.v_Instance->currentFrame].pCommandBuffers = &buffer;
 
 	//Lock the fence that was open to allow for us to use this image

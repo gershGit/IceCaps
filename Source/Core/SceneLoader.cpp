@@ -235,7 +235,7 @@ void SceneLoader::addManagers(configurationStructure &config, std::vector<Compon
 			}
 			else if (cType == CAMERA) {
 				std::cout << "\tAdding Camera Manager" << std::endl;
-				if (config.api = Vulkan) {
+				if (config.api == Vulkan) {
 					managers.push_back(new MappedManager<v_camera>(V_CAMERA));
 				}
 				else {
@@ -258,6 +258,23 @@ void SceneLoader::addManagers(configurationStructure &config, std::vector<Compon
 			else if (cType == ANIMATION_COMPONENT) {
 				std::cout << "\tAdding Animation Manager" << std::endl;
 				managers.push_back(new MappedManager<animation>(ANIMATION_COMPONENT));
+			}
+			else if (cType == ARMATURE_ANIMATION) {
+				std::cout << "\tAdding Armature Animation Manager" << std::endl;
+				managers.push_back(new MappedManager<armature_animation>(ARMATURE_ANIMATION));
+			}
+			else if (cType == ARMATURE_COMPONENT) {
+				std::cout << "\tAdding Armature Manager" << std::endl;
+				managers.push_back(new MappedManager<armature>(ARMATURE_COMPONENT));
+			}
+			else if (cType == SKINNED_MESH) {
+				std::cout << "\tAdding Skinned Mesh Manager" << std::endl;
+				if (config.api == Vulkan) {
+					managers.push_back(new MappedManager<vk_skinned_mesh>(V_SKINNED_MESH));
+				}
+				else {
+					managers.push_back(new MappedManager<skinned_mesh>(SKINNED_MESH));
+				}
 			}
 			else if (cType == TAGS_COMPONENT) {
 				std::cout << "\tAdding Tags Manager" << std::endl;
@@ -283,6 +300,9 @@ void SceneLoader::fillSystemWithManagers(EntitySystem * system, std::vector<Comp
 		else if (managerType == CAMERA) {
 			system->managers->push_back(getCManager<camera>(managers, CAMERA));
 		}
+		else if (managerType == V_CAMERA) {
+			system->managers->push_back(getCManager<v_camera>(managers, V_CAMERA));
+		}
 		else if (managerType == LIGHT_COMPONENT) {
 			system->managers->push_back(getCManager<light>(managers, LIGHT_COMPONENT));
 		}
@@ -301,6 +321,18 @@ void SceneLoader::fillSystemWithManagers(EntitySystem * system, std::vector<Comp
 		}
 		else if (managerType == ANIMATION_COMPONENT) {
 			system->managers->push_back(getCManager<animation>(managers, ANIMATION_COMPONENT));
+		}
+		else if (managerType == ARMATURE_COMPONENT) {
+			system->managers->push_back(getCManager<armature>(managers, ARMATURE_COMPONENT));
+		}
+		else if (managerType == ARMATURE_ANIMATION) {
+			system->managers->push_back(getCManager<armature_animation>(managers, ARMATURE_ANIMATION));
+		}
+		else if (managerType == SKINNED_MESH) {
+			system->managers->push_back(getCManager<armature>(managers, SKINNED_MESH));
+		}
+		else if (managerType == V_SKINNED_MESH) {
+			system->managers->push_back(getCManager<vk_skinned_mesh>(managers, V_SKINNED_MESH));
 		}
 		else if (managerType == TAGS_COMPONENT) {
 			system->managers->push_back(getCManager<uint64_t>(managers, TAGS_COMPONENT));
@@ -376,6 +408,30 @@ void SceneLoader::fillSystemWithEntities(EntitySystem * system, std::vector<Comp
 						break;
 					}
 				}
+				else if (requiredComponent == ARMATURE_ANIMATION) {
+					if (!getCManager<armature_animation>(managers, ARMATURE_ANIMATION)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
+				else if (requiredComponent == ARMATURE_COMPONENT) {
+					if (!getCManager<armature>(managers, ARMATURE_COMPONENT)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
+				else if (requiredComponent == V_SKINNED_MESH) {
+					if (!getCManager<vk_skinned_mesh>(managers, V_SKINNED_MESH)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
+				else if (requiredComponent == SKINNED_MESH) {
+					if (!getCManager<skinned_mesh>(managers, SKINNED_MESH)->hasEntity(entityID)) {
+						validEntity = false;
+						break;
+					}
+				}
 				else if (requiredComponent == TAGS_COMPONENT) {
 					if (!hasTag(getCManager<uint64_t>(managers, TAGS_COMPONENT)->getComponent(entityID), system->requiredTags)) {
 						validEntity = false;
@@ -423,6 +479,12 @@ void SceneLoader::addSystems(configurationStructure &config, std::vector<EntityS
 				std::cout << "\tAdding animation system" << std::endl;
 				AnimationSystem* animationSystem = new AnimationSystem();
 				systems.push_back(animationSystem);
+			}
+			else if (type == ARMATURE_SYSTEM) {
+				std::cout << "\tAdding armature system" << std::endl;
+				ArmatureSystem* armSystem = new ArmatureSystem();
+				armSystem->setVulkan(config.api == Vulkan);
+				systems.push_back(armSystem);
 			}
 			else if (type == INPUT_SYSTEM) {
 				std::cout << "\tAdding input system" << std::endl;
@@ -667,7 +729,7 @@ collider SceneLoader::buildCollider(FILE * fp, configurationStructure &config) {
 	return retCollider;
 }
 
-//Creates an animation using an animatoin factory
+//Creates an animation using an animation factory
 animation SceneLoader::buildAnimation(FILE * fp, configurationStructure &config) {
 	animation retAnim = animation();
 	char animFile[BUF_SIZE*2];
@@ -686,6 +748,48 @@ animation SceneLoader::buildAnimation(FILE * fp, configurationStructure &config)
 		}
 	}
 	return retAnim;
+}
+
+//Creates an armature from a glac file
+armature SceneLoader::buildArmature(FILE* fp, configurationStructure& config) {
+	armature retArm = armature();
+	char armFile[BUF_SIZE * 2];
+	memcpy(armFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+	int valueCount = 0;
+	while (fscanf(fp, "%s", buffer)) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		valueCount = getValue(buffer, value, BUF_SIZE);
+		if (key == FILE_LOAD_KEY) {
+			memcpy(&value[valueCount], nT, sizeof(char));
+			memcpy(&armFile[config.gamePath.length()], value, (valueCount + 1) * sizeof(char));
+			ArmatureFactory::loadFromFile(armFile, retArm, config);
+		}
+		else if (key == END_STATEMENT) {
+			break;
+		}
+	}
+	return retArm;
+}
+
+//Creates a skinned mesh for vulkan cpu skinning and rendering
+vk_skinned_mesh SceneLoader::buildVulkanSkinnedMesh(FILE* fp, configurationStructure& config, AABB* bounds) {
+	vk_skinned_mesh retMesh = vk_skinned_mesh();
+	char meshFile[BUF_SIZE * 2];
+	int valSize;
+	memcpy(meshFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+	while (fscanf(fp, "%s", buffer) > 0) {
+		valSize = getValue(buffer, value, BUF_SIZE);
+		getSubComponent(buffer, keyString, BUF_SIZE);
+		if (strcmp(keyString, "FILE_LOAD") == 0) {
+			memcpy(&value[valSize], nT, sizeof(char));
+			memcpy(&meshFile[config.gamePath.length()], value, (valSize + 1) * sizeof(char));
+			V_MeshFactory::loadSkinnedMeshFromFile(meshFile, retMesh, config, bounds, false);
+		}
+		else if (strcmp(keyString, "END") == 0) {
+			break;
+		}
+	}
+	return retMesh;
 }
 
 //Loads in an entity under the vulkan api
@@ -708,7 +812,14 @@ void SceneLoader::loadVulkanEntity(int entityID, std::vector<ComponentManager*>&
 				getCManager<transform>(componentManagers, TRANSFORM)->addComponent(entityID, buildTransformComponent(fp));
 			}
 			else if (cType == MESH_COMPONENT) {
+				std::cout << "\tAdding Mesh Component" << std::endl;
 				getCManager<v_mesh>(componentManagers, V_MESH)->addComponent(entityID, buildVulkanMeshComponent(fp, config, &bounds));
+				inScene = true;
+				renderable = true;
+			}
+			else if (cType == SKINNED_MESH) {
+				std::cout << "\tAdding Skinned Mesh Component" << std::endl;
+				getCManager<vk_skinned_mesh>(componentManagers, V_SKINNED_MESH)->addComponent(entityID, buildVulkanSkinnedMesh(fp, config, &bounds));
 				inScene = true;
 				renderable = true;
 			}
@@ -748,6 +859,15 @@ void SceneLoader::loadVulkanEntity(int entityID, std::vector<ComponentManager*>&
 				std::cout << "\tAdding Animation Component" << std::endl;
 				getCManager<animation>(componentManagers, ANIMATION_COMPONENT)->addComponent(entityID, buildAnimation(fp, config));
 			}
+			else if (cType == ARMATURE_ANIMATION) {
+				std::cout << "\tAdding Armature Animation Component" << std::endl;
+				//TODO create loader for this type of file
+				//getCManager<armature_animation>(componentManagers, ARMATURE_ANIMATION)->addComponent(entityID, buildArmatureAnimation(fp, config));
+			}
+			else if (cType == ARMATURE_COMPONENT) {
+				std::cout << "\tAdding Armature Component" << std::endl;
+				getCManager<armature>(componentManagers, ARMATURE_COMPONENT)->addComponent(entityID, buildArmature(fp, config));
+			}
 		}
 		else if (key == ADD_TAG) {
 			if (strcmp(value, "ICE_TAG_INPUT") == 0) {
@@ -766,6 +886,9 @@ void SceneLoader::loadVulkanEntity(int entityID, std::vector<ComponentManager*>&
 		AABB colBounds = getBounds(col, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos);
 		AABB meshBounds = getMeshBounds(&bounds, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos);
 		getCManager<AABB>(componentManagers, AABB_COMPONENT)->setComponent(entityID, getMaxBounds(&meshBounds, &colBounds));
+	}
+	else if (getCManager<vk_skinned_mesh>(componentManagers, V_SKINNED_MESH)->hasEntity(entityID)) {
+		getCManager<AABB>(componentManagers, AABB_COMPONENT)->setComponent(entityID, getMeshBounds(&bounds, getCManager<transform>(componentManagers, TRANSFORM)->getComponent(entityID).pos));
 	}
 	if (inScene) {
 		int pipelineIndex = -2;

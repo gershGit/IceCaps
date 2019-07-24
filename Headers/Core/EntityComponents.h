@@ -9,12 +9,12 @@ enum component_type {TRANSFORM, PARENT, AABB_COMPONENT,
 						PHYSICS, COLLIDER, RIGID_BODY,
 						CAMERA, V_CAMERA, DX12_CAMERA, 
 						SCRIPT,
-						MESH_COMPONENT, MATERIAL_COMPONENT,
+						MESH_COMPONENT, MATERIAL_COMPONENT, SKINNED_MESH, V_SKINNED_MESH,
 						V_MESH, V_MATERIAL, VULKAN_SCENE_NODE_COMPONENT,
 						GL_MESH, GL_MATERIAL,
 						V_DESCRIPTOR, DX12_DESCRIPTOR,
 						LIGHT_COMPONENT,
-						ANIMATION_COMPONENT, ARMATURE_COMPONENT,
+						ANIMATION_COMPONENT, ARMATURE_COMPONENT, V_ARMATURE_COMPONENT, ARMATURE_ANIMATION,
 						TAGS_COMPONENT,
 						COLLISION, NO_TYPE};
 enum system_type {RENDER_SYSTEM, RIGID_BODY_SYSTEM, COLLISION_SYSTEM, ANIMATION_SYSTEM, 
@@ -44,11 +44,12 @@ struct transform {
 };
 
 struct bone {
-	transform mTransformation;
-	transform localBindTransform;
-	transform inverseBindTransform;
+	int id;
+	transform poseTransform;
+	glm::mat4 localBindTransform;
+	glm::mat4 inverseBindTransform;
 	bone* parent;
-	bone* children;
+	std::vector<int> childrenIDs;
 };
 
 struct parentEntity {
@@ -119,7 +120,15 @@ struct camera {
 };
 
 struct armature {
+	bool onGPU = false;
+	int maxWeights = 0;
+	std::vector<glm::mat4> finalTransforms;
 	std::vector<bone> bones;
+};
+
+struct vk_armature : armature {
+	VkBuffer boneBuffer;
+	VkDeviceMemory boneBufMem;
 };
 
 struct skinned_mesh {
@@ -132,12 +141,23 @@ struct light {
 	float range;
 };
 
-struct key_frame {
-	double t;
-	unsigned int index;
+struct snapshot {
 	glm::vec3 deltaPosition;
 	glm::vec3 deltaRotation;
 	glm::vec3 deltaScale;
+};
+
+struct key_frame {
+	double t;
+	unsigned int index;
+	snapshot snap;
+};
+
+struct armature_key {
+	double t;
+	unsigned int index;
+	std::vector<int> boneIDs; //Every bone affected by the animation must have a snapshot pre-interpolated for every key frame
+	std::vector<snapshot> snaps;
 };
 
 struct animation {
@@ -153,6 +173,22 @@ struct animation {
 	key_frame* lastFrameStart;
 	key_frame* lastFrameEnd;
 	key_frame lastCalulatedFrame;
+};
+
+struct armature_animation {
+	std::string name;
+	anim_state state;
+	float animationWeight;
+	bool repeat;
+	bool playOnStartup = true;
+	double startTime;
+	double length;
+	unsigned int frameCount;
+	std::vector<int> boneIDs;
+	armature_key* frames; //Array of frames
+	armature_key* lastFrameStart;
+	armature_key* lastFrameEnd;
+	armature_key lastCalulatedFrame;
 };
 
 struct gl_material {

@@ -1,6 +1,9 @@
 #pragma once
 #include "Core/Global_Callbacks.h"
 #include "Vulkan/V_GraphicsPipeline.h"
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <algorithm>
 
 //Prints the queue families available on a physical device
@@ -785,4 +788,33 @@ int findInt(int arrayIn[], int value, int arraySize) {
 		}
 	}
 	return -1;
+}
+
+glm::mat4 getTransformationMatrix(transform transform_component)
+{
+	glm::mat4 scaleMat = glm::scale(glm::mat4(1), transform_component.scale);
+	glm::mat4 rotMat = glm::toMat4(glm::quat(transform_component.rot));
+	glm::mat4 transMat = glm::translate(glm::mat4(1), transform_component.pos);
+
+	return transMat * rotMat * scaleMat;
+}
+
+//Returns a vector of ints from a string of length size
+std::vector<int> getIntVector(char* asString, int size) {
+	std::vector<int> retVec = std::vector<int>();
+	char tempBuf[5];
+	int tempBufLoc = 0;
+	for (int i = 0; i < size; i++) {
+		if (asString[i] == ',') {
+			tempBuf[tempBufLoc] = '\0';
+			retVec.push_back(atoi(tempBuf));
+			tempBufLoc = 0;
+		}
+		else {
+			tempBuf[tempBufLoc++] = asString[i];
+		}
+	}
+	tempBuf[tempBufLoc] = '\0';
+	retVec.push_back(atoi(tempBuf));
+	return retVec;
 }

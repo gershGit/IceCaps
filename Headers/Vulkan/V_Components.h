@@ -15,8 +15,13 @@ struct v_mesh {
 	uint32_t indicesCount;
 };
 
-struct v_skinned_mesh : skinned_mesh, v_mesh {
+struct vk_skinned_mesh : skinned_mesh, v_mesh {
 	
+};
+
+struct vk_gpu_skinned_mesh : v_mesh {
+	VkBuffer boneBuffer;
+	VkDeviceMemory boneBufVRAM;
 };
 
 //Material component containing a type and all the textures with a descriptor for them

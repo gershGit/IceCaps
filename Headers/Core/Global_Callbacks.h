@@ -104,3 +104,6 @@ LightObject toLightObject(light light_in, glm::vec3 pos_in);
 
 //Widely usable functions
 int findInt(int arrayIn[], int value, int arraySize);
+
+glm::mat4 getTransformationMatrix(transform transform_component);
+std::vector<int> getIntVector(char* asString, int size);

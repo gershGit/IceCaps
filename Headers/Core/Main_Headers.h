@@ -66,13 +66,13 @@ struct initAPIinfo {
 	bool openGL = false;
 	bool dx_11 = false;
 	bool dx_12 = false;
-	GLInstance* gl_instance;
-	V_Instance* v_Instance;
+	GLInstance* gl_instance = nullptr;
+	V_Instance* v_Instance = nullptr;
 };
 
 //Information on the cpu and threads to be used
 struct cpuInfo {
-	unsigned int coreCount;
+	unsigned int coreCount = 1;
 	std::vector<std::thread> threads;
 };
 

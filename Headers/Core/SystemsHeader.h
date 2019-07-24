@@ -11,3 +11,4 @@
 #include "Core/InputSystem.h"
 #include "Core/SceneTreeSystem.h"
 #include "Core/BoundsSystem.h"
+#include "Core/ArmatureSystem.h"

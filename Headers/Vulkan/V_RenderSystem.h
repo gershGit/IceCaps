@@ -48,6 +48,11 @@ private:
 	std::mutex cullMutex;
 	std::vector<int> visibleNodes = std::vector<int>();
 
+	MappedManager<vk_skinned_mesh>* skinManager = nullptr;
+	MappedManager<v_mesh>* meshManager = nullptr;
+	MappedManager<v_material>* matManager = nullptr;
+	ArrayManager<transform>* tManager = nullptr;
+
 public:
 	//Descriptor sets that reference camera and light entities
 	std::vector<VkDescriptorSet> descriptorSets;
@@ -63,6 +68,7 @@ public:
 	void doSomething(int& someInt);
 	void cullNode(std::vector<int>& visible, SceneNode& node, frustum& frus, configurationStructure& config);
 	void cullNodes();
+	void renderSingleThread();
 	void renderAllNodes();
 	void renderSinglePipeline(V_GraphicsPipeline* gPipeline, NodeManager<VulkanSceneNode>* nodeManager);
 	void renderEntities(V_GraphicsPipeline& gPipeline, std::vector<int> entityIDs, VulkanSceneNode& node);

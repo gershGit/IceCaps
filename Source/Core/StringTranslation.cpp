@@ -924,6 +924,15 @@ component_type getComponentType(char * value)
 	else if (strcmp(value, "ANIMATION") == 0) {
 		return ANIMATION_COMPONENT;
 	}
+	else if (strcmp(value, "ARMATURE") == 0) {
+		return ARMATURE_COMPONENT;
+	}
+	else if (strcmp(value, "ARMATURE_ANIMATION") == 0) {
+		return ARMATURE_ANIMATION;
+	}
+	else if (strcmp(value, "SKINNED_MESH") == 0) {
+		return SKINNED_MESH;
+	}
 	else if (strcmp(value, "TAGS") == 0) {
 		return TAGS_COMPONENT;
 	}
@@ -947,6 +956,9 @@ system_type getSystemType(char * value)
 	}
 	else if (strcmp(value, "ANIMATION") == 0) {
 		return ANIMATION_SYSTEM;
+	}
+	else if (strcmp(value, "ARMATURE") == 0) {
+		return ARMATURE_SYSTEM;
 	}
 	else if (strcmp(value, "CLIENT") == 0) {
 		return CLIENT_NET_SYSTEM;

@@ -10,6 +10,7 @@
 #include "Vulkan/V_MeshFactory.h"
 #include "Vulkan/V_MaterialFactory.h"
 #include "Core/AnimationFactory.h"
+#include "Core/ArmatureFactory.h"
 
 //Manager Retrieval Functions ---------
 
@@ -26,7 +27,6 @@ inline CManager<CType>* getCManager(std::vector<ComponentManager*>& managers, co
 
 //Special manager functions
 int countImages(MappedManager<v_material> * vulkanMaterialManager);
-glm::mat4 getTransformationMatrix(transform transform_component);
 
 //Manager Cleanup Functions
 
