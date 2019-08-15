@@ -74,17 +74,33 @@ void V_MeshFactory::buildIndexBuffer(v_mesh & mesh, std::vector<uint16_t>& indic
 	vkDestroyBuffer(device->getLogicalDevice(), stagingBuffer, nullptr);
 	vkFreeMemory(device->getLogicalDevice(), stagingBufferMemory, nullptr);
 }
-void V_MeshFactory::buildSkinnedIndexBuffer(vk_skinned_mesh& mesh, std::vector<uint16_t>& indices, V_CommandPool* transferPool, V_Device* device) {
+void V_MeshFactory::buildIndexBuffer(vk_skinned_mesh& mesh, std::vector<uint16_t>& indices, V_CommandPool* transferPool, V_Device* device) {
+	//Get size from index vector
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
-	//Create a buffer to hold the vertices
-	V_BufferHelper::createBuffer(device, bufferSize, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, mesh.indexBuffer, mesh.iBufferVRAM);
+	//Set the meshes index count
+	mesh.indicesCount = (int)indices.size();
 
-	//Copy the vertices over
+	//Create a staging buffer
+	VkBuffer stagingBuffer;
+	VkDeviceMemory stagingBufferMemory;
+	V_BufferHelper::createBuffer(device, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+
+	//Copy indices to staging buffer
 	void* data;
-	vkMapMemory(device->getLogicalDevice(), mesh.iBufferVRAM, 0, bufferSize, 0, &data);
+	vkMapMemory(device->getLogicalDevice(), stagingBufferMemory, 0, bufferSize, 0, &data);
 	memcpy(data, indices.data(), (size_t)bufferSize);
-	vkUnmapMemory(device->getLogicalDevice(), mesh.iBufferVRAM);
+	vkUnmapMemory(device->getLogicalDevice(), stagingBufferMemory);
+
+	//Create an index buffer
+	V_BufferHelper::createBuffer(device, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, mesh.indexBuffer, mesh.iBufferVRAM);
+
+	//Transfer data from staging buffer to index buffer
+	V_BufferHelper::copyBuffer(transferPool, stagingBuffer, mesh.indexBuffer, bufferSize);
+
+	//Free staging buffer
+	vkDestroyBuffer(device->getLogicalDevice(), stagingBuffer, nullptr);
+	vkFreeMemory(device->getLogicalDevice(), stagingBufferMemory, nullptr);
 }
 
 //Uses a filename to load a mesh
@@ -158,7 +174,7 @@ void V_MeshFactory::loadSkinnedMeshFromFile(const char* fileName, vk_skinned_mes
 	errno_t err;
 	err = fopen_s(&file, fileName, "r");
 	if (file == NULL) {
-		std::cout << "\t!!! File open error !!!" << std::endl;
+		std::cout << "\tFile open error!" << std::endl;
 		return;
 	}
 
@@ -175,7 +191,7 @@ void V_MeshFactory::loadSkinnedMeshFromFile(const char* fileName, vk_skinned_mes
 	//Loop through the lines of the ice and store them into vectors
 	while (true) {
 		//Determine the type of each line
-		char lineHeader[128];
+		char lineHeader[256];
 		int res = fscanf(file, "%s", lineHeader);
 		if (res == EOF) {
 			break;
@@ -189,8 +205,7 @@ void V_MeshFactory::loadSkinnedMeshFromFile(const char* fileName, vk_skinned_mes
 					&tempVertex.mVertex.tangent.x, &tempVertex.mVertex.tangent.y, &tempVertex.mVertex.tangent.z,
 					&tempVertex.mVertex.uv.x, &tempVertex.mVertex.uv.y,
 					&tempVertex.bone_id[0], &tempVertex.bone_id[1], &tempVertex.bone_id[2], &tempVertex.bone_id[3],
-					&tempVertex.bone_weight[0], &tempVertex.bone_weight[1], &tempVertex.bone_weight[2], &tempVertex.bone_weight[3]
-					);
+					&tempVertex.bone_weight[0], &tempVertex.bone_weight[1], &tempVertex.bone_weight[2], &tempVertex.bone_weight[3]);
 
 				vertices.push_back(tempVertex);
 				if (glm::length(tempVertex.mVertex.position) > radius) {

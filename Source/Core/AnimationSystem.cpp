@@ -95,7 +95,7 @@ key_frame AnimationSystem::getLeftOver(double t, animation *anim, key_frame* lef
 }
 armature_key AnimationSystem::getLeftOver(double t, armature_animation* anim, armature_key* leftOverStart, armature_key* thisFrameStart) {
 	armature_key leftOverFrame;
-	for (int i = 0; i < leftOverStart->boneIDs.size(); i++) {
+	for (int i = 0; i < anim->boneIDs.size(); i++) {
 		leftOverFrame.snaps[i].deltaPosition = leftOverStart->snaps[i].deltaPosition - anim->lastCalulatedFrame.snaps[i].deltaPosition;
 		leftOverFrame.snaps[i].deltaRotation = leftOverStart->snaps[i].deltaRotation - anim->lastCalulatedFrame.snaps[i].deltaRotation;
 		leftOverFrame.snaps[i].deltaScale = leftOverStart->snaps[i].deltaScale - anim->lastCalulatedFrame.snaps[i].deltaScale;
@@ -181,7 +181,6 @@ void AnimationSystem::applyArmatureAnimation(armature_animation* anim, armature*
 				newDeltaRot = quaternionInterpolation(glm::vec3(0), anim->lastFrameEnd->snaps[i].deltaRotation, timePercentage) * anim->animationWeight;
 				newDeltaScale = linearInterpolation(glm::vec3(0), anim->lastFrameEnd->snaps[i].deltaScale, timePercentage) * anim->animationWeight;
 
-				//TODO this needs to be += from last position
 				bone* thisBone = &arm->bones.at(anim->boneIDs.at(i));
 				thisBone->poseTransform.pos += (newDeltaPos - anim->lastCalulatedFrame.snaps[i].deltaPosition);
 				thisBone->poseTransform.rot += (newDeltaRot - anim->lastCalulatedFrame.snaps[i].deltaRotation);

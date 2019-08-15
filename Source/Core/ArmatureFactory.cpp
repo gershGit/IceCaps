@@ -14,7 +14,7 @@ void calculateInverseBinds(int boneID, armature& arm, glm::mat4 parentBindTransf
 
 void ArmatureFactory::loadFromFile(char* fileIn, armature& arm, configurationStructure& config)
 {
-	std::cout << "\tLoading Animation from file: " << fileIn << std::endl;
+	std::cout << "\tLoading Armature from file: " << fileIn << std::endl;
 
 	FILE* armFile;
 	char buffer[256];
@@ -73,6 +73,7 @@ void ArmatureFactory::loadFromFile(char* fileIn, armature& arm, configurationStr
 				}
 			}
 
+			arm.bones.at(idVal).poseTransform = tempTransform;
 			arm.bones.at(idVal).localBindTransform = getTransformationMatrix(tempTransform);
 		}
 		else if (strcmp(keyString, "END_ARMATURE") == 0) {

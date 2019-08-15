@@ -42,6 +42,15 @@ void managerCleanup(MappedManager<v_mesh>* manager, V_Device * device) {
 	}
 }
 
+void managerCleanup(MappedManager<vk_skinned_mesh>* manager, V_Device* device) {
+	for (std::pair<int, vk_skinned_mesh> mesh : manager->componentMap) {
+		vkDestroyBuffer(device->getLogicalDevice(), mesh.second.indexBuffer, nullptr);
+		vkFreeMemory(device->getLogicalDevice(), mesh.second.iBufferVRAM, nullptr);
+		vkDestroyBuffer(device->getLogicalDevice(), mesh.second.vBuffer, nullptr);
+		vkFreeMemory(device->getLogicalDevice(), mesh.second.vBufferVRAM, nullptr);
+	}
+}
+
 void managerCleanup(MappedManager<v_camera>* manager, V_Device* device, int bufferCount) {
 	for (std::pair<int, v_camera> cam : manager->componentMap) {
 		for (int i = 0; i < bufferCount; i++) {

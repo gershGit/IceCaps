@@ -45,6 +45,7 @@ public:
 	static collider buildCollider(FILE * fp, configurationStructure & config);
 	static animation buildAnimation(FILE * fp, configurationStructure & config);
 	static armature buildArmature(FILE* fp, configurationStructure& config);
+	static armature_animation buildArmatureAnimation(FILE* fp, configurationStructure& config);
 	static vk_skinned_mesh buildVulkanSkinnedMesh(FILE* fp, configurationStructure& config, AABB* bounds);
 	static void loadVulkanEntity(int entityID, std::vector<ComponentManager*>& componentManagers, FILE * fp, configurationStructure & config, SceneNode * scene, std::vector<NodeManager<VulkanSceneNode>*>* renderNodes, std::vector<std::vector<int>*>* staticTemp);
 	static void loadEntity(int entityID, configurationStructure & config, std::vector<ComponentManager*>& componentManagers, FILE * fp, SceneNode * scene);

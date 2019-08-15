@@ -5,4 +5,5 @@
 class AnimationFactory {
 public:
 	static void loadFromFile(char * fileIn, animation &anim, configurationStructure &config);
+	static void loadArmatureAnimationFromFile(char* fileIn, armature_animation& anim, configurationStructure& config);
 };

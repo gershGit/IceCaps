@@ -2,6 +2,8 @@
 #include "Core/GameTimer.h"
 #include "Core/ThreadPool.h"
 
+//TODO the collision is no longer happening between the test object and the test collider
+
 //Checks to see if two entities collide in any fashion
 collision CollisionSystem::checkCollision(int entityOne, int entityTwo) {
 	collision collisionInfo = collision();

@@ -15,6 +15,7 @@ public:
 	static void buildVertexBuffer(v_mesh & mesh, std::vector<vertex> &vertices, V_CommandPool * transferPool, V_Device * device);
 	static void buildSkinnedVertexBuffer(vk_skinned_mesh& mesh, std::vector<skinned_vertex>& vertices, V_CommandPool* transferPool, V_Device* device);
 	static void buildIndexBuffer(v_mesh &mesh, std::vector<uint16_t> &indices, V_CommandPool* transferPool, V_Device * device);
+	static void buildIndexBuffer(vk_skinned_mesh& mesh, std::vector<uint16_t>& indices, V_CommandPool* transferPool, V_Device* device);
 	static void buildSkinnedIndexBuffer(vk_skinned_mesh& mesh, std::vector<uint16_t>& indices, V_CommandPool* transferPool, V_Device* device);
 	static void loadFromFile(const char * fileName, v_mesh & mesh, configurationStructure &config, AABB * bounds);
 	static void loadSkinnedMeshFromFile(const char* fileName, vk_skinned_mesh& mesh, configurationStructure& config, AABB* bounds, bool onGPU);

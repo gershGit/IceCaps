@@ -771,6 +771,27 @@ armature SceneLoader::buildArmature(FILE* fp, configurationStructure& config) {
 	return retArm;
 }
 
+//Creates an animation for an armature from an spl file
+armature_animation SceneLoader::buildArmatureAnimation(FILE* fp, configurationStructure& config) {
+	armature_animation retAnim = armature_animation();
+	char armFile[BUF_SIZE * 2];
+	memcpy(armFile, config.gamePath.c_str(), sizeof(char) * config.gamePath.length());
+	int valueCount = 0;
+	while (fscanf(fp, "%s", buffer)) {
+		key = getSceneKey(buffer, BUF_SIZE);
+		valueCount = getValue(buffer, value, BUF_SIZE);
+		if (key == FILE_LOAD_KEY) {
+			memcpy(&value[valueCount], nT, sizeof(char));
+			memcpy(&armFile[config.gamePath.length()], value, (valueCount + 1) * sizeof(char));
+			AnimationFactory::loadArmatureAnimationFromFile(armFile, retAnim, config);
+		}
+		else if (key == END_STATEMENT) {
+			break;
+		}
+	}
+	return retAnim;
+}
+
 //Creates a skinned mesh for vulkan cpu skinning and rendering
 vk_skinned_mesh SceneLoader::buildVulkanSkinnedMesh(FILE* fp, configurationStructure& config, AABB* bounds) {
 	vk_skinned_mesh retMesh = vk_skinned_mesh();
@@ -861,8 +882,7 @@ void SceneLoader::loadVulkanEntity(int entityID, std::vector<ComponentManager*>&
 			}
 			else if (cType == ARMATURE_ANIMATION) {
 				std::cout << "\tAdding Armature Animation Component" << std::endl;
-				//TODO create loader for this type of file
-				//getCManager<armature_animation>(componentManagers, ARMATURE_ANIMATION)->addComponent(entityID, buildArmatureAnimation(fp, config));
+				getCManager<armature_animation>(componentManagers, ARMATURE_ANIMATION)->addComponent(entityID, buildArmatureAnimation(fp, config));
 			}
 			else if (cType == ARMATURE_COMPONENT) {
 				std::cout << "\tAdding Armature Component" << std::endl;
@@ -1143,6 +1163,7 @@ void SceneLoader::unloadScene(configurationStructure &config, std::vector<Compon
 	if (config.api == Vulkan) {
 		std::cout << "\tCleaning vulkan meshes" << std::endl;
 		managerCleanup(dynamic_cast<MappedManager<v_mesh>*>( getCManager<v_mesh>(managers,V_MESH)), config.apiInfo.v_Instance->getPrimaryDevice());
+		managerCleanup(dynamic_cast<MappedManager<vk_skinned_mesh>*>(getCManager<vk_skinned_mesh>(managers, V_SKINNED_MESH)), config.apiInfo.v_Instance->getPrimaryDevice());
 		std::cout << "\tCleaning vulkan materials" << std::endl;
 		managerCleanup(dynamic_cast<MappedManager<v_material>*>(getCManager<v_material>(managers, V_MATERIAL)), config.apiInfo.v_Instance->getPrimaryDevice());
 		std::cout << "\tCleaning vulkan cameras" << std::endl;

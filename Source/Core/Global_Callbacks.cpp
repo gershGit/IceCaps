@@ -532,11 +532,15 @@ void printNode(SceneNode * scene_node, int childCount)
 	printf("|@ %p|\n", (void*)scene_node);
 	printf("| Bounds Position: |\n");
 	printf("|    x: %7.2lf    |\n", scene_node->bounds.pos.x);
-	printf("|    y: %7.2lf    |\n", scene_node->bounds.pos.y);
+	if (childCount == 8) {
+		printf("|    y: %7.2lf    |\n", scene_node->bounds.pos.y);
+	}
 	printf("|    z: %7.2lf    |\n", scene_node->bounds.pos.z);
 	printf("| Bounds Size:     |\n");
 	printf("|    x: %7.2lf    |\n", scene_node->bounds.size.x);
-	printf("|    y: %7.2lf    |\n", scene_node->bounds.size.y);
+	if (childCount == 8) {
+		printf("|    y: %7.2lf    |\n", scene_node->bounds.size.y);
+	}
 	printf("|    z: %7.2lf    |\n", scene_node->bounds.size.z);
 	if (scene_node->isLeaf) {
 		printf("|       LEAF       |\n");
@@ -802,7 +806,7 @@ glm::mat4 getTransformationMatrix(transform transform_component)
 //Returns a vector of ints from a string of length size
 std::vector<int> getIntVector(char* asString, int size) {
 	std::vector<int> retVec = std::vector<int>();
-	char tempBuf[5];
+	char tempBuf[25];
 	int tempBufLoc = 0;
 	for (int i = 0; i < size; i++) {
 		if (asString[i] == ',') {

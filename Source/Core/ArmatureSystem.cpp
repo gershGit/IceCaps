@@ -1,4 +1,5 @@
 #include "Core/ArmatureSystem.h"
+#include "Core/GameTimer.h"
 
 void ArmatureSystem::initialize()
 {
@@ -30,20 +31,21 @@ void ArmatureSystem::setVulkan(bool vulkanOn = true)
 void ArmatureSystem::updateVulkanCurrentVertexLocation(vk_skinned_mesh& mesh, armature& arm)
 {
 	std::vector<vertex> newVertices = std::vector<vertex>(mesh.originalVertices.size());
-
-	//TODO split into threadpool calls?
 	for (int i = 0; i < mesh.originalVertices.size(); i++) {
+		newVertices.at(i) = mesh.originalVertices.at(i).mVertex;
+
+		skinned_vertex originalVertex = mesh.originalVertices.at(i);
 		glm::vec4 localPos = glm::vec4(0);
 
 		for (int i = 0; i < arm.maxWeights; i++) {
-			glm::mat4 boneTransform = arm.finalTransforms.at( mesh.originalVertices.at(i).bone_id[i] );
-			glm::vec4 posePosition = boneTransform * glm::vec4(mesh.originalVertices.at(i).mVertex.position, 1.0f);
-			localPos += posePosition * mesh.originalVertices.at(i).bone_weight[i];
+			int boneID = originalVertex.bone_id[i];
+			glm::mat4 boneTransform = arm.finalTransforms.at(boneID);
+			glm::vec4 originalPos = glm::vec4(originalVertex.mVertex.position, 1.0f);
+			glm::vec4 posePosition = boneTransform * originalPos;
+			float bone_weight = originalVertex.bone_weight[i];
+			localPos += posePosition * bone_weight;
 		}
 		newVertices.at(i).position = localPos;
-		newVertices.at(i).normal = mesh.originalVertices.at(i).mVertex.normal;
-		newVertices.at(i).tangent = mesh.originalVertices.at(i).mVertex.tangent;
-		newVertices.at(i).uv = mesh.originalVertices.at(i).mVertex.uv;
 	}
 
 	//Skinned meshes use slower host visible buffers as they need to be updated every frame

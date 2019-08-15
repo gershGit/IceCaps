@@ -6,8 +6,6 @@
 
 using namespace std;
 
-//TODO modify the scene file to be manager based with construction of entities at the end, this should help with prefabs as well
-
 int main() {
 	//Initialize glfw and prepare the configuration structure
 	glfwInit();

@@ -38,9 +38,9 @@ struct prefab {
 };
 
 struct transform {
-	glm::vec3 pos;
-	glm::vec3 rot;
-	glm::vec3 scale;
+	glm::vec3 pos = glm::vec3(0);
+	glm::vec3 rot = glm::vec3(0);
+	glm::vec3 scale = glm::vec3(1);
 };
 
 struct bone {
@@ -154,10 +154,10 @@ struct key_frame {
 };
 
 struct armature_key {
-	double t;
-	unsigned int index;
-	std::vector<int> boneIDs; //Every bone affected by the animation must have a snapshot pre-interpolated for every key frame
-	std::vector<snapshot> snaps;
+	double t = 0.0;
+	unsigned int index = 0;
+	int* boneIDs = nullptr;  //Every bone affected by the animation must have a snapshot pre-interpolated for every key frame
+	snapshot* snaps = nullptr;
 };
 
 struct animation {

@@ -139,7 +139,7 @@ struct ui_rectangle {
 
 //Special vertex structure containing bone information
 struct skinned_vertex {
-	vertex mVertex;
+	vertex mVertex = vertex();
 	int bone_id[4];
 	float bone_weight[4];
 };
