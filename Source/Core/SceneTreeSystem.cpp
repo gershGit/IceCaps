@@ -192,7 +192,7 @@ void SceneTreeSystem::moveObjects(SceneNode& scene_node)
 				boundsManager->getComponentAddress(eID)) ) {
 				if (!scene_node.isLeaf) {
 					for (int j = 0; j < config->sceneChildren; j++) {
-						if (attemptPlace(&scene_node.children[j], eID)) {
+						if (attemptPlace(&scene_node.children[j], eID) != -1) {
 							//If the object is succesfully placed into a child it can be removed from the parent
 							scene_node.dynamicEntities->erase(scene_node.dynamicEntities->begin() + i);
 							if (usingVulkan) {
